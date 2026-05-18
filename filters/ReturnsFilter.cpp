@@ -41,7 +41,7 @@ namespace pdal
 
 static StaticPluginInfo const s_info{
     "filters.returns", "Split data by return order",
-    "http://pdal.io/stages/filters.returns.html"};
+    "https://pdal.org/stages/filters.returns.html"};
 
 CREATE_STATIC_STAGE(ReturnsFilter, s_info)
 
@@ -73,8 +73,6 @@ void ReturnsFilter::prepared(PointTableRef table)
 PointViewSet ReturnsFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
 
     m_outputTypes = 0;
     for (auto& r : m_returnsString)

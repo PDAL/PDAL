@@ -41,13 +41,9 @@ namespace pdal
 class PDAL_EXPORT I3SReader : public EsriReader
 {
 public:
-    std::string getName() const override;
+    I3SReader();
 
-protected:
-    virtual NL::json initInfo() override;
-    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
-        std::string ext) const override;
-    virtual std::string fetchJson(std::string) override;
+    std::string getName() const override;
 };
 
 } // namespace pdal

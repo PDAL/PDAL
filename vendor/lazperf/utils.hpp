@@ -2,7 +2,7 @@
 ===============================================================================
 
   FILE:  util.hpp
-  
+
   CONTENTS:
     Utility classes
 
@@ -10,9 +10,9 @@
 
     martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
     uday.karan@gmail.com - Hobu, Inc.
-  
+
   COPYRIGHT:
-  
+
     (c) 2007-2014, martin isenburg, rapidlasso - tools to catch reality
     (c) 2014, Uday Verma, Hobu, Inc.
 
@@ -22,9 +22,9 @@
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  
+
   CHANGE HISTORY:
-  
+
 ===============================================================================
 */
 
@@ -37,6 +37,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+
+#include "portable_endian.hpp"
 
 #ifdef PRINT_DEBUG
 #define LAZDEBUG(e) (void)(e)
@@ -144,6 +146,19 @@ inline uint32_t unpack(const char *in)
         ((b3 & 0xFF) << 16) |
         ((b2 & 0xFF) << 8) |
         (b1 & 0xFF));
+}
+
+
+template<>
+inline float unpack(const char *in)
+{
+    uint32_t u;
+    float f;
+
+    memcpy(&u, in, sizeof(u));
+    u = le32toh(u);
+    memcpy(&f, &u, sizeof(u));
+    return f;
 }
 
 inline void pack(const uint32_t v, char *out)

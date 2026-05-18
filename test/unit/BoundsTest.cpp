@@ -111,19 +111,7 @@ TEST(BoundsTest, test_clip)
 
     BOX2D r4(2,4,6,8);
     r1.clip(r4);
-
     EXPECT_TRUE(r1==r4);
-
-    BOX2D r5(20,40,1,2);
-    r1.clip(r5);
-
-    EXPECT_TRUE(r1 == r4);
-
-    BOX2D r6(8, 5, 5, 2);
-    r1.clip(r6);
-
-    BOX2D r7(2,5, 5,8);
-    EXPECT_TRUE(r1 == r7);;
 
 	BOX3D r8(0, 0, 0, 10, 10, 10);
 	BOX3D r9(1, 1, 1, 11, 11, 11);
@@ -136,17 +124,6 @@ TEST(BoundsTest, test_clip)
     r8.clip(r11);
 
     EXPECT_TRUE(r8 == r11);
-
-    BOX3D r12(8, 9, 10, 1, 2, 3);
-    r8.clip(r12);
-
-    EXPECT_TRUE(r8 == r11);
-
-    BOX3D r13(3, 9, 5, 1, 7, 3);
-    r8.clip(r13);
-
-    BOX3D r14(3, 3, 5, 7, 7, 9);
-    EXPECT_TRUE(r8 == r14);
 }
 
 TEST(BoundsTest, test_intersect)

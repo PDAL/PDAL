@@ -95,7 +95,9 @@ void TileContents::readLaszip()
     reader.setOptions(options);
 
     reader.prepare(*m_table);
-    reader.execute(*m_table);
+    PointViewSet viewset = reader.execute(*m_table);
+    if ((*viewset.begin())->size() != size())
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 }
 
 void TileContents::readBinary()
@@ -106,6 +108,10 @@ void TileContents::readBinary()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
+    // Have to check seperately in readBinary and readZstandard because m_table
+    // (BasePointTable) doesn't have a numPoints attribute, but VectorPointTable does
+    if (vpt->numPoints() != size())
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 
     transform();
 }
@@ -126,6 +132,8 @@ void TileContents::readZstandard()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
+    if (vpt->numPoints() != size())
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 
     transform();
 }

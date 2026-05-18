@@ -158,7 +158,7 @@ void Catalog::collectErrors()
 void Catalog::handleItem(const Item::Filters& f, NL::json readerArgs, std::string path)
 {
         NL::json itemJson = m_connector.getJson(path);
-        Item item(itemJson, path, m_connector, m_validate, m_log);
+        Item item(itemJson, path, m_connector, m_validate);
 
         bool valid = item.init(f, readerArgs, m_schemaUrls);
         if (valid)

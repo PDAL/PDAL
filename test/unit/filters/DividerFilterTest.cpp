@@ -36,6 +36,9 @@
 
 #include <io/FauxReader.hpp>
 #include <filters/DividerFilter.hpp>
+#include <io/LasReader.hpp>
+#include <filters/SortFilter.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -206,3 +209,90 @@ TEST(DividerFilterTest, round_robin_capacity)
     }
 }
 
+
+TEST(DividerFilterTest, break_on_expression)
+{
+    point_count_t count = 1000;
+
+    Options readerOps;
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
+    readerOps.add("mode", "ramp");
+    readerOps.add("count", count);
+
+    FauxReader r;
+    r.setOptions(readerOps);
+
+    Options filterOps;
+    filterOps.add("expression", "X == 500");
+    filterOps.add("mode", "expression");
+    DividerFilter f;
+    f.setInput(r);
+    f.setOptions(filterOps);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+
+    EXPECT_EQ(s.size(), 2u);
+
+    auto it = std::begin(s);
+    PointViewPtr v1 = *it;
+    EXPECT_EQ(v1->size(), 499u);
+
+    ++it;
+    if (it != s.end())
+    {
+        PointViewPtr v2 = *it;
+        EXPECT_EQ(v2->size(), 501u);
+    }
+
+}
+
+
+TEST(DividerFilterTest, break_on_userdata)
+{
+
+    LasReader read;
+    Options ro;
+    ro.add("filename", Support::datapath("autzen/autzen-utm.las"));
+    read.setOptions(ro);
+
+    SortFilter sort;
+    Options sOps;
+
+    sOps.add("dimension", "PointSourceId");
+    sOps.add("algorithm", "stable");
+    sort.setOptions(sOps);
+    sort.setInput(read);
+
+    Options dOps;
+
+    // There are 44 points with PointSourceId of 7326
+    // When we break on 7327, we are going to get the first 44
+    // points in one view and then a bunch of views of 1 point
+    // for each expression that succeeds
+    dOps.add("expression", "PointSourceId == 7327");
+
+    DividerFilter divide;
+    divide.setInput(sort);
+    divide.setOptions(dOps);
+
+    PointTable t;
+    divide.prepare(t);
+    PointViewSet vs = divide.execute(t);
+
+    EXPECT_EQ(vs.size(), 129u);
+
+    auto it = std::begin(vs);
+    PointViewPtr v1 = *it;
+    EXPECT_EQ(v1->size(), 44u);
+
+    ++it;
+    if (it != vs.end())
+    {
+        PointViewPtr v2 = *it;
+        EXPECT_EQ(v2->size(), 1u);
+    }
+
+}

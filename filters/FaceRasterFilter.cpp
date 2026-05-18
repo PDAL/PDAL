@@ -45,7 +45,7 @@ static StaticPluginInfo const s_info
 {
     "filters.faceraster",
     "Face Raster Filter",
-    "http://pdal.io/stages/filters.faceraster.html"
+    "https://pdal.org/stages/filters.faceraster.html"
 };
 
 CREATE_STATIC_STAGE(FaceRasterFilter, s_info)
@@ -59,7 +59,7 @@ std::string FaceRasterFilter::getName() const
 FaceRasterFilter::FaceRasterFilter() : m_limits(new RasterLimits)
 {}
 
-FaceRasterFilter::~FaceRasterFilter() 
+FaceRasterFilter::~FaceRasterFilter()
 {}
 
 void FaceRasterFilter::addArgs(ProgramArgs& args)
@@ -161,6 +161,15 @@ void FaceRasterFilter::filter(PointView& v)
         for (int xi = ax; xi < bx; ++xi)
             for (int yi = ay; yi < by; ++yi)
             {
+                double v = raster->at(xi, yi);
+                if (std::isnan(m_noData))
+                {
+                    if (!std::isnan(v))
+                        continue;
+                }
+                else if (v != m_noData)
+                    continue;
+
                 double x = raster->xCellPos(xi);
                 double y = raster->yCellPos(yi);
 

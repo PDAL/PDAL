@@ -20,6 +20,7 @@ Sort and extract the 100 lowest intensity points.
 
 ```json
 [
+    "input.las",
     {
         "type":"filters.sort",
         "dimension":"Intensity",

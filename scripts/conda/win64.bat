@@ -19,13 +19,13 @@ cmake -G %GENERATOR% ^
       -DBUILD_PLUGIN_NITF=ON ^
       -DBUILD_PLUGIN_TRAJECTORY=ON ^
       -DBUILD_PLUGIN_DRACO=ON ^
+      -DBUILD_PLUGIN_SPZ=ON ^
       -DBUILD_PLUGIN_TILEDB=OFF ^
       -DWITH_TESTS=ON ^
       -DWITH_ZLIB=ON ^
       -DCMAKE_VERBOSE_MAKEFILE=OFF ^
       -DWITH_ZSTD=ON ^
       -DWITH_LZMA=ON ^
-      -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
       -DZSTD_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\libzstd.lib ^
       ..
 

@@ -38,6 +38,7 @@
 #include "OGRWriter.hpp"
 
 #include <sstream>
+#include <tuple>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wredundant-decls"
@@ -57,7 +58,7 @@ static StaticPluginInfo const s_info
 {
     "writers.ogr",
     "Write a point cloud as a set of OGR points/multipoints",
-    "http://pdal.io/stages/writers.ogr.html",
+    "https://pdal.org/stages/writers.ogr.html",
     { "shp", "geojson" }
 };
 
@@ -187,12 +188,20 @@ void OGRWriter::readyTable(PointTableRef table)
                 throwError("Unknown type for dimension '" + name + "' (attr_dims).");
                 continue;
         }
-        auto ogrField = new OGRFieldDefn(name.c_str(), ogrType);
-        m_attrs.emplace_back(dim, dimType, ogrField);
+
+        // This is strange code. The attributes stored in m_attrs are a tuple and the
+        // third element is an OGRFieldDefn, NOT an OGRFieldDefn*. However, there is a
+        // constructor for an OGRFieldDefn that takes OGRFieldDefn* and that's
+        // what's invoked in emplace_back() below.
+        // Despite the existince of this copying via a pointer, older versions of GDAL
+        // disallowed the normal copy constructor for OGRFieldDefn.  This changed with
+        // GDAL version 3.10.2, where regular copy ctors were enabled. So if PDAL
+        // requries GDAL of at least that version, this dynamic allocation can
+        // be replaced with a stack-based construction.
+        std::unique_ptr<OGRFieldDefn> fieldDef(new OGRFieldDefn(name.c_str(), ogrType));
+        m_attrs.emplace_back(dim, dimType, fieldDef.get());
     }
-
 }
-
 
 void OGRWriter::readyFile(const std::string& filename, const SpatialReference& srs)
 {
@@ -218,7 +227,8 @@ void OGRWriter::readyFile(const std::string& filename, const SpatialReference& s
     ogr_create_options.push_back(nullptr);
 
     // Layer
-    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType, const_cast<char**>(ogr_create_options.data()));
+    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType,
+        const_cast<char**>(ogr_create_options.data()));
     if (!m_layer)
         throwError(std::string("Can't create OGR layer: ") + CPLGetLastErrorMsg());
 
@@ -317,11 +327,7 @@ bool OGRWriter::processOne(PointRef& point)
         if (m_layer->CreateFeature(m_feature))
             throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
 
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
         m_feature->Reset();
-#else
-        m_feature->SetFID(OGRNullFID);
-#endif
     }
     return true;
 }
@@ -330,11 +336,7 @@ bool OGRWriter::processOne(PointRef& point)
 void OGRWriter::doneFile()
 {
     if (m_curCount % m_multiCount > 0) {
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
         m_feature->Reset();
-#else
-        m_feature->SetFID(OGRNullFID);
-#endif
 
         m_feature->SetGeometry(&m_multiPoint);
 

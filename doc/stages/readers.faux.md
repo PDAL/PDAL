@@ -66,8 +66,10 @@ grid
 bounds
 
 : The spatial extent within which points should be generated.
-  Specified as a string in the form "(\[xmin,xmax\],\[ymin,ymax\],\[zmin,zmax\])".
   \[Default: unit cube\]
+
+  ```{include} bounds_opts.md
+  ```
 
 count
 

@@ -54,8 +54,8 @@ exceeds 1.2 before writing the output.
         "minpts":20
     },
     {
-        "type":"filters.range",
-        "limits":"LocalOutlierFactor[:1.2]"
+        "type":"filters.expression",
+        "expression":"LocalOutlierFactor >= 1.2"
     },
     "output.laz"
 ]

@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.hausdorff",
     "Hausdorff Kernel [DEPRECATED]",
-    "http://pdal.io/apps/hausdorff.html"
+    "https://pdal.org/apps/hausdorff.html"
 };
 
 CREATE_STATIC_KERNEL(HausdorffKernel, s_info)

@@ -41,7 +41,7 @@ static StaticPluginInfo const s_info
 {
     "readers.memoryview",
     "Memory View Reader",
-    "http://pdal.io/stages/readers.memoryview.html",
+    "https://pdal.org/stages/readers.memoryview.html",
     {}
 };
 

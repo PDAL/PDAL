@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
 {
     "filters.transformation",
     "Transform each point using a 4x4 transformation matrix",
-    "http://pdal.io/stages/filters.transformation.html"
+    "https://pdal.org/stages/filters.transformation.html"
 };
 
 CREATE_STATIC_STAGE(TransformationFilter, s_info)

@@ -103,6 +103,8 @@ public:
         uint16_t version;
     };
 
+    static constexpr uint32_t VariableChunkSize = (std::numeric_limits<uint32_t>::max)();
+
     uint16_t compressor;
     uint16_t coder;
     uint8_t ver_major;
@@ -127,6 +129,8 @@ public:
     virtual uint64_t size() const;
     virtual vlr_header header() const;
     virtual evlr_header eheader() const;
+    bool variableChunks() const;
+    static bool variableChunks(uint32_t chunk_size);
 
     laz_vlr(const char *vlrdata);
 };

@@ -8,6 +8,7 @@ if (STANDALONE)
 endif(STANDALONE)
 
 include(${PDAL_CMAKE_DIR}/arrow.cmake)
+include(${PDAL_CMAKE_DIR}/gdal.cmake)
 
 if (NOT Arrow_FOUND)
     message(FATAL_ERROR "Arrow-cpp can't be found. Can't build Arrow support")
@@ -35,6 +36,7 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
         Parquet::parquet_shared
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        GDAL::GDAL
 )
 
 if (WIN32)

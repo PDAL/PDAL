@@ -123,13 +123,25 @@ void KD2Index::knnSearch(PointRef& point, point_count_t k, PointIdList *indices,
     knnSearch(x, y, k, indices, sqr_dists);
 }
 
-PointIdList KD2Index::radius(double const& x, double const& y,
-    double const& r) const
+PointIdList KD2Index::radius(double x, double y, double r) const
 {
     return m_impl->radius(x, y, r);
 }
 
-PointIdList KD2Index::radius(PointId idx, double const& r) const
+void KD2Index::radius(double x, double y, double r, KD2Index::RadiusResults& result) const
+{
+    return m_impl->radius(x, y, r, result);
+}
+
+void KD2Index::radius(PointId idx, double r, KD2Index::RadiusResults& result) const
+{
+    double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+
+    return radius(x, y, r, result);
+}
+
+PointIdList KD2Index::radius(PointId idx, double r) const
 {
     double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
     double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -137,7 +149,7 @@ PointIdList KD2Index::radius(PointId idx, double const& r) const
     return radius(x, y, r);
 }
 
-PointIdList KD2Index::radius(PointRef &point, double const& r) const
+PointIdList KD2Index::radius(PointRef &point, double r) const
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -241,6 +253,21 @@ void KD3Index::knnSearch(PointRef &point, point_count_t k,
 PointIdList KD3Index::radius(double x, double y, double z, double r) const
 {
     return m_impl->radius(x, y, z, r);
+}
+
+void KD3Index::radius(double x, double y, double z, double r,
+    KD3Index::RadiusResults& results) const
+{
+    m_impl->radius(x, y, z, r, results);
+}
+
+void KD3Index::radius(PointId idx, double r, KD3Index::RadiusResults& results) const
+{
+    double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+    double z = m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
+
+    radius(x, y, z, r, results);
 }
 
 PointIdList KD3Index::radius(PointId idx, double r) const

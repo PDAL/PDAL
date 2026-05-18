@@ -40,8 +40,8 @@ percentage is less than 98% before writing the output.
         "knn":8
     },
     {
-        "type":"filters.range",
-        "limits":"Reciprocity[:98.0]"
+        "type":"filters.expression",
+        "limits":"Reciprocity >=98.0"
     },
     "output.laz"
 ]

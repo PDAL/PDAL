@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 
-#include "Comparison.hpp"
+#include "../Comparison.hpp"
 #include "Grid.hpp"
 #include "VoxelRayTrace.hpp"
 

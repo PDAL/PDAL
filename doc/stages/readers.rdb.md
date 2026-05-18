@@ -295,4 +295,4 @@ Details about the transaction objects see RDB SDK documentation.
 
 [riegl download pages]: http://www.riegl.com/members-area/software-downloads/libraries/
 [riegl laser measurement systems gmbh]: http://www.riegl.com
-[the optional library documentation]: http://pdal.io/compilation/unix.html#configure-your-optional-libraries
+[the optional library documentation]: https://pdal.org/compilation/unix.html#configure-your-optional-libraries

@@ -106,7 +106,7 @@ pdal_error stageError(const std::string& cls, const std::string& type)
     std::ostringstream ss;
     ss << "Couldn't create " << cls << " stage of type '" << type << "'.\n";
     ss << "You probably have a version of PDAL that didn't come with a plugin\n"
-        "you're trying to load.  Please see the FAQ at https://pdal.io/faq.html";
+        "you're trying to load.  Please see the FAQ at https://pdal.org/faq.html";
     return pdal_error(ss.str());
 }
 
@@ -321,7 +321,7 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
     if (!status)
         throw pdal_error(status.what());
 
-    ReaderCreationOptions ops { spec, driver };
+    ReaderCreationOptions ops { std::move(spec), driver };
 
     return makeReader(ops);
 }
@@ -335,12 +335,12 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
     if (!status)
         throw pdal_error(status.what());
 
-    ReaderCreationOptions ops { spec, driver, nullptr, options };
+    ReaderCreationOptions ops { std::move(spec), driver, nullptr, options };
 
     return makeReader(ops);
 }
 
-// keeping for backward compatibility 
+// keeping for backward compatibility
 Stage& PipelineManager::makeReader(StageCreationOptions& o)
 {
     FileSpec spec;
@@ -348,7 +348,7 @@ Stage& PipelineManager::makeReader(StageCreationOptions& o)
     if (!status)
         throw pdal_error(status.what());
 
-    ReaderCreationOptions rOpts { spec, o.m_driver, o.m_parent, 
+    ReaderCreationOptions rOpts { std::move(spec), o.m_driver, o.m_parent,
                             o.m_options, o.m_tag };
     return makeReader(rOpts);
 }
@@ -357,11 +357,12 @@ Stage& PipelineManager::makeReader(ReaderCreationOptions& o)
 {
     if (o.m_driver.empty())
     {
-        o.m_driver = StageFactory::inferReaderDriver(o.m_filespec.m_path.string());
+        o.m_driver = StageFactory::inferReaderDriver(o.m_filespec.u8string());
         if (o.m_driver.empty())
             throw pdal_error("Cannot determine reader for input file: " +
-                o.m_filespec.m_path.string());
+                o.m_filespec.u8string());
     }
+
     // test if empty
     if (o.m_filespec.valid())
         o.m_options.replace("filename", o.m_filespec);

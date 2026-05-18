@@ -8,7 +8,7 @@ statistical. These two approaches are discussed in further detail below.
 It is worth noting that both filtering methods simply apply a classification
 value of 7 to the noise points (per the [LAS specification]).
 To remove the noise
-points altogether, users can add a {ref}`range filter<filters.range>` to their
+points altogether, users can add a {ref}`expression filter<filters.expression>` to their
 pipeline, downstream from the outlier filter.
 
 ```{eval-rst}
@@ -17,8 +17,8 @@ pipeline, downstream from the outlier filter.
 
 ```json
 {
-  "type":"filters.range",
-  "limits":"Classification![7:7]"
+  "type":"filters.expression",
+  "expression":"Classification != 7"
 }
 ```
 

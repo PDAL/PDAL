@@ -27,13 +27,14 @@ public:
     virtual ~BaseGrid();
 
     void addPoint(Point& p);
-    bool isDense(HexId hex);
+    bool isDense(HexId hex) const;
     void findShapes();
     void findParentPaths();
     void toWKT(std::ostream& output) const;
+    void flushSamples();
 
     void setSampleSize(int num)
-        {m_maxSample = num; }
+        { m_maxSample = num; }
     std::vector<Path *> const& rootPaths() const
         { return m_roots; }
     // returns all hexagons in the grid and their counts
@@ -92,7 +93,7 @@ private:
     void findShape(HexId root);
     double computeHexSize();
     void parentOrChild(Path& p);
-    std::pair<Segment, Segment> nextSegments(const Segment& s) const;
+    virtual Segment nextSegment(const Segment& s) const = 0;
 
     /// Vector of points to use to determine hex height
     std::vector<Point> m_sample;

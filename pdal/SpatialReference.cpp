@@ -53,22 +53,13 @@
 namespace
 {
 
-struct OGRDeleter
-{
-    void operator()(OGRSpatialReference* o)
-    {
-        OSRDestroySpatialReference(o);
-    };
-};
-
 using OGRScopedSpatialReference =
-    std::unique_ptr<OGRSpatialReference, OGRDeleter>;
+    std::unique_ptr<OGRSpatialReference>;
 
 OGRScopedSpatialReference ogrCreateSrs(std::string s = "", double epoch=0.0)
 {
     OGRScopedSpatialReference r(
-        static_cast<OGRSpatialReference*>(
-            OSRNewSpatialReference(s.size() ? s.c_str() : nullptr)));
+        new OGRSpatialReference(s.size() ? s.c_str() : nullptr));
     if (!pdal::Utils::compare_approx(epoch, 0.0f, 0.00001f))
     {
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
@@ -129,7 +120,7 @@ bool SpatialReference::valid() const
 {
     OGRSpatialReference current(m_wkt.data());
 
-    return OSRValidate(&current) == OGRERR_NONE;
+    return current.Validate() == OGRERR_NONE;
 }
 
 
@@ -367,7 +358,7 @@ bool SpatialReference::equals(const SpatialReference& input) const
     if (!current || !other)
         return false;
 
-    int output = OSRIsSame(current.get(), other.get());
+    int output = current->IsSame(other.get());
 
     return (output == 1);
 }
@@ -398,7 +389,7 @@ bool SpatialReference::isGeographic() const
     if (!current)
         return false;
 
-    bool output = OSRIsGeographic(current.get());
+    bool output = current->IsGeographic();
     return output;
 }
 
@@ -409,7 +400,7 @@ bool SpatialReference::isGeocentric() const
     if (!current)
         return false;
 
-    bool output = OSRIsGeocentric(current.get());
+    bool output = current->IsGeocentric();
     return output;
 }
 
@@ -420,7 +411,7 @@ bool SpatialReference::isProjected() const
     if (!current)
         return false;
 
-    bool output = OSRIsProjected(current.get());
+    bool output = current->IsProjected();
     return output;
 }
 
@@ -429,7 +420,7 @@ std::vector<int> SpatialReference::getAxisOrdering() const
     std::vector<int> output;
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     if (current)
-        output = current.get()->GetDataAxisToSRSAxisMapping();
+        output = current->GetDataAxisToSRSAxisMapping();
     return output;
 }
 
@@ -573,7 +564,7 @@ int SpatialReference::getUTMZone() const
         throw pdal_error("Could not fetch current SRS");
 
     int north(0);
-    int zone = OSRGetUTMZone(current.get(), &north);
+    int zone = current->GetUTMZone(&north);
     return (north ? 1 : -1) * zone;
 }
 

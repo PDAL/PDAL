@@ -40,6 +40,7 @@
 
 #ifdef _WIN32
 #   define PDAL_EXPORT   __declspec(dllexport)
+#   define PDAL_DLL     PDAL_EXPORT
 #   define PDAL_LOCAL
 #   define PDAL_EXPORT_UNIX
 #ifdef __GNUC__

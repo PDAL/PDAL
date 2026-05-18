@@ -39,10 +39,6 @@
 #include <curl/curl.h>
 #include <pdal/util/FileUtils.hpp>
 
-
-
-
-
 namespace pdal
 {
 namespace connector
@@ -97,9 +93,9 @@ Connector::Connector(const std::string& filename, const StringMap& headers,
 
 Connector::Connector(const FileSpec& spec) :
     m_arbiter(new arbiter::Arbiter),
-    m_headers(spec.m_headers),
-    m_query(spec.m_query),
-    m_filename(spec.m_path.string())
+    m_headers(spec.headers()),
+    m_query(spec.query()),
+    m_filename(spec.u8string())
 {
     if (m_headers.find("User-Agent") == m_headers.end())
     {
@@ -140,6 +136,10 @@ std::vector<char> Connector::getBinary(const std::string& path) const
 
 arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
 {
+    if (Utils::startsWith(Utils::toupper(path), "/VSI"))
+        // workaround so that arbiter path is not used to read/write with VSI
+        return arbiter::LocalHandle(path, false);
+
     if (m_arbiter->isLocal(path))
         return m_arbiter->getLocalHandle(path);
     else
@@ -180,19 +180,20 @@ std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
     if (size <= 0)
         return std::vector<char>();
 
-    if (m_arbiter->isLocal(m_filename))
+    if (Utils::startsWith(Utils::toupper(m_filename), "/VSI") || m_arbiter->isLocal(m_filename))
     {
         std::vector<char> buf(size);
-        std::ifstream in(m_filename, std::ios::binary);
-        if (in.fail() )
+        std::istream* in = FileUtils::openFile(m_filename);
+        if (!in || in->fail())
         {
             std::string message = "Unable to open '" + m_filename + "'.";
             if (!pdal::FileUtils::fileExists(m_filename))
                 message += " File does not exist.";
             throw pdal_error(message);
         }
-        in.seekg(offset);
-        in.read(buf.data(), size);
+        in->seekg(offset);
+        in->read(buf.data(), size);
+        delete in;
         return buf;
     }
     else

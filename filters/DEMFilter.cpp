@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.dem",
     "Filter points about an elevation surface",
-    "http://pdal.io/stages/filters.dem.html"
+    "https://pdal.org/stages/filters.dem.html"
 };
 
 CREATE_STATIC_STAGE(DEMFilter, s_info)
@@ -133,8 +133,6 @@ bool DEMFilter::processOne(PointRef& point)
 PointViewSet DEMFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
 
     PointViewPtr outView = inView->makeNew();
 

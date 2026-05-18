@@ -143,7 +143,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.tindex",
     "TIndex Kernel",
-    "http://pdal.io/apps/tindex.html"
+    "https://pdal.org/apps/tindex.html"
 };
 
 CREATE_STATIC_KERNEL(TIndexKernel, s_info)
@@ -156,6 +156,7 @@ TIndexKernel::TIndexKernel() : SubcommandKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_overrideASrs(false)
+    , m_maxFieldSize(0)
 {}
 
 
@@ -172,8 +173,10 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
     {
         args.add("tindex", "OGR-readable/writeable tile index output",
             m_idxFilename).setPositional();
-        args.add("filespec", "Pattern of files to index",
+        args.add("glob", "Pattern of files to index",
             m_filespec).setOptionalPositional();
+        args.addSynonym("glob", "filespec");
+        args.add("filelist", "Text file containing list of files to index", m_listfile);
         args.add("fast_boundary", "Use extent instead of exact boundary",
             m_fastBoundary);
         args.add("lyr_name", "OGR layer name to write into datasource",
@@ -182,6 +185,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "location");
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
+        args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
+            m_lcOptions);
         args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
             "EPSG:4326");
         args.add("a_srs", "Assign SRS of tile with no SRS to this value",
@@ -243,16 +248,21 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
     }
     else
     {
-        if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("Must specify either --filespec or --stdin.");
-        if (m_filespec.size() && m_usestdin)
-            throw pdal_error("Can't specify both --filespec and --stdin "
-                "options.");
+        int argc = static_cast<int>(!m_filespec.empty()) +
+            static_cast<int>(!m_listfile.empty()) + static_cast<int>(m_usestdin);
+        if (argc > 1)
+            throw pdal_error("Can't specify more than one of --glob, "
+                "--filelist or --stdin.");
+        if (!argc)
+            throw pdal_error("Must specify either --glob, --filelist or"
+                " --stdin.");
         if (m_prefix.size() && m_absPath)
             throw pdal_error("Can't specify both --write_absolute_path and "
                 "--path_prefix options.");
         if (args.set("a_srs"))
             m_overrideASrs = true;
+        if (m_driverName == "ESRI Shapefile")
+            m_maxFieldSize = 254;
     }
 }
 
@@ -291,6 +301,23 @@ StringList readSTDIN()
     return output;
 }
 
+StringList readFileList(const std::string& filename)
+{
+    std::istream* in = Utils::openFile(filename);
+    if (!in)
+        throw pdal_error("Unable to open filelist '" + filename + "'");
+    std::string line;
+    StringList output;
+    while (std::getline(*in, line))
+    {
+        Utils::trim(line);
+        if (!line.empty())
+            output.push_back(line);
+    }
+    FileUtils::closeFile(in);
+    return output;
+}
+
 
 bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     const FileInfo& fileInfo)
@@ -325,8 +352,10 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 
 void TIndexKernel::createFile()
 {
-    if (!m_usestdin)
+    if (!m_usestdin && m_listfile.empty())
         m_files = Utils::glob(m_filespec);
+    else if (m_listfile.size())
+        m_files = readFileList(m_listfile);
     else
         m_files = readSTDIN();
 
@@ -529,7 +558,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     setDate(hFeature, fileInfo.m_mtime, indexes.m_mtime);
 
     // Set the filename into the feature.
-    OGR_F_SetFieldString(hFeature, indexes.m_filename,
+    setStringField(hFeature, indexes.m_filename,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
@@ -560,7 +589,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     }
     std::string wkt =
         SpatialReference(fileInfo.m_srs).getWKT();
-    OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
+
+    setStringField(hFeature, indexes.m_srs, wkt.data());
 
     // Set the geometry in the feature
     Polygon g = prepareGeometry(fileInfo);
@@ -580,6 +610,27 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 }
 
 
+void TIndexKernel::setStringField(OGRFeatureH hFeature, int idx,
+    const char* value)
+{
+    if (m_maxFieldSize == 0 || strlen(value) <= m_maxFieldSize)
+    {
+        OGR_F_SetFieldString(hFeature, idx, value);
+    }
+    else
+    {
+        std::ostringstream oss;
+        OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(hFeature, idx);
+
+        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(value) <<
+            " characters; ESRI Shapefile driver supports a maximum of 254.";
+
+        OGR_F_Destroy(hFeature);
+        throw pdal_error(oss.str());
+    }
+}
+
+
 void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 {
     QuickInfo qi = reader.preview();
@@ -590,12 +641,6 @@ void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
     if (!qi.m_srs.empty())
         fileInfo.m_srs = qi.m_srs.getWKT();
     fileInfo.m_gridHeight = 0.0;
-}
-
-
-void TIndexKernel::slowBoundary(PipelineManager& manager)
-{
-    manager.execute(ExecMode::PreferStream);
 }
 
 
@@ -611,30 +656,33 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
     bool fast(m_fastBoundary);
-    try
+    if (!fast)
     {
-        if (!fast)
+        TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
+        if (m_boundaryExpr.size())
         {
-            TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
-            if (m_boundaryExpr.size())
-            {
-                Options opts;
-                opts.add("where", m_boundaryExpr);
-                hexer.addOptions(opts);
-            }
-            hexer.setInput(reader);
-            manager.addStage(&hexer);
-            slowBoundary(manager);
+            Options opts;
+            opts.add("where", m_boundaryExpr);
+            hexer.addOptions(opts);
+        }
+        hexer.setInput(reader);
+        manager.addStage(&hexer);
+        try
+        {
+            manager.execute(ExecMode::PreferStream);
 
             fileInfo.m_boundary = hexer.toWKT();
             fileInfo.m_srs = hexer.getSpatialReference().getWKT();
             fileInfo.m_gridHeight = hexer.height();
         }
+        catch(pdal_error& e)
+        {
+            fast = true;
+            m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " << 
+                fileInfo.m_filename << " with error: '" << e.what() << std::endl;
+        }
     }
-    catch (pdal_error&)
-    {
-        fast = true;
-    }
+
     if (fast)
         fastBoundary(reader, fileInfo);
 }
@@ -682,8 +730,14 @@ bool TIndexKernel::createLayer(std::string const& layername)
         m_log->get(LogLevel::Error) << "Unable to import srs for layer "
            "creation" << std::endl;
 
+    char** papszOptions = NULL;
+    for (std::string& s : m_lcOptions)
+        papszOptions = CSLAddString(papszOptions, s.c_str());
+
     m_layer = OGR_DS_CreateLayer(m_dataset, m_layerName.c_str(),
-        srs.get(), wkbMultiPolygon, NULL);
+        srs.get(), wkbMultiPolygon, papszOptions);
+
+    CSLDestroy(papszOptions);
 
     if (m_layer)
         createFields();
@@ -701,7 +755,6 @@ void TIndexKernel::createFields()
 {
     OGRFieldDefnH hFieldDefn = OGR_Fld_Create(
         m_tileIndexColumnName.c_str(), OFTString);
-    OGR_Fld_SetWidth(hFieldDefn, 254);
     OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
     OGR_Fld_Destroy(hFieldDefn);
 
@@ -723,7 +776,7 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
 {
     FieldIndexes indexes;
 
-    void *fDefn = OGR_L_GetLayerDefn(m_layer);
+    OGRFeatureDefnH fDefn = OGR_L_GetLayerDefn(m_layer);
 
     indexes.m_filename = OGR_FD_GetFieldIndex(fDefn,
         m_tileIndexColumnName.c_str());

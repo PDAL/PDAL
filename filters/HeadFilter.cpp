@@ -40,7 +40,7 @@ static StaticPluginInfo const s_info
 {
     "filters.head",
     "Return N points from beginning of the point cloud.",
-    "http://pdal.io/stages/filters.head.html"
+    "https://pdal.org/stages/filters.head.html"
 };
 
 CREATE_STATIC_STAGE(HeadFilter, s_info)
@@ -81,11 +81,9 @@ bool HeadFilter::processOne(PointRef& point)
 
 PointViewSet HeadFilter::run(PointViewPtr inView)
 {
-    m_index = 0;
-
     PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
+
+    m_index = 0;
 
     PointViewPtr outView = inView->makeNew();
 

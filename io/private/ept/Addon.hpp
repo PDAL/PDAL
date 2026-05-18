@@ -37,7 +37,8 @@
 #include <list>
 #include <string>
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
+
 #include <pdal/PointLayout.hpp>
 
 #include "Overlap.hpp"

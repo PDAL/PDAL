@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a arr=("i3s" "pgpointcloud" "draco" "nitf" "tiledb" "trajectory" "hdf" "icebridge" )
+declare -a arr=("i3s" "pgpointcloud" "draco" "nitf" "tiledb" "trajectory" "hdf" "icebridge" "spz")
 
 BASE=`pwd`
 

@@ -123,6 +123,7 @@ parts:
       - file: stages/filters.dbscan
       - file: stages/filters.litree
       - file: stages/filters.lloydkmeans
+      - file: stages/filters.supervoxel
       # create features
       - file: stages/filters.approximatecoplanar
       - file: stages/filters.covariancefeatures
@@ -130,6 +131,7 @@ parts:
       - file: stages/filters.estimaterank
       - file: stages/filters.label_duplicates
       - file: stages/filters.lof
+      - file: stages/filters.m3c2
       - file: stages/filters.miniball
       - file: stages/filters.nndistance
       - file: stages/filters.normal
@@ -275,7 +277,7 @@ parts:
       - file: development/compilation/unix
       - file: development/compilation/windows
       - file: development/compilation/dependencies
-    - file: development/documentation-quickstart
+    - file: development/docs
     - file: development/errorhandling
     - file: development/metadata
     - file: development/writing
@@ -289,7 +291,6 @@ parts:
     sections:
     - file: project/conventions
     - file: project/contributors
-    - file: project/docs
     - file: project/docker
     - file: project/alpine
     - file: project/testing

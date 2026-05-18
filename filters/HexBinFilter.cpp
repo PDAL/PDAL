@@ -48,7 +48,7 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo(
     "filters.hexbin",
     "Tessellate the point's X/Y domain and determine point density and/or point boundary.",
-    "http://pdal.io/stages/filters.hexbin.html" );
+    "https://pdal.org/stages/filters.hexbin.html" );
 
 CREATE_STATIC_STAGE(HexBin, s_info)
 
@@ -73,7 +73,7 @@ hexer::BaseGrid *HexBin::grid() const
 
 void HexBin::addArgs(ProgramArgs& args)
 {
-    args.add("sample_size", "Sample size for auto-edge length calculation",
+    args.add("sample_size", "Maximum sample size for auto-edge length calculation",
         m_sampleSize, 5000U);
     args.add("threshold", "Required cell density", m_density, 15);
     args.add("output_tesselation", "Write tesselation to output metadata",
@@ -124,7 +124,7 @@ void HexBin::initialize()
                 "processing. Set 'edge_length' option to specify cell size.");
         else
             log()->get(LogLevel::Warning) << "'h3_resolution' not implemented "
-                "for standard processing. Using 'edge_length'\n"; 
+                "for standard processing. Using 'edge_length'\n";
     }
 }
 
@@ -189,20 +189,24 @@ void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 }
 
 
-void HexBin::done(PointTableRef table)
+bool HexBin::createGrid()
 {
-    if (m_grid->sampling())
-    {
-        std::ostringstream oss;
-        oss << "Sampling for hexbin auto-edge length calculation failed! ";
-        if (m_sampleSize > m_count)
-            oss << "Decrease sample size: sample size of " << m_sampleSize 
-                << " with " << m_count << " points.";
-        throwError(oss.str());
-    }
-
     try
     {
+        if (m_grid->sampling())
+        {
+            // If we ran out of points while sampling, process the points in the sample buffer:
+            // in stream mode, we can't check this until we've gone through all the points
+            if (m_sampleSize > m_count)
+            {
+                m_grid->flushSamples();
+                // Setting this so it gets written to metadata correctly
+                m_sampleSize = m_count;
+            }
+            else
+                throwError("Sampling for hexbin auto-edge length calculation failed!");
+        }
+
         m_grid->findShapes();
         m_grid->findParentPaths();
     }
@@ -212,14 +216,21 @@ void HexBin::done(PointTableRef table)
             "Hexer threw an error and was unable to compute a boundary");
         m_metadata.add("boundary", "MULTIPOLYGON EMPTY",
             "Empty polygon -- unable to compute boundary");
-        return;
+        return false;
     }
+    return true;
+}
+
+void HexBin::done(PointTableRef table)
+{
+    if (!createGrid())
+        return;
 
     m_metadata.add("threshold", m_grid->denseLimit(),
         "Minimum number of points inside a hexagon to be considered full");
-    m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
-        "when estimating hexagon edge size. Specify 0.0 or omit options "
-        "for edge_size if you want to compute one.");
+    m_metadata.add("sample_size", m_sampleSize, "Number of samples used for "
+        "estimating hexagon edge size. Only used if 'edge_length' or "
+        "'h3_resolution' is not set.");
 
     Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -241,7 +252,7 @@ void HexBin::done(PointTableRef table)
     if (m_boundaryOutput.size())
     {
         OGR writer(m_boundaryOutput, m_srs.getWKT(), m_driver, "hexbins");
-        writer.writeBoundary(*m_grid); 
+        writer.writeBoundary(*m_grid);
     }
 
     pdal::Polygon p(polygon.str(), m_srs);
@@ -339,7 +350,7 @@ void HexBin::done(PointTableRef table)
             "of the grid. See https://h3geo.org/docs/core-library/restable "
             "for more information" );
     }
-    
+
     m_metadata.add("boundary", p.wkt(m_precision),
         "Approximated MULTIPOLYGON of domain");
     m_metadata.addWithType("boundary_json", p.json(), "json",

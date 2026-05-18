@@ -81,6 +81,6 @@ else()
       FetchContent_Populate(googletest)
       add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
-  endif()
 endif()
 
+endif()

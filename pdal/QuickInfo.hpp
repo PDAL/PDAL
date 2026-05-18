@@ -37,6 +37,7 @@
 #include <vector>
 
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
 
 namespace pdal
@@ -58,6 +59,41 @@ public:
 
     bool valid() const
         { return m_valid; }
+
+    MetadataNode dumpSummary() const
+    {
+        MetadataNode summary;
+        summary.add("num_points", this->m_pointCount);
+        if (this->m_srs.valid())
+        {
+            MetadataNode srs = this->m_srs.toMetadata();
+            summary.add(srs);
+        }
+        if (this->m_bounds.valid())
+        {
+            MetadataNode bounds = Utils::toMetadata(this->m_bounds);
+            summary.add(bounds.clone("bounds"));
+        }
+
+        std::string dims;
+        auto di = this->m_dimNames.begin();
+        while (di != this->m_dimNames.end())
+        {
+            dims += *di;
+            ++di;
+            if (di != this->m_dimNames.end())
+               dims += ", ";
+        }
+        if (dims.size())
+            summary.add("dimensions", dims);
+
+        if (!this->m_metadata.empty() && this->m_metadata.valid())
+        {
+            summary.add(this->m_metadata.clone("metadata"));
+        }
+
+        return summary;
+    }
 };
 
 } // namespace pdal

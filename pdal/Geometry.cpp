@@ -32,11 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4251)
+#endif
+
 #include <ogr_api.h>
 #include <ogr_geometry.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <pdal/Geometry.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -52,10 +58,6 @@ void Geometry::throwNoGeos()
         throw pdal_error("PDAL must be using a version of GDAL built with "
             "GEOS support to use this function.");
 }
-
-
-Geometry::Geometry()
-{}
 
 
 Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
@@ -77,28 +79,6 @@ Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 {}
 
 
-Geometry::Geometry(OGRGeometryH g)
-{
-    OGRGeometry* geom(nullptr);
-    geom = reinterpret_cast<OGRGeometry *>(g);
-
-    if (geom)
-        m_geom.reset(geom->clone());
-}
-
-
-Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
-{
-    OGRGeometry* geom(nullptr);
-    geom = reinterpret_cast<OGRGeometry *>(g);
-
-    if (geom)
-        m_geom.reset(geom->clone());
-
-    setSpatialReference(srs);
-}
-
-
 Geometry::Geometry(double x, double y, double z, SpatialReference ref)
 {
     OGRGeometry* geom(nullptr);
@@ -111,10 +91,31 @@ Geometry::Geometry(double x, double y, double z, SpatialReference ref)
     setSpatialReference(ref);
 }
 
+void Geometry::OGRGeometryDeleter::operator()(OGRGeometry *geom)
+{
+    delete geom;
+}
+
+void Geometry::construct(void *g)
+{
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+}
 
 
-Geometry::~Geometry()
-{}
+void Geometry::construct(void *g, const SpatialReference& srs)
+{
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+
+    setSpatialReference(srs);
+}
 
 
 void Geometry::modified()
@@ -269,11 +270,11 @@ Geometry Geometry::getRing() const
 {
     throwNoGeos();
 
-    int count = OGR_G_GetGeometryCount(m_geom.get());
+    int count = OGR_G_GetGeometryCount(gdal::toHandle(m_geom.get()));
     if (count)
     {
 
-        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(m_geom.get(), 0));
+        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(gdal::toHandle(m_geom.get()), 0));
         OGRGeometryH linestring = OGR_G_ForceToLineString(ring);
 
         return Geometry(linestring, getSpatialReference());

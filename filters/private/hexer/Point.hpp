@@ -13,7 +13,7 @@ struct Point
 
     double m_x;
     double m_y;
-        
+
     void operator -= (const Point& p)
     {
        m_x -= p.m_x;
@@ -26,7 +26,7 @@ struct Point
         m_y += p.m_y;
         return *this;
     }
-    
+
     friend Point operator - (Point p1, const Point& p2)
     {
         p1 -= p2;
@@ -39,5 +39,11 @@ struct Point
         return p1;
     }
 };
+
+inline std::ostream& operator<<(std::ostream& out, const Point& p)
+{
+    out << p.m_x << "/" << p.m_y;
+    return out;
+}
 
 } // namespace hexer;

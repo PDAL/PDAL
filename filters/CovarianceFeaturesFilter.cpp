@@ -58,7 +58,7 @@ static StaticPluginInfo const s_info
     "filters.covariancefeatures",
     "Filter that calculates local features based on the covariance matrix of a "
     "point's neighborhood.",
-    "http://pdal.io/stages/filters.covariancefeatures.html"
+    "https://pdal.org/stages/filters.covariancefeatures.html"
 };
 
 CREATE_STATIC_STAGE(CovarianceFeaturesFilter, s_info)
@@ -162,7 +162,8 @@ void CovarianceFeaturesFilter::prepared(PointTableRef table)
     if (std::count(m_extraDims.begin(), m_extraDims.end(), Id::Density))
     {
         if (!(layout->hasDim(Id::OptimalKNN) && layout->hasDim(Id::OptimalRadius)))
-            throwError("Missing OptimalKNN and OptimalRadius dimensions in input PointView.");
+            throwError("Density feature requires OptimalKNN and OptimalRadius "
+                       "dimensions, which are missing in the input PointView.");
     }
     if (m_optimal)
     {
@@ -179,6 +180,9 @@ void CovarianceFeaturesFilter::filter(PointView& view)
     point_count_t chunk_size = npoints / m_threads;
     if (npoints % m_threads) chunk_size++;
     std::vector<std::thread> threadList(m_threads);
+
+    log()->get(LogLevel::Debug) << "Processing " << npoints << " points in "
+                                << m_threads << " threads.\n";
 
     for(int t = 0; t < m_threads; t++)
     {
@@ -212,8 +216,12 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     else if (m_radiusArg->set())
     {
         ids = kdi.radius(p, m_radius);
-        if (ids.size() < (size_t)m_minK)
+        if (ids.size() < (size_t)m_minK) {
+            log()->get(LogLevel::Info)
+                << "Skipping point " << id << ". Found " << ids.size()
+                << " neighbors but required " << m_minK << ".\n";
             return;
+        }
     }
     else
     {
@@ -222,6 +230,17 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
 
     // compute covariance of the neighborhood
     auto B = math::computeCovariance(view, ids);
+
+    // Check if the covariance matrix is all zeros
+    if (B.isZero())
+    {
+        log()->get(LogLevel::Info)
+            << "Skipping point " << id
+            << ". Covariance matrix is all zeros. This suggests a large number "
+               "of redundant points. Consider using filters.sample with a "
+               "small radius to remove redundant points.\n";
+        return;
+    }
 
     // perform the eigen decomposition
     SelfAdjointEigenSolver<Matrix3d> solver(B);

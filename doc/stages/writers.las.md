@@ -142,7 +142,7 @@ creation_year
 dataformat_id
 
 : Controls whether information about color and time are stored with the point
-  information in the LAS file. \[Default: 3\]
+  information in the LAS file. \[Default: 7\]
 
   - 0 == no color or time stored
   - 1 == time is stored

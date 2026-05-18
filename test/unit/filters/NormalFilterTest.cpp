@@ -72,7 +72,7 @@ TEST(NormalFilterTest, XYPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
@@ -109,7 +109,7 @@ TEST(NormalFilterTest, XZPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 1.0);
@@ -146,7 +146,7 @@ TEST(NormalFilterTest, YZPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 1.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
@@ -194,7 +194,7 @@ TEST(NormalFilterTest, RampPlane)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), (float)-expected);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0f);
@@ -242,7 +242,67 @@ TEST(NormalFilterTest, RampPlane2)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
+    {
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0f);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), (float)-expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), (float)expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0f);
+    }
+}
+
+TEST(NormalFilterTest, RadiusSearch)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader;
+    NormalFilter filter;
+    Options filterOps;
+    filterOps.add("radius", 2.0);
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+    filter.prepare(table);
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 0);
+    view->setField(Id::X, 1, 0);
+    view->setField(Id::X, 2, 1);
+    view->setField(Id::X, 3, 1);
+    view->setField(Id::X, 4, 9);
+    view->setField(Id::X, 5, 9);
+    view->setField(Id::X, 6, 10);
+    view->setField(Id::X, 7, 10);
+    view->setField(Id::Y, 0, 0);
+    view->setField(Id::Y, 1, 1);
+    view->setField(Id::Y, 2, 0);
+    view->setField(Id::Y, 3, 1);
+    view->setField(Id::Y, 4, 9);
+    view->setField(Id::Y, 5, 10);
+    view->setField(Id::Y, 6, 9);
+    view->setField(Id::Y, 7, 10);
+    view->setField(Id::Z, 0, 0);
+    view->setField(Id::Z, 1, 1);
+    view->setField(Id::Z, 2, 0);
+    view->setField(Id::Z, 3, 1);
+    view->setField(Id::Z, 4, 9);
+    view->setField(Id::Z, 5, 10);
+    view->setField(Id::Z, 6, 9);
+    view->setField(Id::Z, 7, 10);
+    reader.addView(view);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    Dimension::Id nx = table.layout()->findDim("NormalX");
+    Dimension::Id ny = table.layout()->findDim("NormalY");
+    Dimension::Id nz = table.layout()->findDim("NormalZ");
+    Dimension::Id c = table.layout()->findDim("Curvature");
+
+    double expected = std::sqrt(2.0) / 2.0;
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0f);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), (float)-expected);

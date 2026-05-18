@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "filters.nndistance",
     "NN-Distance Filter",
-    "http://pdal.io/stages/filters.nndistance.html"
+    "https://pdal.org/stages/filters.nndistance.html"
 };
 
 CREATE_STATIC_STAGE(NNDistanceFilter, s_info)

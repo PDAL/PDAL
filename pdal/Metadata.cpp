@@ -35,6 +35,9 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/PDALUtils.hpp>
+
+#include <pdal/private/gdal/ErrorHandler.hpp>
 
 namespace pdal
 {
@@ -103,12 +106,18 @@ std::string Metadata::inferType(const std::string& val)
 
     try
     {
+        gdal::ErrorHandlerSuspender();
+
         SpatialReference s(val);
         return "spatialreference";
     }
     catch (pdal_error&)
     {
     }
+
+    // or, could try to json::parse and catch errors
+    if (Utils::isJSON(val))
+        return "json";
 
     Uuid uuid(val);
     if (!uuid.isNull())

@@ -24,8 +24,8 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v2
+    - uses: actions/checkout@v6
+    - uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
         environment-file: "scripts/ci/current-environment.yml"
@@ -59,7 +59,7 @@ jobs:
          done
       working-directory: ./build
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       name: Gather source distribution artifact
       with:
         name: source-package-ubuntu-latest
@@ -74,7 +74,7 @@ jobs:
     permissions:
       contents: write
     steps:
-     - uses: actions/download-artifact@v4
+     - uses: actions/download-artifact@v8
        name: Download release artifact
        with:
          name: source-package-ubuntu-latest
@@ -98,7 +98,7 @@ jobs:
           tar xvf PDAL-${{ github.ref_name }}-src.tar.bz2
           cd PDAL-$GITHUB_REF_NAME-src
 
-     - uses: mamba-org/setup-micromamba@v2
+     - uses: mamba-org/setup-micromamba@v3
        name: Install mamba
        with:
          init-shell: bash
@@ -138,7 +138,7 @@ jobs:
     permissions:
       contents: write
     steps:
-     - uses: actions/download-artifact@v4
+     - uses: actions/download-artifact@v8
        name: Download release artifact
        with:
          name: source-package-ubuntu-latest

@@ -6,6 +6,10 @@ The **SPZ writer** writes files in the [spz] format, designed for
 storing compressed [gaussian splat] data. The format stores compressed
 points, with their associated scale, rotation, color and spherical harmonics.
 
+```{eval-rst}
+.. plugin::
+```
+
 ```{note}
 The SPZ writer expects valid gaussian splat data. If scale, rotation, color, 
 or opacity dimensions aren't found in the point input, zeroes will be written for
@@ -22,10 +26,6 @@ are as follows:
 - **rot_0, rot_1, rot_2, rot_3**: W (real component)/X/Y/Z normalized rotation quaternion.
 - Optional: **Spherical Harmonics** -- 0, 9, 24 or 45 dimensions labeled `f_dc_*`, with SH
 coefficients as the fastest-changing axis and color as the slower-changing axis.
-
-```{eval-rst}
-.. embed::
-```
 
 ## Example
 

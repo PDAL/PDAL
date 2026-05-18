@@ -33,7 +33,7 @@ options, please let us know.
 [
     "dense.las",
     {
-      "type":"filters.assign"
+      "type":"filters.assign",
       "value": [
           "Red = Red / 256",
           "Green = Green / 256",
@@ -44,7 +44,7 @@ options, please let us know.
         "type":"filters.poisson"
     },
     {
-      "type":"filters.assign"
+      "type":"filters.assign",
       "value": [
           "Red = Red * 256",
           "Green = Green * 256",

@@ -321,8 +321,69 @@ TEST(ExpressionFilterTest, simple_logic)
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 4), 9);
 }
 
+// This tests problems with paren handling that was introduced in 3.9.
+TEST(ExpressionFilterTest, issue_4920)
+{
+
+    auto run = [](const std::string& expr, int count)
+    {
+        Options ops;
+        ops.add("bounds", BOX3D(1, 101, 201, 10, 110, 210));
+        ops.add("mode", "ramp");
+        ops.add("count", 10);
+
+        FauxReader reader;
+        reader.setOptions(ops);
+
+        Options expressionOps;
+        expressionOps.add("expression", expr);
+
+        ExpressionFilter filter;
+        filter.setOptions(expressionOps);
+        filter.setInput(reader);
+
+        PointTable table;
+        filter.prepare(table);
+        PointViewSet viewSet = filter.execute(table);
+        PointViewPtr view = *viewSet.begin();
+
+        EXPECT_EQ(1u, viewSet.size());
+        EXPECT_EQ((size_t)count, view->size());
+    };
+
+    run("(Y - 25) / 4 < 20", 4);
+    run("((Y - 25) / 4) < 20", 4);
+    run("((Y - 25) / 4) <= 20", 5);
+}
+
+TEST(ExpressionFilterTest, extrachars)
+{
+    Options expressionOps;
+    expressionOps.add("expression", "(Y - 25) / 4 < 20)andsomeextra");
+
+    ExpressionFilter filter;
+    filter.setOptions(expressionOps);
+
+    PointTable table;
+    EXPECT_THROW(
+    {
+        try
+        {
+            filter.prepare(table);
+        }
+        catch (const pdal_error& err)
+        {
+            const std::string& val = err.what();
+            EXPECT_TRUE(val.find("andsomeextra") != std::string::npos);
+            EXPECT_TRUE(val.find("following valid expression") != std::string::npos);
+            throw;
+        }
+    }, pdal_error);
+}
+
+
 // Make sure that dimension names containing digits works
-TEST(ExpressionFilterTest, case_1659)
+TEST(ExpressionFilterTest, issue_1659)
 {
     TextReader reader;
 

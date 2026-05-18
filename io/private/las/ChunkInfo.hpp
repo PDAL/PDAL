@@ -67,14 +67,13 @@ public:
             throw pdal_error("Invalid version " + std::to_string(version) +
                 " found in LAZ chunk table.");
 
-        bool variable = (chunkSize == lazperf::VariableChunkSize);
-
         if (numChunks)
-            m_chunks = lazperf::decompress_chunk_table(stream, numChunks, variable);
+            m_chunks = lazperf::decompress_chunk_table(stream, numChunks,
+                lazperf::laz_vlr::variableChunks(chunkSize));
 
         // If the chunk size is fixed, set the counts to the chunk size since
         // they aren't stored in the chunk table.
-        if (!variable)
+        if (!lazperf::laz_vlr::variableChunks(chunkSize))
         {
             uint64_t remaining = m_numPoints;
             for (lazperf::chunk& chunk : m_chunks)

@@ -71,7 +71,7 @@ const StaticPluginInfo s_info
 {
     "readers.copc",
     "COPC Reader",
-    "http://pdal.io/stages/reader.copc.html",
+    "https://pdal.org/stages/reader.copc.html",
     { "copc" }
 };
 
@@ -385,6 +385,10 @@ void CopcReader::initialize(PointTableRef table)
 
     if (m_args->resolution)
         log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << std::endl;
+
+    // Initialize our threadpool
+    m_p->pool.reset(new ThreadPool(m_args->threads));
+
 }
 
 
@@ -641,7 +645,14 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 
 void CopcReader::ready(PointTableRef table)
 {
-    m_p->pool.reset(new ThreadPool(m_args->threads));
+    // We may need to reset these after initialize(), since the reader could be being run
+    // multiple times without re-initializing.
+    if (m_p->done)
+    {
+        m_p->pool.reset(new ThreadPool(m_args->threads));
+        m_p->connector.reset(new connector::Connector(m_filespec));
+    }
+
     // Determine all overlapping data files we'll need to fetch.
     try
     {

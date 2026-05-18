@@ -28,14 +28,17 @@ returns to the output file.
         "type":"filters.skewnessbalancing"
     },
     {
-        "type":"filters.range",
-        "limits":"Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"Classification == 2"
     },
     "output.laz"
 ]
 ```
 
 ## Options
+
+```{include} ground_cls_opts.md
+```
 
 ```{include} filter_opts.md
 ```

@@ -76,7 +76,10 @@ inline std::string opToString(LogicalOperator o)
 class LogicGate : public Filterable
 {
 public:
-    virtual ~LogicGate() { }
+    LogicGate() = default;
+    LogicGate(LogicGate&&) = default;
+    LogicGate& operator=(LogicGate&&) = default;
+    virtual ~LogicGate() = default;
 
     static std::unique_ptr<LogicGate> create(std::string s)
     {

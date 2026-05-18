@@ -53,7 +53,7 @@ static StaticPluginInfo const s_info
 {
     "filters.geomdistance",
     "Compute the distance for points to a given geometry",
-    "http://pdal.io/stages/filters.geomdistance.html"
+    "https://pdal.org/stages/filters.geomdistance.html"
 };
 
 CREATE_STATIC_STAGE(GeomDistanceFilter, s_info)

@@ -1,7 +1,7 @@
 /******************************************************************************
  * $Id$
  *
- * Project:  PDAL - http://pdal.org - A BSD library for point cloud data.
+ * Project:  PDAL - https://pdal.org - A BSD library for point cloud data.
  * Purpose:  PDAL chipper class
  * Author:   Howard Butler, hobu.inc@gmail.com
  *

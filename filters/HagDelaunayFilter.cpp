@@ -66,7 +66,7 @@ double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
     }
 
     delaunator::Delaunator triangulation(neighbors);
-    const std::vector<delaunator::index_t>& triangles(triangulation.triangles);
+    const std::vector<size_t>& triangles(triangulation.triangles);
 
     for (size_t j = 0; j < triangles.size(); j += 3)
     {
@@ -105,7 +105,7 @@ static StaticPluginInfo const s_info
     "filters.hag_delaunay",
     "Computes height above ground using delaunay interpolation of "
         "ground returns.",
-    "http://pdal.io/stages/filters.hag_delaunay.html"
+    "https://pdal.org/stages/filters.hag_delaunay.html"
 };
 
 CREATE_STATIC_STAGE(HagDelaunayFilter, s_info)
@@ -127,6 +127,8 @@ void HagDelaunayFilter::addArgs(ProgramArgs& args)
     args.add("allow_extrapolation", "Allow extrapolation for points "
         "outside of the local triangulations. [Default: true].",
         m_allowExtrapolation, true);
+    args.add("class", "Class to use for ground points. [Default: 2]",
+        m_class, ClassLabel::Ground);
 }
 
 
@@ -158,7 +160,7 @@ void HagDelaunayFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         if (view.getFieldAs<uint8_t>(Id::Classification, i) ==
-            ClassLabel::Ground)
+            m_class)
         {
             view.setField(Id::HeightAboveGround, i, 0);
             gView->appendPoint(view, i);
@@ -215,7 +217,16 @@ void HagDelaunayFilter::filter(PointView& view)
         }
         else
         {
-            z1 = delaunay_interp_ground(x0, y0, gView, ids);
+            try
+            {
+                z1 = delaunay_interp_ground(x0, y0, gView, ids);
+            }
+            // In degenerate cases (ids are collinear or duplicates), the above will throw,
+            // so treat x0/y0 as outside and assign the current value.
+            catch (...)
+            {
+                z1 = z0;
+            }
         }
         ngView->setField(Dimension::Id::HeightAboveGround, i, z0 - z1);
     }

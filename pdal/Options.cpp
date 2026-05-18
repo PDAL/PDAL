@@ -35,6 +35,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/private/JsonSupport.hpp>
 #include <nlohmann/json.hpp>
 
 #include <iostream>
@@ -52,12 +53,8 @@ std::string Option::toArg() const
 
 void Option::toMetadata(MetadataNode& parent) const
 {
-    // 'user_data' nodes on Stages are JSON
-    if (!Utils::iequals(getName(), "user_data"))
-        parent.add(getName(), getValue());
-    else
-        parent.addWithType(getName(), getValue(), "json", "User JSON");
-
+    std::string value = getValue();
+    parent.addWithType(getName(), value, Utils::inferJsonType(value));
 }
 
 
@@ -120,6 +117,17 @@ void Options::addConditional(const Options& other)
 void Options::remove(const Option& option)
 {
     m_options.erase(option.getName());
+}
+
+
+void Options::toMetadata(MetadataNode& parent) const
+{
+    for (std::string& k : getKeys())
+    {
+        StringList l = getValues(k);
+        for(const auto& vs: l)
+            parent.addWithType(k, vs, Utils::inferJsonType(vs));
+    }
 }
 
 

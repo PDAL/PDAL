@@ -16,7 +16,7 @@ on your system.
 
 ## Required Dependencies
 
-### GDAL (3.0+)
+### GDAL (3.8+)
 
 PDAL uses GDAL for spatial reference system description manipulation, and image
 reading supporting for the NITF driver. In

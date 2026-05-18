@@ -280,7 +280,7 @@ bool MathParser::parexpr(Expression& expr)
     if (!match(TokenType::Lparen))
         return false;
 
-    if (!addexpr(expr))
+    if (!expression(expr))
     {
         setError("Expected expression following '('.");
         return false;

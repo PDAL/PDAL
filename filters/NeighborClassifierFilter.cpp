@@ -47,7 +47,7 @@ static PluginInfo const s_info
 {
     "filters.neighborclassifier",
     "Re-assign some point attributes based KNN voting",
-    "http://pdal.io/stages/filters.neighborclassifier.html"
+    "https://pdal.org/stages/filters.neighborclassifier.html"
 };
 
 CREATE_STATIC_STAGE(NeighborClassifierFilter, s_info)

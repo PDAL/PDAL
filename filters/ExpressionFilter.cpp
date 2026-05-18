@@ -53,7 +53,7 @@ static StaticPluginInfo const s_info
 {
     "filters.expression",
     "Pass only points given an expression",
-    "http://pdal.io/stages/filters.expression.html"
+    "https://pdal.org/stages/filters.expression.html"
 };
 
 CREATE_STATIC_STAGE(ExpressionFilter, s_info)
@@ -83,6 +83,8 @@ void ExpressionFilter::addArgs(ProgramArgs& args)
     m_args->m_whereArg = &args.add("expression",
         "Conditional expression describing points to be passed to this filter",
         m_args->m_expressions).setPositional();
+
+    args.addSynonym("expression", "limits");
 }
 
 

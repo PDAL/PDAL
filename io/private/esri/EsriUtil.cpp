@@ -72,14 +72,37 @@ NL::json parse(const std::string& data, const std::string& error)
     return j;
 }
 
+// Wrapper for managing lepcc context lifecycle
+class ContextWrapper
+{
+public:
+    ContextWrapper() : m_ctx(lepcc_createContext())
+    {}
+    ~ContextWrapper()
+    {
+        lepcc_deleteContext(&m_ctx);   
+    }
+
+    operator lepcc_ContextHdl() const { return m_ctx; }
+
+private:
+    lepcc_ContextHdl m_ctx;
+};
+
+// Helper function to get size of compressed data
+int getNBytes(ContextWrapper& ctx, const unsigned char* compressed, int nInfo)
+{
+    lepcc_blobType bt;
+    lepcc::uint32 blobSize = 0;
+    lepcc::ErrCode errCode = (lepcc::ErrCode)lepcc_getBlobInfo(ctx,
+        compressed, nInfo, &bt, &blobSize);
+    return (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
+}
 
 std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
 {
     int nInfo = lepcc_getBlobInfoSize();
-    lepcc_ContextHdl ctx(nullptr);
-    ctx = lepcc_createContext();
-    lepcc_blobType bt;
-    lepcc::uint32 blobSize = 0;
+    ContextWrapper ctx;
 
     const unsigned char* compressed = reinterpret_cast<const unsigned char*>
         (compData->data());
@@ -87,10 +110,7 @@ std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
     std::vector<lepcc::Point3D> decVec;
     lepcc::uint32 xyzPts = 0;
 
-    lepcc::ErrCode errCode = (lepcc::ErrCode)lepcc_getBlobInfo(ctx,
-        compressed, nInfo, &bt, &blobSize);
-
-    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
+    int nBytes = getNBytes(ctx, compressed, nInfo);
     if (nBytes > 0)
     {
         const lepcc::Byte* pByte = compressed;
@@ -113,21 +133,14 @@ std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
     const unsigned char* compressed = reinterpret_cast<const unsigned char*>
         (compData->data());
     int nInfo = lepcc_getBlobInfoSize();
-    lepcc_ContextHdl ctx(nullptr);
-    ctx = lepcc_createContext();
-    lepcc_blobType bt;
-    lepcc::uint32 blobSize = 0;
+    ContextWrapper ctx;
 
     lepcc_status stat;
     std::vector<lepcc::RGB_t> rgbVec;
 
     lepcc::uint32 nPts = 0;
-    lepcc::ErrCode errCode =
-        (lepcc::ErrCode)lepcc_getBlobInfo(
-                ctx, compressed, nInfo, &bt, &blobSize);
 
-    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-
+    int nBytes = getNBytes(ctx, compressed, nInfo);
     if (nBytes > 0)
     {
         const lepcc::Byte* pByte = compressed;
@@ -150,18 +163,12 @@ std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
     const unsigned char* compressed = reinterpret_cast<const unsigned char*>
         (compData->data());
     int nInfo = lepcc_getBlobInfoSize();
-    lepcc_ContextHdl ctx(nullptr);
-    ctx = lepcc_createContext();
-    lepcc_blobType bt;
-    lepcc::uint32 blobSize = 0;
+    ContextWrapper ctx;
 
     lepcc_status stat;
     lepcc::uint32 nPts = 0;
-    lepcc::ErrCode errCode =
-        (lepcc::ErrCode)lepcc_getBlobInfo(
-                ctx, compressed, nInfo, &bt, &blobSize);
 
-    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
+    int nBytes = getNBytes(ctx, compressed, nInfo);
     std::vector<uint16_t> intVec;
     if (nBytes > 0)
     {

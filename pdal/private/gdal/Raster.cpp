@@ -32,11 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4251)
+#endif
+
 #include <gdal.h>
 #include <gdal_priv.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <pdal/util/Algorithm.hpp>
 
@@ -690,16 +696,11 @@ GDALError Raster::statistics(int nBand, double *minimum, double *maximum,
 
 MetadataNode Raster::getMetadata(std::string domain) const
 {
-    char **papszMetadata = NULL;
-
     MetadataNode output("raster");
 
-    // m_ds owns this
-    papszMetadata = m_ds->GetMetadata(domain.c_str());
+    CSLConstList papszMetadata = m_ds->GetMetadata(domain.c_str());
 
-    for( int i = 0;
-         papszMetadata != NULL && papszMetadata[i] != NULL;
-         i++ )
+    for( int i = 0; i < CSLCount(papszMetadata); ++i )
     {
         std::string v(papszMetadata[i]);
 
@@ -714,8 +715,6 @@ MetadataNode Raster::getMetadata(std::string domain) const
         {
             throw pdal_error("Metadata must be defined in 'key=value,key2=value2' arrangement");
         }
-
-
     }
 
     return output;

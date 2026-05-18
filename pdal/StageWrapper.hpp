@@ -28,7 +28,23 @@ public:
     static void done(Stage& s, PointTableRef table)
         { s.done(table); }
     static PointViewSet run(Stage& s, PointViewPtr view)
-        { return s.run(view); }
+        {
+            bool bDoRunStage(true);
+            Filter* isFilterType = dynamic_cast<Filter*>(&s);
+
+            if (isFilterType)
+                if (view->empty())
+                    bDoRunStage = false;
+            if (bDoRunStage)
+                return s.run(view);
+            else
+            {
+                s.log()->get(LogLevel::Debug)
+                    << " Filter '" << s.tag()
+                    << "' was passed an empty view and not executed";
+                return PointViewSet();
+            }
+        }
 };
 
 // Provide access to private members of Filter.

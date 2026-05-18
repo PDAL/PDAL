@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(PDAL VERSION 2.9.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.10.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -41,7 +41,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PDAL_LIB_NAME pdalcpp)
 
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
-set(PDAL_SPZ_LIB_NAME pdal_spz)
 set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
@@ -153,6 +152,9 @@ endif()
 
 add_subdirectory(plugins)
 
+if (BUILD_DOCS)
+    add_subdirectory(doc)
+endif()
 if (WITH_TESTS)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
     add_subdirectory(test)
@@ -165,7 +167,6 @@ add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
 add_subdirectory(vendor/h3)
-add_subdirectory(vendor/spz)
 add_subdirectory(tools)
 add_subdirectory(apps)
 
@@ -261,7 +262,6 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
-        ${PDAL_SPZ_LIB_NAME}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
@@ -315,9 +315,12 @@ if(WIN32)
     )
 endif(WIN32)
 
+set(PDALCPP_LIB_OUTPUT_NAME "pdalcpp" CACHE STRING "Name of the PDALCPP library")
+
 set_target_properties(${PDAL_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
+    OUTPUT_NAME ${PDALCPP_LIB_OUTPUT_NAME}
     CLEAN_DIRECT_OUTPUT 1)
 
 # shut off -Wpedantic selectively

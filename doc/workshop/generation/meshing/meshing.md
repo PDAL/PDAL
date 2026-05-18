@@ -6,7 +6,7 @@
 ```
 
 This exercise uses PDAL to create surface meshes. PDAL is able to use a number
-of meshing filters: <https://pdal.io/en/latest/stages/filters.html>. Three of these
+of meshing filters: <https://pdal.org/en/latest/stages/filters.html>. Three of these
 are 'in the box', without needing plugins compiled. These are 2D Delaunay
 triangulation, Greedy projection meshing and Poisson surface meshing.
 
@@ -23,7 +23,7 @@ After running each command, the output `.ply` file can be viewed in Meshlab or
 
 ```{note}
 Since QGIS doesn't support `.ply` files we can't use it for this exercise.
-In order to use QGIS you can covert the files to OBJ or `.copc` using PDAL.
+In order to use QGIS you can convert the files to OBJ or `.copc` using PDAL.
 ```
 
 ```{seealso}
@@ -84,7 +84,7 @@ To colorize the points, select `first-mesh` in the left window. Under
 ### Filtering
 
 If we want to just mesh a building, or just terrain, or both we can apply a
-`range` filter based on point classification. These data have ground labeled as
+{ref}`filters.expression` filter based on point classification. These data have ground labeled as
 class 2, and buildings as 6.
 
 In this exercise we will create a poisson mesh surface of a building and the
@@ -98,8 +98,8 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 ```console
 $ pdal translate -i ./exercises/analysis/clipping/stadium.copc.laz \
 -o ./exercises/analysis/meshing/building-exercise.ply \
-range poisson \
---filters.range.limits="Classification[2:2],Classification[6:6]" \
+expression poisson \
+--filters.expression.expression="Classification == 2 || Classification == 6" \
 --filters.poisson.depth=16 \
 --verbose 4
 ```
@@ -107,8 +107,8 @@ range poisson \
 ```doscon
 > pdal translate -i ./exercises/analysis/clipping/stadium.copc.laz ^
 -o ./exercises/analysis/meshing/building-exercise.ply ^
-range poisson ^
---filters.range.limits="Classification[2:2],Classification[6:6]" ^
+expression poisson ^
+--filters.expression.limits="Classification == 2 || Classification == 6" ^
 --filters.poisson.depth=16 ^
 --verbose 4
 ```

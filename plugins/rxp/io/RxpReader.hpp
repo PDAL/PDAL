@@ -55,7 +55,7 @@ namespace pdal
 
 const bool DEFAULT_SYNC_TO_PPS = true;
 const bool DEFAULT_IS_RDTP = false;
-const bool DEFAULT_MINIMAL = false;
+const bool DEFAULT_EMPIT_EMPTY_SHOTS = false;
 const bool DEFAULT_REFLECTANCE_AS_INTENSITY = true;
 const float DEFAULT_MIN_REFLECTANCE = -25.0;
 const float DEFAULT_MAX_REFLECTANCE = 5.0;
@@ -70,6 +70,8 @@ public:
         : pdal::Reader()
         , pdal::Streamable()
         , m_syncToPps(DEFAULT_SYNC_TO_PPS)
+        , m_isRdtp(DEFAULT_IS_RDTP)
+        , m_emitEmptyShots(DEFAULT_EMPIT_EMPTY_SHOTS)
         , m_reflectanceAsIntensity(DEFAULT_REFLECTANCE_AS_INTENSITY)
         , m_minReflectance(DEFAULT_MIN_REFLECTANCE)
         , m_maxReflectance(DEFAULT_MAX_REFLECTANCE)
@@ -90,6 +92,7 @@ private:
     std::string m_uri;
     bool m_syncToPps;
     bool m_isRdtp;
+    bool m_emitEmptyShots;
     bool m_reflectanceAsIntensity;
     float m_minReflectance;
     float m_maxReflectance;

@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <limits>
+#include <cmath>
 
 #include <pdal/pdal_test_main.hpp>
 
@@ -160,4 +161,84 @@ TEST(RxpReaderTest, testReflectanceAsIntensity)
     PointViewPtr view = *viewSet.begin();
     uint16_t intensity = view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0);
     EXPECT_EQ((std::numeric_limits<uint16_t>::max)(), intensity);
+}
+
+TEST(RxpReaderTest, testEmptyShotsDefaultFile)
+{
+    using namespace Dimension;
+    
+    // Read without empty shots (baseline)
+    Options optionsNoEmpty = defaultRxpReaderOptions();
+    RxpReader readerNoEmpty;
+    readerNoEmpty.setOptions(optionsNoEmpty);
+
+    PointTable tableNoEmpty;
+    readerNoEmpty.prepare(tableNoEmpty);
+
+    PointViewSet viewSetNoEmpty = readerNoEmpty.execute(tableNoEmpty);
+    PointViewPtr viewNoEmpty = *viewSetNoEmpty.begin();
+    size_t countNoEmpty = viewNoEmpty->size();
+
+    // Read with empty shots enabled
+    Options optionsWithEmpty = defaultRxpReaderOptions();
+    optionsWithEmpty.add("empty_shots", true);
+    RxpReader readerWithEmpty;
+    readerWithEmpty.setOptions(optionsWithEmpty);
+
+    PointTable tableWithEmpty;
+    readerWithEmpty.prepare(tableWithEmpty);
+
+    PointViewSet viewSetWithEmpty = readerWithEmpty.execute(tableWithEmpty);
+    PointViewPtr viewWithEmpty = *viewSetWithEmpty.begin();
+    size_t countWithEmpty = viewWithEmpty->size();
+
+    // Count and validate empty vs non-empty shots
+    // Empty shots have coordinates at beam_origin and zero range/amplitude/reflectance
+    size_t countEmptyShots = 0;
+    size_t countNonEmptyShots = 0;
+    for (point_count_t i = 0; i < viewWithEmpty->size(); ++i)
+    {
+        uint8_t numberOfReturns = viewWithEmpty->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
+        if (numberOfReturns == 0)
+        {
+            countEmptyShots++;
+            // Empty shot payload: coordinates at beam_origin, range/amplitude/reflectance/deviation = 0
+            double x = viewWithEmpty->getFieldAs<double>(Id::X, i);
+            double y = viewWithEmpty->getFieldAs<double>(Id::Y, i);
+            double z = viewWithEmpty->getFieldAs<double>(Id::Z, i);
+            double beamOriginX = viewWithEmpty->getFieldAs<double>(Id::BeamOriginX, i);
+            double beamOriginY = viewWithEmpty->getFieldAs<double>(Id::BeamOriginY, i);
+            double beamOriginZ = viewWithEmpty->getFieldAs<double>(Id::BeamOriginZ, i);
+            double echoRange = viewWithEmpty->getFieldAs<double>(Id::EchoRange, i);
+            float amplitude = viewWithEmpty->getFieldAs<float>(Id::Amplitude, i);
+            float reflectance = viewWithEmpty->getFieldAs<float>(Id::Reflectance, i);
+            float deviation = viewWithEmpty->getFieldAs<float>(Id::Deviation, i);
+            float bgRadiation = viewWithEmpty->getFieldAs<float>(Id::BackgroundRadiation, i);
+
+            // Coordinates should match beam origin (zero range)
+            EXPECT_NEAR(x, beamOriginX, 1e-6) << "X should equal beamOriginX for empty shot at index " << i;
+            EXPECT_NEAR(y, beamOriginY, 1e-6) << "Y should equal beamOriginY for empty shot at index " << i;
+            EXPECT_NEAR(z, beamOriginZ, 1e-6) << "Z should equal beamOriginZ for empty shot at index " << i;
+            
+            // Range and measurement values should be zero
+            EXPECT_EQ(echoRange, 0.0) << "EchoRange should be 0 for empty shot at index " << i;
+            EXPECT_EQ(amplitude, 0.0f) << "Amplitude should be 0 for empty shot at index " << i;
+            EXPECT_EQ(reflectance, 0.0f) << "Reflectance should be 0 for empty shot at index " << i;
+            EXPECT_EQ(deviation, 0.0f) << "Deviation should be 0 for empty shot at index " << i;
+            EXPECT_EQ(bgRadiation, 0.0f) << "BackgroundRadiation should be 0 for empty shot at index " << i;
+
+            // Shot metadata should be valid
+            double shotTimestamp = viewWithEmpty->getFieldAs<double>(Id::ShotTimestamp, i);
+            EXPECT_GT(shotTimestamp, 0.0) << "ShotTimestamp should be valid for empty shot at index " << i;
+        }
+        else
+        {
+            countNonEmptyShots++;
+        }
+    }
+
+    // Expected counts for 130501_232206_cut.rxp
+    EXPECT_EQ(countNoEmpty, 177208u);
+    EXPECT_EQ(countWithEmpty, 221122u);
+    EXPECT_EQ(countEmptyShots, 43914u);
 }

@@ -65,6 +65,7 @@ private:
     bool m_allowExtrapolation;
     double m_maxDistance;
     point_count_t m_count;
+    uint8_t m_class;
 };
 
 } // namespace pdal

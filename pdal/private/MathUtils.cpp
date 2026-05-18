@@ -37,6 +37,7 @@
 #include <numeric>
 #include <vector>
 
+#include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -393,6 +394,17 @@ Eigen::Vector3d rotate(const Eigen::Vector3d& v, const Eigen::Quaterniond& rot)
     return p.vec();
 }
 
+namespace
+{
+
+// Return the square of the magnitude between (x1, y1) and (x2, y2)
+double mag2(double x1, double y1, double x2, double y2)
+{
+    return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+}
+
+} // unnamed namespace
+
 // https://en.wikipedia.org/wiki/Barycentric_coordinate_system
 // http://blackpawn.com/texts/pointinpoly/default.html
 //
@@ -423,25 +435,103 @@ double barycentricInterpolation(double x1, double y1, double z1,
     // the signs differ, the test point is outside. We treat zero (a point on an edge)
     // as inside the triangle.
 
+    // When the size-adjusted area is less than this, we assume that the test point is
+    // on the outside edge of the triangle being tested.
+    const double almostZero = 1e-14;
+
     // Another way to think about this is that we're making a basis
     // for a system with the basis vectors being two sides of
     // the triangle where one point is (0,0), one is (1, 0) and the other is (0, 1)
     // and points in or on the triangle take on X and Y values [0, 1].
     double area12 = (x2-x1) * (y-y1) - (y2-y1) * (x-x1);
     if (area12 && std::signbit(area12) != signtotal)
-        return std::numeric_limits<double>::infinity();
+    {
+        // Two sides determine the third, so we gain nothing by including that.
+        double magnitude1 = mag2(x1, y1, x2, y2);
+        double magnitude2 = mag2(x1, y1, x, y);
+        double magsum = magnitude1 + magnitude2;
+        if (std::abs(area12 / magsum) > almostZero)
+            return std::numeric_limits<double>::infinity();
+        area12 = 0;
+    }
     double area23 = (x3-x2) * (y-y2) - (y3-y2) * (x-x2);
     if (area23 && std::signbit(area23) != signtotal)
-        return std::numeric_limits<double>::infinity();
+    {
+        double magnitude1 = mag2(x3, y3, x2, y2);
+        double magnitude2 = mag2(x3, y3, x, y);
+        double magsum = magnitude1 + magnitude2;
+        if (std::abs(area23 / magsum) > almostZero)
+            return std::numeric_limits<double>::infinity();
+        area23 = 0;
+    }
     double area31 = (x1-x3) * (y-y3) - (y1-y3) * (x-x3);
     if (area31 && std::signbit(area31) != signtotal)
-        return std::numeric_limits<double>::infinity();
+    {
+        double magnitude1 = mag2(x3, y3, x1, y1);
+        double magnitude2 = mag2(x3, y3, x, y);
+        double magsum = magnitude1 + magnitude2;
+        if (std::abs(area31 / magsum) > almostZero)
+            return std::numeric_limits<double>::infinity();
+        area31 = 0;
+    }
 
     // Compute the z value of the test point as a weighted sum of each of corner z values,
     // dividing by the total triangle area so that area of each sub-triangle is a fraction
     // of the total area.
     return (area12 * z3 + area23 * z1 + area31 * z2) / areaTotal;
 }
+
+NormalResult findNormal(const PointView& view, PointIdList neighbors)
+{
+    using namespace Eigen;
+
+    NormalResult result;
+    if (neighbors.size() < 3)
+    {
+        result.msg = "Not enough neighbors to compute normal.";
+        return result;
+    }
+
+    // Check if the covariance matrix is all zeros
+    auto B = math::computeCovariance(view, neighbors);
+    if (B.isZero())
+    {
+        result.msg = "Covariance matrix is all zeros. This suggests a large "
+            "number of redundant points.";
+        return result;
+    }
+
+    SelfAdjointEigenSolver<Matrix3d> solver(B);
+    if (solver.info() != Success)
+    {
+        result.msg = "Cannot perform eigen decomposition during normal calculation.";
+        return result;
+    }
+
+    // The curvature is computed as the ratio of the first (smallest)
+    // eigenvalue to the sum of all eigenvalues.
+    auto eval = solver.eigenvalues();
+    double sum = eval[0] + eval[1] + eval[2];
+
+    result.curvature = sum ? std::fabs(eval[0] / sum) : 0;
+
+    // The normal is defined by the eigenvector corresponding to the
+    // smallest eigenvalue.
+    result.normal = solver.eigenvectors().col(0);
+
+    return result;
+}
+
+NormalResult findNormal(double x, double y, double z, PointView& v, double radius)
+{
+    return findNormal(v, v.build3dIndex().radius(x, y, z, radius));
+}
+
+NormalResult findNormal(double x, double y, double z, PointView& v, int knn)
+{
+    return findNormal(v, v.build3dIndex().neighbors(x, y, z, knn));;
+}
+
 
 } // namespace math
 } // namespace pdal

@@ -41,7 +41,7 @@ static StaticPluginInfo const s_info
 {
     "filters.merge",
     "Merge data from two different readers into a single stream.",
-    "http://pdal.io/stages/filters.merge.html"
+    "https://pdal.org/stages/filters.merge.html"
 };
 
 CREATE_STATIC_STAGE(MergeFilter, s_info)

@@ -65,6 +65,8 @@ private:
     void handleForwardVlrs(MetadataNode& forward);
     void handleUserVlrs(MetadataNode m);
     void handlePipelineVlr();
+    void handleMetadataVLR(MetadataNode& m);
+
 
     std::unique_ptr<copcwriter::BaseInfo> b;
     bool isRemote;

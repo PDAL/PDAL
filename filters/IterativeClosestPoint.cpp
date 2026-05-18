@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
 {
     "filters.icp",
     "Iterative Closest Point (ICP) registration.",
-    "http://pdal.io/stages/filters.icp.html"
+    "https://pdal.org/stages/filters.icp.html"
 };
 
 CREATE_STATIC_STAGE(IterativeClosestPoint, s_info)

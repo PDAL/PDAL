@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "filters.greedyprojection",
     "Greedy Triangulation filter",
-    "http://pdal.io/stages/filters.greedyprojection.html"
+    "https://pdal.org/stages/filters.greedyprojection.html"
 };
 
 CREATE_STATIC_STAGE(GreedyProjection, s_info)
@@ -129,11 +129,6 @@ void GreedyProjection::filter(PointView& view)
     NormalFilter nf;
     nf.setLog(log());
     nf.doFilter(view);
-
-    // no points in the view, nothing we
-    // can do
-    if (!view.size())
-        return;
 
     KD3Index& tree = view.build3dIndex();
 

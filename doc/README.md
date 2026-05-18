@@ -13,6 +13,7 @@ mamba activate pdal-docs
 
 ```
 cd doc
-make html
-open build/html
+cmake -S . -B _build
+cmake --build ./_build --target html
+open _build/html
 ```

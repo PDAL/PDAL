@@ -39,7 +39,6 @@
 #include <memory>
 #include <unordered_set>
 
-#include <pdal/JsonFwd.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -81,7 +80,6 @@ private:
     virtual bool processOne(PointRef& point) override;
     virtual void done(PointTableRef) override;
 
-
     // If argument "origin" is specified, this function will clip the query
     // bounds to the bounds of the specified origin and set m_queryOriginId to
     // the selected OriginId value.  If the selected origin is not found, throw.
@@ -91,9 +89,6 @@ private:
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(ept::Hierarchy& target, const NL::json& current, const ept::Key& key);
-    bool hasSpatialFilter() const;
-    bool passesSpatialFilter(const BOX3D& tileBounds) const;
     void process(PointViewPtr dstView, const ept::TileContents& tile, point_count_t count);
     bool processPoint(PointRef& dst, const ept::TileContents& tile);
     void load(const ept::Overlap& overlap);
@@ -107,15 +102,11 @@ private:
     uint64_t m_tileCount;
     int64_t m_queryOriginId = -1;
 
-    uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
-    uint64_t m_hierarchyStep = 0;
-
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
     ArtifactManager *m_artifactMgr;
     PointId m_pointId = 0;
-    uint64_t m_nodeId;
 };
 
 } // namespace pdal

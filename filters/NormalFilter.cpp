@@ -60,7 +60,7 @@ using namespace Dimension;
 
 static StaticPluginInfo const s_info{
     "filters.normal", "Normal Filter",
-    "http://pdal.io/stages/filters.normal.html"};
+    "https://pdal.org/stages/filters.normal.html"};
 
 CREATE_STATIC_STAGE(NormalFilter, s_info)
 
@@ -68,6 +68,7 @@ struct NormalArgs
 {
     int m_knn;
     filter::Point m_viewpoint;
+    double m_radius;
     bool m_up;
     bool m_refine;
 };
@@ -83,7 +84,9 @@ std::string NormalFilter::getName() const
 
 void NormalFilter::addArgs(ProgramArgs& args)
 {
-    args.add("knn", "k-Nearest Neighbors", m_args->m_knn, 8);
+    m_knnArg = &args.add("knn", "k-Nearest Neighbors", m_args->m_knn, 8);
+    m_radiusArg = &args.add("radius", "Radius to use for neighbor search",
+        m_args->m_radius);
     m_viewpointArg = &args.add("viewpoint", "Viewpoint as WKT or GeoJSON",
                                m_args->m_viewpoint);
     args.add("always_up", "Normals always oriented with positive Z?",
@@ -119,9 +122,19 @@ void NormalFilter::prepared(PointTableRef table)
         m_args->m_up = false;
     }
 
-    // The query point is returned as a neighbor of itself, so we must increase
-    // k by one to get the desired number of neighbors.
-    ++m_args->m_knn;
+    if (m_radiusArg->set())
+    {
+        if (m_knnArg->set())
+            throwError("Cannot set both knn and radius.");
+        m_args->m_knn = 0;
+    }
+    else
+    {
+        // The query point is returned as a neighbor of itself, so we must increase
+        // k by one to get the desired number of neighbors.
+        ++m_args->m_knn;
+    }
+
 }
 
 void NormalFilter::compute(PointView& view, KD3Index& kdi)
@@ -129,23 +142,22 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
     log()->get(LogLevel::Debug) << "Computing normal vectors\n";
     for (auto&& p : view)
     {
+        math::NormalResult result;
+
         // Perform eigen decomposition of covariance matrix computed from
-        // neighborhood composed of k-nearest neighbors.
-        PointIdList neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
-        auto B = math::computeCovariance(view, neighbors);
-        SelfAdjointEigenSolver<Matrix3d> solver(B);
-        if (solver.info() != Success)
-            throwError("Cannot perform eigen decomposition.");
+        // neighborhood composed of k-nearest neighbors, or within radius.
+        if (m_radiusArg->set())
+            result = math::findNormal(view, kdi.radius(p.pointId(), m_args->m_radius));
+        else
+            result = math::findNormal(view, kdi.neighbors(p.pointId(), m_args->m_knn));
 
-        // The curvature is computed as the ratio of the first (smallest)
-        // eigenvalue to the sum of all eigenvalues.
-        auto eval = solver.eigenvalues();
-        double sum = eval[0] + eval[1] + eval[2];
-        double curvature = sum ? std::fabs(eval[0] / sum) : 0;
-
-        // The normal is defined by the eigenvector corresponding to the
-        // smallest eigenvalue.
-        Vector3d normal = solver.eigenvectors().col(0);
+        if (result.normal.isZero())
+        {
+            log()->get(LogLevel::Info)
+                << "Skipping point " << p.pointId()
+                << ": " << result.msg << "\n";
+            continue;
+        }
 
         if (m_viewpointArg->set())
         {
@@ -156,23 +168,16 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
             double dx = m_args->m_viewpoint.x() - p.getFieldAs<double>(Id::X);
             double dy = m_args->m_viewpoint.y() - p.getFieldAs<double>(Id::Y);
             double dz = m_args->m_viewpoint.z() - p.getFieldAs<double>(Id::Z);
-            Vector3d vp(dx, dy, dz);
-            if (vp.dot(normal) < 0)
-                normal *= -1.0;
+            result.normal = math::orientToViewpoint({ dx, dy, dz }, result.normal);
         }
         else if (m_args->m_up)
-        {
-            // If normals are expected to be upward facing, invert them when the
-            // Z component is negative.
-            if (normal[2] < 0)
-                normal *= -1.0;
-        }
+            result.normal = math::orientUp(result.normal);
 
         // Set the computed normal and curvature dimensions.
-        p.setField(Id::NormalX, normal[0]);
-        p.setField(Id::NormalY, normal[1]);
-        p.setField(Id::NormalZ, normal[2]);
-        p.setField(Id::Curvature, curvature);
+        p.setField(Id::NormalX, result.normal[0]);
+        p.setField(Id::NormalY, result.normal[1]);
+        p.setField(Id::NormalZ, result.normal[2]);
+        p.setField(Id::Curvature, result.curvature);
     }
 }
 
@@ -190,7 +195,12 @@ void NormalFilter::update(
     // spanning tree. The first neighbor is the query point which is
     // already part of the minimum spanning tree and can safely be
     // skipped.
-    PointIdList neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+    PointIdList neighbors;
+    if (m_radiusArg->set())
+        neighbors = kdi.radius(updateIdx, m_args->m_radius);
+    else
+        neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+
     neighbors.erase(neighbors.begin());
     PointRef p = view.point(updateIdx);
     Vector3d N0(p.getFieldAs<double>(Id::NormalX),

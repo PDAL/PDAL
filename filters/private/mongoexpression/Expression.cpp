@@ -80,7 +80,7 @@ void Expression::build(LogicGate& gate, const NL::json& json)
         else if (!val.is_object() || val.size() == 1)
         {
             // A comparison object.
-            active->push(Comparison::create(m_layout, key, val));
+            active->push(Comparison::create(*m_layout, key, val));
         }
         else
         {
@@ -96,7 +96,7 @@ void Expression::build(LogicGate& gate, const NL::json& json)
             {
                 NL::json nest;
                 nest[inner.key()] = inner.value();
-                active->push(Comparison::create(m_layout, key, nest));
+                active->push(Comparison::create(*m_layout, key, nest));
             }
         }
     }

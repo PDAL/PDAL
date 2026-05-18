@@ -65,12 +65,10 @@ This example crops all points more than 500 units in any direction from a point.
 
 bounds
 
-: The extent of the clipping rectangle in the format
-  `"([xmin, xmax], [ymin, ymax])"`.  This option can be specified more than
-  once by placing values in an array.
+: The extent of the clipping rectangle in the format.  This option can be
+  specified more than once by placing values in an array.
 
-  ```{note}
-  3D bounds can be given in the form `([xmin, xmax], [ymin, ymax], [zmin, zmax])`.
+  ```{include} bounds_opts.md
   ```
 
   ```{warning}
@@ -119,4 +117,4 @@ a_srs
 
 ## Notes
 
-1. See {ref}`workshop-clipping`: and {ref}`clipping` for example usage scenarios for {ref}`filters.crop`.
+1. See {ref}`workshop-clipping`: and {ref}`clipping` for example usage scenarios for {ref}`filters.overlay`.

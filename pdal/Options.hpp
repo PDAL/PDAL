@@ -148,22 +148,7 @@ public:
         add(option);
     }
 
-    void toMetadata(MetadataNode& parent) const
-    {
-        for (std::string& k : getKeys())
-        {
-            StringList l = getValues(k);
-            for(const auto& vs: l)
-            {
-                bool isUserData = Utils::iequals(k, "user_data") || Utils::iequals(k, "userdata");
-                // 'userData' keys on stages and such are JSON
-                if (!isUserData)
-                    parent.add(k, vs);
-                else
-                    parent.addWithType(k, vs, "json", "User JSON");
-            }
-        }
-    }
+    void toMetadata(MetadataNode& parent) const;
 
     // add an option (shortcut version, bypass need for an Option object)
     template<typename T> void add(const std::string& name, T value)

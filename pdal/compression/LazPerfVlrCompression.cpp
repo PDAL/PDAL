@@ -32,12 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
+#endif
+
 #include <lazperf/lazperf.hpp>
 #include <lazperf/filestream.hpp>
 #include <lazperf/vlr.hpp>
+
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 // This only exist in version 1.3+, so is an acceptable version test for now.
 #ifndef LAZPERF_VERSION
@@ -221,14 +227,13 @@ public:
             throw pdal_error("Invalid version " + std::to_string(version) +
                 " found in LAZ chunk table.");
 
-        bool variable = (m_vlr.chunk_size == lazperf::VariableChunkSize);
-
         if (numChunks)
-            m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
+            m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks,
+                m_vlr.variableChunks());
 
         // If the chunk size is fixed, set the counts to the chunk size since
         // they aren't stored in the chunk table..
-        if (!variable)
+        if (!m_vlr.variableChunks())
         {
             uint64_t remaining = m_pointCount;
             for (lazperf::chunk& chunk : m_chunks)
@@ -269,7 +274,7 @@ public:
         m_fileStream.reset();
     }
 
-    
+
     bool seek(uint64_t record)
     {
         if (record >= m_pointCount || m_chunks.empty())

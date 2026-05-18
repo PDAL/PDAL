@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <iomanip>
+#include <numeric>
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
@@ -78,6 +79,49 @@ PointId PointView::addPoint()
     m_index.push_back(tableId);
     m_size++;
     return tableId;
+}
+
+template<typename Sorter>
+void PointView::basic_sort(Sorter sort, Compare comp)
+{
+    std::vector<PointId> order(size());
+
+    std::iota(order.begin(), order.end(), 0);
+
+    sort(order.begin(), order.end(), comp);
+
+    for (PointId& o : order)
+        o = m_index[o];
+    for (size_t i = 0; i < m_index.size(); ++i)
+        m_index[i] = order[i];
+}
+
+void PointView::sort(Dimension::Id dim)
+{
+    auto comp = [this, dim](PointId id1, PointId id2)
+    {
+        return compare(dim, id1, id2);
+    };
+    basic_sort(std::sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+}
+
+void PointView::sort(Compare comp)
+{
+    basic_sort(std::sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+}
+
+void PointView::stableSort(Dimension::Id dim)
+{
+    auto comp = [this, dim](PointId id1, PointId id2)
+    {
+        return compare(dim, id1, id2);
+    };
+    basic_sort(std::stable_sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+}
+
+void PointView::stableSort(Compare comp)
+{
+    basic_sort(std::stable_sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
 }
 
 void PointView::calculateBounds(BOX2D& output) const

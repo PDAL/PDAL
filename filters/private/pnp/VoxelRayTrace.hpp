@@ -5,7 +5,7 @@
 #include <utility>
 #include <cmath>
 
-#include "Comparison.hpp"
+#include "../Comparison.hpp"
 
 // Amanatides and Woo algorithm to find cells traversed by a segment (2D).
 class VoxelRayTrace

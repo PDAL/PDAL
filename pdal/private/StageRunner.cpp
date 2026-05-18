@@ -55,7 +55,13 @@ PointViewPtr StageRunner::keeps()
 void StageRunner::run()
 {
     point_count_t keepSize = m_keeps->size();
-    m_viewSet = m_stage->run(m_keeps);
+
+    // Don't run the stage if we're a filter and we're empty
+    if (dynamic_cast<Filter *>(m_stage) && keepSize == 0)
+        m_stage->log()->get(LogLevel::Debug) << "'where' filtering removed all points or "
+            "the reader is empty. Filter '" << m_stage->tag() << "' was not applied.";
+    else
+        m_viewSet = m_stage->run(m_keeps);
 
     if (m_skips->size() == 0)
         return;

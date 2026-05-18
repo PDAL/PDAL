@@ -306,7 +306,7 @@ public:
         { return m_metadata; }
 
     /**
-      Serialize a stage by inserting apporpritate data into the provided
+      Serialize a stage by inserting appropriate data into the provided
       MetadataNode.  Used to dump a pipeline specification in a portable
       format.
 

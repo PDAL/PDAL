@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
 {
     "readers.terrasolid",
     "TerraSolid Reader",
-    "http://pdal.io/stages/readers.terrasolid.html",
+    "https://pdal.org/stages/readers.terrasolid.html",
     { "bin" }
 };
 

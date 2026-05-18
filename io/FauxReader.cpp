@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "readers.faux",
     "Faux Reader",
-    "http://pdal.io/stages/readers.faux.html"
+    "https://pdal.org/stages/readers.faux.html"
 };
 
 CREATE_STATIC_STAGE(FauxReader, s_info)

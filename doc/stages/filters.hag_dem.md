@@ -2,8 +2,8 @@
 
 # filters.hag_dem
 
-The **Height Above Ground (HAG) Digital Elevation Model (DEM) filter** loads
-a GDAL-readable raster image specifying the DEM. The `Z` value of each point
+The **Height Above Ground (HAG) Digital Elevation Model (DEM) filter** uses
+a GDAL-readable raster image to specifying the DEM. The `Z` value of each point
 in the input is compared against the value at the corresponding X,Y location
 in the DEM raster. It creates a new dimension, `HeightAboveGround`, that
 contains the normalized height values.
@@ -32,8 +32,8 @@ Using the autzen dataset (here shown colored by elevation)
 we generate a DEM based on the points already classified as ground
 
 ```
-$ pdal translate autzen.laz autzen_dem.tif range \
-    --filters.range.limits="Classification[2:2]" \
+$ pdal translate autzen.laz autzen_dem.tif expression \
+    --filters.expression.expression="Classification == 2" \
     --writers.gdal.output_type="idw" \
     --writers.gdal.resolution=6 \
     --writers.gdal.window_size=24
@@ -82,11 +82,30 @@ band
 : GDAL Band number to read (count from 1).
   \[Default: 1\]
 
+nodata_hag
+
+: HAG value to set when pixel value is NoData
+  \[Default: 0.0]
+
+min_clamp
+
+: Clamp HAG minimum value to specified
+  \[Default: std::numeric_limits<double>::min]
+
+max_clamp
+
+: Clamp HAG maximum value to specified
+  \[Default: std::numeric_limits<double>::max]
+
 zero_ground
 
 : If true, set HAG of ground-classified points to 0 rather than comparing
   `Z` value to raster DEM.
   \[Default: true\]
+
+class
+
+: Classification value of ground points. Used when `zero_ground` is set to true.  \[Default: 2\]
 
 ```{include} filter_opts.md
 ```

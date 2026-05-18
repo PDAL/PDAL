@@ -40,6 +40,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
 #include <io/HeaderVal.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
@@ -810,4 +811,29 @@ TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_name)
     ASSERT_FALSE(view->hasDim( layout->findDim("Deviation") ));
     ASSERT_TRUE(view->hasDim( layout->findDim("confidence") ));
     ASSERT_TRUE(view->hasDim( layout->findDim("Bad_Name") ));
+}
+
+TEST(LasReaderTest, remote_vsi)
+{
+    Options ops1;
+    ops1.add("filename", "/vsicurl/http://localhost/simple.laz");
+
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    PointTable table;
+
+    // check we get past looking up the arbiter driver
+    EXPECT_THROW({
+        try
+        {
+            reader.prepare(table);
+        }
+        catch(const pdal_error& e)
+        {
+            EXPECT_TRUE(Utils::startsWith(e.what(),
+                "Unable to open stream for"));
+            throw;
+        }
+    }, pdal_error);
 }

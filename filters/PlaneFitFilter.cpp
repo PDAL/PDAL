@@ -59,7 +59,7 @@ static StaticPluginInfo const s_info
 {
     "filters.planefit",
     "Plane Fit (Kutz et al., 2003)",
-    "http://pdal.io/stages/filters.planefit.html"
+    "https://pdal.org/stages/filters.planefit.html"
 };
 
 CREATE_STATIC_STAGE(PlaneFitFilter, s_info)
@@ -133,6 +133,17 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i)
 
     // Compute covariance of the neighbors.
     Matrix3d B = math::computeCovariance(view, neighbors);
+
+    // Check if the covariance matrix is all zeros
+    if (B.isZero())
+    {
+        log()->get(LogLevel::Info)
+            << "Skipping point " << i
+            << ". Covariance matrix is all zeros. This suggests a large "
+               "number of redundant points. Consider using filters.sample "
+               "with a small radius to remove redundant points.\n";
+        return;
+    }
 
     // Perform the eigen decomposition, using the eigenvector of the smallest
     // eigenvalue as the normal.

@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "writers.pcd",
     "Write data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/writers.pcd.html",
+    "https://pdal.org/stages/writers.pcd.html",
     {"pcd"}
 };
 

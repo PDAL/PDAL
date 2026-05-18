@@ -20,7 +20,7 @@ Point clouds stored in spherical format are not supported.
 
 ```{note}
 The E57 `cartesianInvalidState` dimension is mapped to the Omit
-PDAL dimension.  A range filter can be used to filter out the
+PDAL dimension.  An {ref}`filters.expression` filter can be used to filter out the
 invalid points.
 ```
 
@@ -57,8 +57,8 @@ invalid points.
         "filename":"inputfile.e57"
     },
     {
-        "type":"filters.range",
-        "limits":"Omit[0:0]"
+        "type":"filters.expression",
+        "expression":"Omit == 0"
     },
     {
         "type":"writers.text",

@@ -183,6 +183,22 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
+bool isJSON(const std::string& value)
+{
+    static constexpr std::array<std::pair<char, char>, 3> delims
+    { { { '{', '}' }, { '[', ']' }, { '"', '"' } } };
+
+    std::string t = value;
+    Utils::trim(t);
+
+    if (t.size() < 2)
+        return false;
+    for (const std::pair<char, char>& d : delims)
+        if (t.front() == d.first && t.back() == d.second)
+            return true;
+    return false;
+}
+
 std::string tempFilename(const std::string& path)
 {
     const std::string tempdir(arbiter::getTempPath());
@@ -304,7 +320,11 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    return path.find("://") != std::string::npos;
+    // if you are using GDAL VSI you know what you are doing
+    if (Utils::startsWith(Utils::toupper(path), "/VSI"))
+        return false;
+    else
+        return path.find("://") != std::string::npos;
 }
 
 
@@ -556,25 +576,6 @@ std::vector<std::string> glob(const std::string& path)
         return remoteGlob(path);
     else
         return FileUtils::glob(path);
-}
-
-StatusWithReason parseJson(const std::string& s, NL::json& json)
-{
-    try
-    {
-        json = NL::json::parse(s);
-    }
-    catch (NL::json::parse_error& err)
-    {
-        // Look for a right bracket -- this indicates the start of the
-        // actual message from the parse error.
-        std::string s(err.what());
-        auto pos = s.find(']');
-        if (pos != std::string::npos)
-            s = s.substr(pos + 1);
-        return { -1, s };
-    }
-    return true;
 }
 
 } // namespace Utils

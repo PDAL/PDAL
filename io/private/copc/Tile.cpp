@@ -32,10 +32,16 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
+#endif
+
 #include <lazperf/readers.hpp>
+
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 #include <io/LasReader.hpp>
 #include <io/private/las/Header.hpp>

@@ -129,16 +129,35 @@ private:
         {
             std::cout << tag();
             m_entered = true;
+            point.setField(Dimension::Id::X, 0.0);
             return true;
         }
         return false;
     }
 
-    virtual point_count_t read(PointViewPtr, point_count_t)
+    virtual void addDimensions(PointLayoutPtr layout)
     {
-        std::cout << tag();
-        return 0;
+        Dimension::Id id = layout->registerOrAssignDim("something", Dimension::Type::Double);
+        Dimension::Id x = layout->registerOrAssignDim("X", Dimension::Type::Double);
     }
+
+    virtual point_count_t read(PointViewPtr view, point_count_t numPts)
+    {
+
+        PointId idx = view->size();
+        point_count_t cnt = 0;
+        PointRef point(*view);
+        while (cnt < numPts)
+        {
+            point.setPointId(idx);
+            if (!processOne(point))
+                break;
+            cnt++;
+            idx++;
+        }
+        return cnt;
+     }
+
 private:
     bool m_entered;
 };
@@ -490,7 +509,7 @@ R"(
 }
 )";
 
-/**
+/**point.setField(Dimension::Id::X, 0.0);
   Tree representation of the pipeline above:
 
          D
@@ -509,6 +528,7 @@ R"(
         PipelineManager mgr;
         mgr.readPipeline(iss);
         FixedPointTable t(10000);
+        mgr.prepare();
         mgr.executeStream(t);
         Utils::restore(std::cout, ctx);
         std::string output(oss.str());
@@ -522,6 +542,7 @@ R"(
         auto ctx = Utils::redirect(std::cout, oss);
         PipelineManager mgr;
         mgr.readPipeline(iss);
+        mgr.prepare();
         mgr.execute();
         std::string output(oss.str());
         Utils::restore(std::cout, ctx);

@@ -21,7 +21,10 @@ target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
         ${PDAL_LIB_NAME}
         GTest::gtest
+<<<<<<< HEAD
         GTest::gtest_main
+=======
+>>>>>>> master
 )
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
@@ -43,6 +46,13 @@ PDAL_ADD_TEST(pdal_eigen_test
         ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
+PDAL_ADD_TEST(pdal_io_vsi_test
+    FILES
+        VSITest.cpp
+        ${PDAL_SRC_DIR}/util/VSIIO.cpp
+    LINK_WITH
+        GDAL::GDAL
+)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
     FILES
@@ -67,7 +77,7 @@ PDAL_ADD_TEST(pdal_options_test
     FILES
         OptionsTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
@@ -85,7 +95,7 @@ PDAL_ADD_TEST(pdal_ogr_arg_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filespec_test
     FILES
@@ -100,6 +110,7 @@ PDAL_ADD_TEST(pdal_pipeline_writer_test
         PipelineWriterTest.cpp
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test
@@ -122,20 +133,17 @@ PDAL_ADD_TEST(pdal_polygon_test
     FILES
         PolygonTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
-target_include_directories(pdal_polygon_test
-    PRIVATE
-        ${GDAL_INCLUDE_DIR})
+
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test
     FILES
         SpatialReferenceTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${GDAL_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
@@ -174,10 +182,8 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY}
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
+        GDAL::GDAL
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
@@ -193,39 +199,39 @@ PDAL_ADD_TEST(pdal_io_copc_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
+    FILES
+        io/CopcRemoteReaderTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
+        GDAL::GDAL
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
         io/GDALReaderTest.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY}
+    INCLUDES
+        GDAL::GDAL
 )
-    target_include_directories(pdal_io_gdal_reader_test
-        PRIVATE
-            ${GDAL_INCLUDE_DIR})
 
 PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY}
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_io_ogr_writer_test
     FILES
         io/OGRWriterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
-    INCLUDES
-        ${GDAL_INCLUDE_DIR}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_io_las_reader_test
     FILES
@@ -235,7 +241,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
     FILES
         io/LasWriterTest.cpp
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
+        GDAL::GDAL
         ${NLOHMANN_INCLUDE_DIR}
 )
 
@@ -296,20 +302,6 @@ PDAL_ADD_TEST(pdal_io_slpk_reader_test
         io/SlpkReaderTest.cpp
 )
 
-PDAL_ADD_TEST(pdal_io_spz_reader_test
-    FILES
-        io/SpzReaderTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}
-)
-
-PDAL_ADD_TEST(pdal_io_spz_writer_test
-    FILES
-        io/SpzWriterTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}
-)
-
 PDAL_ADD_TEST(pdal_i3s_obb_test
     FILES
         io/ObbTest.cpp
@@ -333,6 +325,7 @@ endif()
 #
 # sources for the native filters
 #
+PDAL_ADD_TEST(pdal_filters_georeference_test FILES filters/GeoreferenceFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES
@@ -348,32 +341,28 @@ PDAL_ADD_TEST(pdal_filters_nndistance_test
 PDAL_ADD_TEST(pdal_filters_colorinterp_test
     FILES
         filters/ColorinterpFilterTest.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY}
+    INCLUDES
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_colorization_test
     FILES
         filters/ColorizationFilterTest.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY}
+    INCLUDES
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
+        GDAL::GDAL
         ${NLOHMANN_INCLUDE_DIR}
-    LINK_WITH
-        ${GDAL_LIBRARY}
 )
 PDAL_ADD_TEST(pdal_filters_geomdistance_test
     FILES
         filters/GeomDistanceFilterTest.cpp
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
-    LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_csf_test FILES filters/CSFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
@@ -393,6 +382,7 @@ PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_gpstimeconvert_test FILES filters/GpsTimeConvertTest.cpp)
+PDAL_ADD_TEST(pdal_filters_groundfilter_test FILES filters/GroundFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_separatescanline_test FILES filters/SeparatescanlineFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_h3_test FILES filters/H3FilterTest.cpp)
@@ -406,10 +396,12 @@ PDAL_ADD_TEST(pdal_filters_icp_test
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_lloydkmeans_test FILES filters/LloydKMeansFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_radius_assign_test FILES filters/RadiusAssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
+PDAL_ADD_TEST(pdal_filters_supervoxel_test FILES filters/SupervoxelFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
         filters/AdditionalMergeTest.cpp
@@ -417,6 +409,11 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_labelduplicates_test FILES filters/LabelDuplicatesFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_m3c2_test 
+    FILES 
+        filters/M3C2FilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_EIGEN_DIR})
 PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_planefit_test
@@ -468,7 +465,8 @@ target_compile_definitions(pdal_filters_hexbin_test
         H3_PREFIX=PDALH3
 )
 
-PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
+PDAL_ADD_TEST(pdal_filters_voxel_center_nearest_neighbor_test FILES filters/VoxelCenterNearestNeighborFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_voxel_centroid_nearest_neighbor_test FILES filters/VoxelCentroidNearestNeighborFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)

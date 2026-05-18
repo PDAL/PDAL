@@ -39,7 +39,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
@@ -55,31 +54,16 @@ namespace stac
 
 class PDAL_EXPORT StacReader : public Reader, public Streamable
 {
-    public:
-
+public:
         StacReader();
         ~StacReader();
 
         std::string getName() const override;
 
     private:
-
         struct Private;
-        struct Args;
 
-        std::unique_ptr<Args> m_args;
         std::unique_ptr<Private> m_p;
-
-        StageFactory m_factory;
-
-        void printErrors(stac::Catalog& c);
-        void handleNested(stac::Catalog& c);
-        void addItem(stac::Item& item);
-        void handleItem(NL::json stacJson, std::string itemPath);
-        void handleCatalog(NL::json stacJson, std::string catPath);
-        void handleCollection(NL::json stacJson, std::string colPath);
-        void handleItemCollection(NL::json stacJson, std::string icPath);
-        void initializeArgs();
 
         virtual void initialize() override;
         virtual void addArgs(ProgramArgs& args) override;
@@ -91,8 +75,6 @@ class PDAL_EXPORT StacReader : public Reader, public Streamable
         virtual bool processOne(PointRef& point) override;
         virtual PointViewSet run(PointViewPtr view) override;
         virtual void done(PointTableRef) override;
-
-        MergeFilter m_merge;
-
 };
-}
+
+} // namespace pdal

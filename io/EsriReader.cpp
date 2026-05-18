@@ -37,16 +37,13 @@
 
 #include <Eigen/Geometry>
 
-
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/MathUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-
-
-
 #include "private/esri/Obb.hpp"
+#include "private/esri/Interface.hpp"
 #include "lepcc/src/include/lepcc_types.h"
 
 namespace pdal
@@ -124,7 +121,8 @@ public:
     std::string m_error;
 };
 
-EsriReader::EsriReader() : m_args(new Args)
+EsriReader::EsriReader(std::unique_ptr<Interface> interface) :
+    m_interface(std::move(interface)), m_args(new Args)
 {}
 
 
@@ -154,8 +152,6 @@ void EsriReader::initialize(PointTableRef table)
     for (std::string& s : m_args->dimensions)
         s = Utils::toupper(s);
 
-    m_arbiter.reset(new arbiter::Arbiter());
-
     //adjust filename string
     const std::string pre("i3s://");
     if (Utils::startsWith(m_filename, pre))
@@ -170,7 +166,7 @@ void EsriReader::initialize(PointTableRef table)
     //personalize for slpk or i3s
     try
     {
-        m_info = initInfo();
+        m_interface->initInfo();
     }
     catch (std::exception& e)
     {
@@ -178,7 +174,7 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //create const for looking into
-    const NL::json jsonBody = m_info;
+    const NL::json jsonBody = m_interface->getInfo();
 
     //find version
     if (jsonBody["store"].contains("version"))
@@ -215,7 +211,7 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //create spatial reference objects
-    NL::json wkid = m_info["spatialReference"]["wkid"];
+    NL::json wkid = jsonBody["spatialReference"]["wkid"];
     int system(0);
     if (wkid.is_string())
     {
@@ -254,9 +250,10 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
 
-    if (!m_info.contains("attributeStorageInfo"))
+    const NL::json& jsonBody = m_interface->getInfo();
+    if (!jsonBody.contains("attributeStorageInfo"))
         throwError("Attributes do not exist for this object");
-    const NL::json& attributes = m_info["attributeStorageInfo"];
+    const NL::json& attributes = jsonBody["attributeStorageInfo"];
 
     layout->registerDims({Id::X, Id::Y, Id::Z});
 
@@ -353,8 +350,8 @@ void EsriReader::ready(PointTableRef table)
     // actual page number, so we use the page size (m_nodeCap) as a factor from the page
     // index to get the proper filename for a page.
     int indexFactor = m_version >= Version("2.0") ? 1 : m_nodeCap;
-    i3s::FetchFunction fetch = std::bind(&EsriReader::fetchJson, this, std::placeholders::_1);
-    m_pageManager.reset(new PageManager(100, 4, indexFactor, fetch));
+    m_pageManager.reset(new PageManager(100, 4, indexFactor,
+        [this](std::string src) { return m_interface->fetchJson(src); }));
     PagePtr p = m_pageManager->getPage(0);
     traverseTree(p, 0);
     m_pool->await();
@@ -661,7 +658,7 @@ EsriReader::TileContents EsriReader::loadPath(const std::string& filepath)
     TileContents tile(filepath, m_extraDimCount);
 
     const std::string geomUrl = filepath + "/geometries/";
-    auto xyzFetch = fetchBinary(geomUrl, "0", ".bin.pccxyz");
+    auto xyzFetch = m_interface->fetchBinary(geomUrl, "0", ".bin.pccxyz");
     tile.m_xyz = i3s::decompressXYZ(&xyzFetch);
 
     size_t size = tile.m_xyz.size();
@@ -670,14 +667,14 @@ EsriReader::TileContents EsriReader::loadPath(const std::string& filepath)
     {
         if (dim.name == "RGB")
         {
-            auto data = fetchBinary(attrUrl, std::to_string(dim.key),
+            auto data = m_interface->fetchBinary(attrUrl, std::to_string(dim.key),
                 ".bin.pccrgb");
             tile.m_rgb = i3s::decompressRGB(&data);
             tile.m_error = checkSize(dim, size, tile.m_rgb.size());
         }
         else if (dim.name == "INTENSITY")
         {
-            auto data = fetchBinary(attrUrl, std::to_string(dim.key),
+            auto data = m_interface->fetchBinary(attrUrl, std::to_string(dim.key),
                 ".bin.pccint");
             tile.m_intensity = i3s::decompressIntensity(&data);
             tile.m_error = checkSize(dim, size, tile.m_intensity.size());
@@ -685,7 +682,7 @@ EsriReader::TileContents EsriReader::loadPath(const std::string& filepath)
         else
         {
             std::vector<char>& data = tile.m_data[dim.pos];
-            data = fetchBinary(attrUrl, std::to_string(dim.key), ".bin.gz");
+            data = m_interface->fetchBinary(attrUrl, std::to_string(dim.key), ".bin.gz");
             tile.m_error = checkSize(dim, size * Dimension::size(dim.type),
                 data.size());
         }

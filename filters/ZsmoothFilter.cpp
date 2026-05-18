@@ -39,7 +39,7 @@ static PluginInfo const ptstatInfo
 {
     "filters.zsmooth",
     "Zsmooth Filter",
-    "http://pdal.io/stages/filters.zsmooth.html"
+    "https://pdal.org/stages/filters.zsmooth.html"
 };
 
 struct ZsmoothFilter::Private

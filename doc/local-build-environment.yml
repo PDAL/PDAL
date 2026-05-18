@@ -1,6 +1,18 @@
 channels:
   - conda-forge
 dependencies:
-  - sed
-  - graphviz
   - doxygen
+  - make
+  - python-pdal
+  - jupyter-book
+  - breathe > 4.34
+  - sphinxcontrib-jquery
+  - sphinx-notfound-page
+  - sphinx-inline-tabs
+  - cmake
+  - pillow
+  - sphinx-jupyterbook-latex
+  - imagemagick
+  - compilers
+
+

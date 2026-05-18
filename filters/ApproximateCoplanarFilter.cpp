@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
 {
     "filters.approximatecoplanar",
     "Estimates the planarity of a neighborhood of points using eigenvalues.",
-    "http://pdal.io/stages/filters.approximatecoplanar.html"
+    "https://pdal.org/stages/filters.approximatecoplanar.html"
 };
 
 CREATE_STATIC_STAGE(ApproximateCoplanarFilter, s_info)
@@ -88,6 +88,17 @@ void ApproximateCoplanarFilter::filter(PointView& view)
 
         // compute covariance of the neighborhood
         Matrix3d B = math::computeCovariance(view, ids);
+
+        // Check if the covariance matrix is all zeros
+        if (B.isZero())
+        {
+            log()->get(LogLevel::Info)
+                << "Skipping point " << p.pointId()
+                << ". Covariance matrix is all zeros. This suggests a large "
+                   "number of redundant points. Consider using filters.sample "
+                   "with a small radius to remove redundant points.\n";
+            continue;
+        }
 
         // perform the eigen decomposition
         Eigen::SelfAdjointEigenSolver<Matrix3d> solver(B);

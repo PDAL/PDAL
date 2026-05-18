@@ -67,5 +67,13 @@ radius
 
 : Mask neighbor points as low noise. \[Default: **1.0**\]
 
+ground_class
+
+: Classification value of ground points.  \[Default: 2\]
+
+low_point_class
+
+: Classification value of low points.  \[Default: 7\]
+
 ```{include} filter_opts.md
 ```

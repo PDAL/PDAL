@@ -2,8 +2,8 @@ name: pdal-build
 channels:
   - conda-forge
 dependencies:
-  - libgdal
-  - boa
+  - libgdal-core
+  - geotiff
   - libpq
   - curl
   - hdf5
@@ -13,7 +13,7 @@ dependencies:
   - openssl
   - nitro
   - ceres-solver
-  - python=3.12
+  - python=3.13
   - conda
   - mamba
   - conda-build
@@ -21,9 +21,11 @@ dependencies:
   - libparquet
   - compilers
   - ninja
+  - liblzma-devel
   - cmake
   - pkg-config
   - make  # [not win]
   - re2  # [linux]
   - ccache
+  - spz
 

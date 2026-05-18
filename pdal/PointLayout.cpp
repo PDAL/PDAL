@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <signal.h>
+
 #include <pdal/PointLayout.hpp>
 #include <pdal/util/Algorithm.hpp>
 

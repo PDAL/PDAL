@@ -170,14 +170,14 @@ void basic_file::Private::writePoint(const char *p)
                 head12.ebCount());
             chunk_point_num = 0;
         }
-        else if ((chunk_point_num == chunk_size) && (chunk_size != VariableChunkSize))
+        else if ((chunk_point_num == chunk_size) && !laz_vlr::variableChunks(chunk_size))
             newChunk();
 
         // now write the point
         pcompressor->compress(p);
         chunk_point_num++;
-        head14.point_count_14++;
     }
+    head14.point_count_14++;
     updateMinMax(*(reinterpret_cast<const las::point10*>(p)));
 }
 
@@ -287,7 +287,7 @@ void basic_file::Private::writeChunkTable()
     OutFileStream w(*f);
     OutCbStream outStream(w.cb());
 
-    compress_chunk_table(w.cb(), chunks, chunk_size == VariableChunkSize);
+    compress_chunk_table(w.cb(), chunks, laz_vlr::variableChunks(chunk_size));
     // go back to where we're supposed to write chunk table offset
     f->seekp(head12.point_offset);
     f->write(reinterpret_cast<char*>(&chunk_table_offset), sizeof(chunk_table_offset));
@@ -322,7 +322,7 @@ uint64_t basic_file::firstChunkOffset() const
 
 uint64_t basic_file::newChunk()
 {
-    assert(p_->chunk_size == VariableChunkSize);
+    assert(laz_vlr::variableChunks(p_->chunk_size));
     return p_->newChunk();
 }
 

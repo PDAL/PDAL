@@ -2,7 +2,7 @@
 .. |GRID| replace:: `GRiD <http://lidar.io/>`__
 .. |ASPRSLAS| replace:: `ASPRS LAS <http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html>`__
 .. |PCL| replace:: `PCL <http://pointclouds.org>`__
-.. |PDAL| replace:: `PDAL <https://pdal.io/>`__
+.. |PDAL| replace:: `PDAL <https://pdal.org/>`__
 .. |PROJ| replace:: `PROJ <https://proj.org>`__
 .. |GeoTIFF| replace:: `GeoTIFF <https://trac.osgeo.org/geotiff/>`__
 .. |libLAS| replace:: `libLAS <http://liblas.org/>`__

@@ -54,7 +54,7 @@ static StaticPluginInfo const s_info
 {
     "filters.h3",
     "Compute H3 indexes for points",
-    "http://pdal.io/stages/filters.h3.html"
+    "https://pdal.org/stages/filters.h3.html"
 };
 
 CREATE_STATIC_STAGE(H3Filter, s_info)

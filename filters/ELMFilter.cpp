@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "filters.elm",
     "Marks low points as noise.",
-    "http://pdal.io/stages/filters.elm.html"
+    "https://pdal.org/stages/filters.elm.html"
 };
 
 CREATE_STATIC_STAGE(ELMFilter, s_info)
@@ -73,9 +73,6 @@ void ELMFilter::addDimensions(PointLayoutPtr layout)
 
 void ELMFilter::filter(PointView& view)
 {
-    if (!view.size())
-        return;
-
     BOX2D bounds;
     view.calculateBounds(bounds);
 

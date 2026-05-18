@@ -39,10 +39,10 @@ namespace pdal
 
 std::unique_ptr<LogicGate> LogicGate::create(const LogicalOperator type)
 {
-    if (type == LogicalOperator::lAnd) return makeUnique<LogicalAnd>();
-    if (type == LogicalOperator::lNot) return makeUnique<LogicalNot>();
-    if (type == LogicalOperator::lOr) return makeUnique<LogicalOr>();
-    if (type == LogicalOperator::lNor) return makeUnique<LogicalNor>();
+    if (type == LogicalOperator::lAnd) return std::make_unique<LogicalAnd>();
+    if (type == LogicalOperator::lNot) return std::make_unique<LogicalNot>();
+    if (type == LogicalOperator::lOr) return std::make_unique<LogicalOr>();
+    if (type == LogicalOperator::lNor) return std::make_unique<LogicalNor>();
     throw pdal_error("Invalid logic gate type");
 }
 

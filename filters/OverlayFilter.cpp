@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
     "filters.overlay",
     "Assign values to a dimension based on the extent of an OGR-readable data "
         " source or an OGR SQL query.",
-    "https://pdal.io/stages/filters.overlay.html"
+    "https://pdal.org/stages/filters.overlay.html"
 };
 
 CREATE_STATIC_STAGE(OverlayFilter, s_info)
@@ -69,6 +69,7 @@ void OverlayFilter::addArgs(ProgramArgs& args)
     args.add("query", "OGR SQL query to execute on the "
         "datasource to fetch geometry and attributes", m_query);
     args.add("layer", "Datasource layer to use", m_layer);
+    args.addSynonym("layer", "lyr_name");
     args.add("bounds", "Bounds to limit query using with OGR_L_SetSpatialFilter", m_bounds);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
 }
@@ -93,7 +94,7 @@ void OverlayFilter::prepared(PointTableRef table)
 void OverlayFilter::ready(PointTableRef table)
 {
     m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
-            [](void *p){ if (p) ::OGR_DS_Destroy(p); });
+            [](OGRDSPtr::element_type *p){ if (p) ::OGR_DS_Destroy(p); });
     if (!m_ds)
         throwError("Unable to open data source '" + m_datasource + "'");
 
@@ -114,7 +115,7 @@ void OverlayFilter::ready(PointTableRef table)
         OGR_L_SetSpatialFilter(m_lyr, g.getOGRHandle());
     }
 
-    auto featureDeleter = [](void *p)
+    auto featureDeleter = [](OGRFeaturePtr::element_type *p)
     {
         if (p)
             ::OGR_F_Destroy(p);

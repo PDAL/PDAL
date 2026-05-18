@@ -50,7 +50,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.pipeline",
     "Pipeline Kernel",
-    "http://pdal.io/apps/pipeline.html"
+    "https://pdal.org/apps/pipeline.html"
 };
 
 CREATE_STATIC_KERNEL(PipelineKernel, s_info)

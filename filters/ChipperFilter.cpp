@@ -71,7 +71,7 @@ static StaticPluginInfo const s_info
 {
     "filters.chipper",
     "Organize points into spatially contiguous, squarish, and non-overlapping chips.",
-    "http://pdal.io/stages/filters.chipper.html"
+    "https://pdal.org/stages/filters.chipper.html"
 };
 
 CREATE_STATIC_STAGE(ChipperFilter, s_info)
@@ -87,8 +87,6 @@ void ChipperFilter::addArgs(ProgramArgs& args)
 
 PointViewSet ChipperFilter::run(PointViewPtr view)
 {
-    if (view->size() == 0)
-        return m_outViews;
 
     m_inView = view;
     m_partitions.resize(0);

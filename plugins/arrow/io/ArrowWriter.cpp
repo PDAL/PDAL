@@ -63,7 +63,7 @@ static PluginInfo const s_info
 {
     "writers.arrow",
     "Arrow Writer",
-    "http://pdal.io/stages/writers.arrow.html"
+    "https://pdal.org/stages/writers.arrow.html"
 };
 
 CREATE_SHARED_STAGE(ArrowWriter, s_info)
@@ -523,7 +523,11 @@ void ArrowWriter::flushBatch()
 
     if (m_formatType == arrowsupport::Parquet)
     {
+#if ARROW_VERSION_MAJOR >= 20
+        auto result = m_parquetFileWriter->NewRowGroup();
+#else
         auto result = m_parquetFileWriter->NewRowGroup(m_batchSize);
+#endif
         if (!result.ok())
             throwError("Unable to make NewRowGroup: " + result.ToString());
 

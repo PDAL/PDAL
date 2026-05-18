@@ -13,7 +13,7 @@ Please note that GitHub issues are meant to report bugs or feature requests, and
 Also note, that issues installing PDAL via Conda should be directed to https://github.com/conda-forge/pdal-feedstock/issues/new. Similarly, issues with the PDAL Python bindings installed via Conda should be directed to https://github.com/conda-forge/python-pdal-feedstock/issues/new.
 
 [1] https://gis.stackexchange.com/questions/tagged/pdal
-[2] https://pdal.io/community.html#mailing-list
+[2] https://pdal.org/community.html#mailing-list
 -->
 
 **Describe the bug**

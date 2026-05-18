@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <algorithm>
+#include <future>
 
 #include <nlohmann/json.hpp>
 
@@ -42,6 +43,8 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
+#include <filters/HeadFilter.hpp>
+#include <filters/MergeFilter.hpp>
 #include <pdal/private/OGRSpec.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/Writer.hpp>
@@ -87,6 +90,13 @@ namespace
 
     const std::string bcbfPath(
             Support::datapath("ept/bcbf/ept.json"));
+    // This dataset has an invalid tile (random bits written to 2-2-2-2.laz)
+    const std::string invalidTilePath(
+            Support::datapath("ept/lone-star-invalid-tile/ept.json"));
+    const std::string badPointCountLazPath(
+            Support::datapath("ept/bad-pointcount/laszip/ept.json"));
+    const std::string badPointCountBinaryPath(
+            Support::datapath("ept/bad-pointcount/binary/ept.json"));
 
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
@@ -204,6 +214,81 @@ TEST(EptReaderTest, unreadableDataFailure)
 
     // This dataset is missing its root point data node, so we should fail here.
     EXPECT_THROW(reader.execute(table), pdal_error);
+}
+
+TEST(EptReaderTest, unreadableTileFailure)
+{
+    Options options;
+    options.add("filename", invalidTilePath);
+    options.add("requests", 4);
+
+    PipelineManager mgr;
+    Stage& reader = mgr.addReader("readers.ept");
+    reader.setOptions(options);
+
+    Stage& writer = mgr.addWriter("writers.null");
+    writer.setInput(reader);
+
+    auto timeoutRunner = std::async(std::launch::async, [&mgr] {
+        EXPECT_THROW(mgr.execute(), pdal_error);
+    });
+
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+        != std::future_status::timeout);
+    // This will abort the whole EPT test on failure. Need to think of a better
+    // way to do this.
+    mgr.destroyStage(&reader);
+}
+
+TEST(EptReaderTest, unreadableTileFailureStreaming)
+{
+    class TestPointTable : public StreamPointTable
+    {
+    public:
+        TestPointTable(PointView& view)
+            : StreamPointTable(*view.table().layout(), 1024)
+            , m_view(view)
+        { }
+
+    protected:
+        virtual void reset() override
+        {
+            m_offset += numPoints();
+        }
+
+        virtual char* getPoint(PointId index) override
+        {
+            return m_view.getOrAddPoint(m_offset + index);
+        }
+
+        PointView& m_view;
+        PointId m_offset = 0;
+    };
+
+    Options options;
+    options.add("filename", invalidTilePath);
+    options.add("requests", 4);
+
+    PipelineManager mgr;
+    Stage& reader = mgr.addReader("readers.ept");
+    reader.setOptions(options);
+
+    Stage& writer = mgr.addWriter("writers.null");
+    writer.setInput(reader);
+
+    PointTable streamTable;
+    PointView streamView(streamTable);
+    TestPointTable table(streamView);
+
+    auto timeoutRunner = std::async(std::launch::async, [&mgr, &table] {
+        EXPECT_THROW(mgr.executeStream(table), pdal_error);
+    });
+
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+        != std::future_status::timeout);
+    // This will abort the whole EPT test on failure. Need to think of a better
+    // way to do this.
+    mgr.destroyStage(&reader);
 }
 
 TEST(EptReaderTest, unreadableDataIgnored)
@@ -628,15 +713,20 @@ void streamTest(const std::string src)
     const std::size_t numPoints(normalView.size());
     const std::size_t pointSize(normalTable.layout()->pointSize());
 
-    const auto sort([nodeIdDim, pointIdDim]
-        (const PointRef& a, const PointRef& b)
-    {
-        if (a.compare(nodeIdDim, b)) return true;
-        return !b.compare(nodeIdDim, a) && a.compare(pointIdDim, b);
-    });
-
-    std::sort(normalView.begin(), normalView.end(), sort);
-    std::sort(streamView.begin(), streamView.end(), sort);
+    normalView.sort([&v = normalView, nodeIdDim, pointIdDim](PointId id1, PointId id2)
+        {
+            if (v.compare(nodeIdDim, id1, id2))
+                return true;
+            return !v.compare(nodeIdDim, id1, id2) && v.compare(pointIdDim, id1, id2);
+        }
+    );
+    streamView.sort([&v = streamView, nodeIdDim, pointIdDim](PointId id1, PointId id2)
+        {
+            if (v.compare(nodeIdDim, id1, id2))
+                return true;
+            return !v.compare(nodeIdDim, id1, id2) && v.compare(pointIdDim, id1, id2);
+        }
+    );
 
     for (PointId i(0); i < normalView.size(); ++i)
     {
@@ -1000,6 +1090,60 @@ TEST(EptReaderTest, bcbfToLonLat)
     }
 
     EXPECT_EQ(np, 5);
+}
+
+TEST(EptReaderTest, badTilePointCountLaszip)
+{
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", badPointCountLazPath);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    EXPECT_THROW(reader.execute(eptTable), pdal_error);
+}
+
+TEST(EptReaderTest, badTilePointCountBinary)
+{
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", badPointCountBinaryPath);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    EXPECT_THROW(reader.execute(eptTable), pdal_error);
+}
+
+TEST(CopcReaderTest, duplicateInputs)
+{
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptLaszipPath);
+        reader.setOptions(options);
+    }
+    HeadFilter f;
+    {
+        Options options;
+        options.add("count", 1500);
+        f.setOptions(options);
+        f.setInput(reader);
+    }
+    MergeFilter merge;
+    {
+        merge.setInput(reader);
+        merge.setInput(f);
+    }
+
+    PointTable eptTable;
+    merge.prepare(eptTable);
+    PointViewSet viewSet = merge.execute(eptTable);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 520362u);
 }
 
 } // namespace pdal

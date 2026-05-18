@@ -64,7 +64,9 @@ Point::Point(
         double beamDirectionY,
         double beamDirectionZ,
         float roll,
-        float pitch)
+        float pitch,
+        double shotTimestamp,
+        double unambiguousRange)
     : target(target)
     , returnNumber(returnNumber)
     , numberOfReturns(numberOfReturns)
@@ -77,6 +79,8 @@ Point::Point(
     , beamDirectionZ(beamDirectionZ)
     , roll(roll)
     , pitch(pitch)
+    , shotTimestamp(shotTimestamp)
+    , unambiguousRange(unambiguousRange)
 {}
 
 
@@ -84,12 +88,15 @@ RxpPointcloud::RxpPointcloud(
         const std::string& uri,
         bool syncToPps,
         bool reflectanceAsIntensity,
+        bool emitEmptyShots,
         float minReflectance,
         float maxReflectance,
-        PointTableRef table)
+    PointTableRef table)
     : scanlib::pointcloud(syncToPps)
     , m_syncToPps(syncToPps)
+    , m_ppsSynced(false)
     , m_reflectanceAsIntensity(reflectanceAsIntensity)
+    , m_emitEmptyShots(emitEmptyShots)
     , m_minReflectance(minReflectance)
     , m_maxReflectance(maxReflectance)
     , m_rc(scanlib::basic_rconnection::create(uri))
@@ -123,7 +130,7 @@ bool RxpPointcloud::readSavedPoint(PointRef& point)
     } else {
         return false;
     }
-};
+}
 
 
 void RxpPointcloud::savePoints() {
@@ -138,29 +145,31 @@ void RxpPointcloud::savePoints() {
 }
 
 
+void RxpPointcloud::on_pps_synchronized()
+{
+    m_ppsSynced = true;
+}
+
+void RxpPointcloud::on_pps_sync_lost()
+{
+    m_ppsSynced = false;
+}
+
+
 void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     using namespace Dimension;
+
+
     to.setField(Id::X, from.target.vertex[0]);
     to.setField(Id::Y, from.target.vertex[1]);
     to.setField(Id::Z, from.target.vertex[2]);
-    to.setField(getTimeDimensionId(m_syncToPps), from.target.time);
+    to.setField(Id::EchoRange, from.target.echo_range);
     to.setField(Id::Amplitude, from.target.amplitude);
     to.setField(Id::Reflectance, from.target.reflectance);
-    to.setField(Id::ReturnNumber, from.returnNumber);
-    to.setField(Id::NumberOfReturns, from.numberOfReturns);
-    to.setField(Id::EchoRange, from.target.echo_range);
     to.setField(Id::Deviation, from.target.deviation);
     to.setField(Id::BackgroundRadiation, from.target.background_radiation);
     to.setField(Id::IsPpsLocked, from.target.is_pps_locked);
-    to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
-    to.setField(Id::BeamDirectionX, from.beamDirectionX);
-    to.setField(Id::BeamDirectionY, from.beamDirectionY);
-    to.setField(Id::BeamDirectionZ, from.beamDirectionZ);
-    to.setField(Id::BeamOriginX, from.beamOriginX);
-    to.setField(Id::BeamOriginY, from.beamOriginY);
-    to.setField(Id::BeamOriginZ, from.beamOriginZ);
-    to.setField(Id::Roll, from.roll);
-    to.setField(Id::Pitch, from.pitch);
+    to.setField(getTimeDimensionId(m_syncToPps), from.target.time);
 
     if (m_reflectanceAsIntensity) {
         uint16_t intensity;
@@ -174,6 +183,23 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
         }
         to.setField(Id::Intensity, intensity);
     }
+    
+    // Shot metadata (always valid)
+    to.setField(Id::ShotTimestamp, from.shotTimestamp);
+    to.setField(Id::UnambiguousRange, from.unambiguousRange);
+    to.setField(Id::ReturnNumber, from.returnNumber);
+    to.setField(Id::NumberOfReturns, from.numberOfReturns);
+    to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
+
+    to.setField(Id::BeamDirectionX, from.beamDirectionX);
+    to.setField(Id::BeamDirectionY, from.beamDirectionY);
+    to.setField(Id::BeamDirectionZ, from.beamDirectionZ);
+    to.setField(Id::BeamOriginX, from.beamOriginX);
+    to.setField(Id::BeamOriginY, from.beamOriginY);
+    to.setField(Id::BeamOriginZ, from.beamOriginZ);
+    to.setField(Id::Roll, from.roll);
+    to.setField(Id::Pitch, from.pitch);
+
 }
 
 
@@ -183,31 +209,12 @@ bool RxpPointcloud::endOfInput() const
 }
 
 
-void RxpPointcloud::on_echo_transformed(echo_type echo)
-{
-    if (!(scanlib::pointcloud::single == echo || scanlib::pointcloud::last == echo))
-    {
-        // Come back later, when we've got all the echos
-        return;
-    }
-
-    unsigned int returnNumber = 1;
-    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
-    {
-        //Only first return is marked as edge of flight line
-        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0],
-        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2],
-        m_roll, m_pitch);
-        if (m_edge)
-            m_edge = false;
-    }
-}
-
 void RxpPointcloud::on_line_start_up(const scanlib::line_start_up<iterator_type> & arg)
 {
     scanlib::pointcloud::on_line_start_up(arg);
     m_edge = true;
 }
+
 
 void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg)
 {
@@ -215,10 +222,71 @@ void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type>
     m_edge = true;
 }
 
+
+void RxpPointcloud::on_line_stop(const scanlib::line_stop<iterator_type> & arg)
+{
+    scanlib::pointcloud::on_line_stop(arg);
+    m_edge = true;
+}
+
+
 void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
     scanlib::pointcloud::on_hk_incl(arg);
     m_roll = (float)arg.ROLL * 0.001;
     m_pitch = (float)arg.PITCH * 0.001;
 }
+
+
+void RxpPointcloud::on_shot_end()
+{   
+    // Detect empty shots (no returns) when enabled
+    // Only emit if time is valid (not NaN) - NaN time indicates sync loss
+    if (m_emitEmptyShots && target_count == 0)
+    {
+        if (m_syncToPps && !m_ppsSynced)
+            return; // skip empty shots when PPS sync is required but not achieved
+        // Create empty target with NaN for invalid measurements
+        // Keep valid metadata (timestamps, beam geometry) for shot identification
+        scanlib::target emptyTarget;
+        emptyTarget.vertex[0] = beam_origin[0];
+        emptyTarget.vertex[1] = beam_origin[1];
+        emptyTarget.vertex[2] = beam_origin[2];
+        emptyTarget.echo_range = 0;
+        emptyTarget.amplitude = 0;
+        emptyTarget.reflectance = 0;
+        emptyTarget.deviation = 0;
+        emptyTarget.background_radiation = 0;
+        emptyTarget.is_pps_locked = false;
+        emptyTarget.time = time;
+        emptyTarget.time_sorg = time_sorg;
+        m_points.emplace_back(
+            emptyTarget, 0, 0, m_edge,
+            beam_origin[0], beam_origin[1], beam_origin[2],
+            beam_direction[0], beam_direction[1], beam_direction[2],
+            m_roll, m_pitch,
+            time, unambiguous_range);
+        
+        if (m_edge)
+            m_edge = false;
+    }
+    else
+    {
+        unsigned int returnNumber = 1;
+        for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
+        {
+            if (m_syncToPps && !targets[i].is_pps_locked)
+                continue; // skip points that are not PPS locked when sync is required
+            m_points.emplace_back(
+                targets[i], returnNumber, target_count, m_edge,
+                beam_origin[0], beam_origin[1], beam_origin[2],
+                beam_direction[0], beam_direction[1], beam_direction[2],
+                m_roll, m_pitch,
+                time, unambiguous_range);
+            if (m_edge)
+                m_edge = false;
+        }
+    }
+}
+
 
 } //pdal

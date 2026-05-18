@@ -49,7 +49,7 @@ merge the data.
 
 filename
 
-: OGROpen'able raster file to read \[Required\]
+: [OGROpen](https://gdal.org/en/stable/api/vector_c_api.html#_CPPv47OGROpenPKciP12OGRSFDriverH)'able raster file to read \[Required\]
 
 ```{include} reader_opts.md
 ```
@@ -59,16 +59,7 @@ lyr_name
 : The OGR layer name for the data source to use to
   fetch the tile index information.
 
-reader_args
-
-: A list of JSON objects with keys of reader options and the values to pass through.
-  These will be in the exact same form as a Pipeline Stage object minus the filename.
-
-  Exmaple:
-
-```bash
---readers.stac.reader_args \
-'[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
+```{include} reader_args.md
 ```
 
 srs_column
@@ -93,6 +84,9 @@ bounds
 : A 2D box to pre-filter the tile index. If it is set,
   it will override any [wkt] option.
 
+  ```{include} bounds_opts.md
+  ```
+
 wkt
 
 : A geometry to pre-filter the tile index using
@@ -101,7 +95,7 @@ wkt
 ogr
 
 : A JSON object representing an OGR query to fetch a polygon for pre-filtering
-  the tile index. This will also override any [wkt] option if set. 
+  the tile index. This will also override any [wkt] option if set.
   The JSON object is specified as follows:
 
 ```{include} ogr_json.md

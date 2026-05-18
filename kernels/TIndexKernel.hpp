@@ -40,6 +40,16 @@
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+using OGRDataSourceH = void *;
+using OGRLayerH = void *;
+using OGRFeatureH = void *;
+#endif
+
 namespace pdal
 {
     class Polygon;
@@ -94,8 +104,8 @@ private:
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
     void createFields();
+    void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
-    void slowBoundary(PipelineManager& manager);
     std::string makeMultiPolygon(const std::string& wkt);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
@@ -103,11 +113,13 @@ private:
     std::string m_idxFilename;
     std::string m_filespec;
     StringList m_files;
+    std::string m_listfile;
     std::string m_layerName;
     std::string m_driverName;
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
+    StringList m_lcOptions;
     BOX2D m_bounds;
     bool m_absPath;
     std::string m_prefix;
@@ -118,8 +130,8 @@ private:
     uint32_t m_sampleSize;
     std::string m_boundaryExpr;
 
-    void *m_dataset;
-    void *m_layer;
+    OGRDataSourceH m_dataset;
+    OGRLayerH m_layer;
     std::string m_tgtSrsString;
     std::string m_assignSrsString;
     bool m_fastBoundary;
@@ -127,6 +139,7 @@ private:
     bool m_overrideASrs;
     bool m_skipMultiSrs;
     std::string m_originalSrs;
+    size_t m_maxFieldSize;
 };
 
 } // namespace pdal

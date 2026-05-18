@@ -84,6 +84,7 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void spatialReferenceChanged(const SpatialReference& srs);
     virtual void done(PointTableRef table);
+    bool createGrid();
 };
 
 } // namespace pdal

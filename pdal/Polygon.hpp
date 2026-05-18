@@ -52,14 +52,16 @@ class PDAL_EXPORT Polygon : public Geometry
 
 public:
     Polygon();
-    virtual ~Polygon();
+    virtual ~Polygon() = default;
 
     Polygon(const std::string& wkt_or_json,
         SpatialReference ref = SpatialReference());
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
-    Polygon(OGRGeometryH g);
-    Polygon(OGRGeometryH g, const SpatialReference& srs);
+    Polygon(OGRGeometryH g)
+        { construct(reinterpret_cast<void *>(g)); }
+    Polygon(OGRGeometryH g, const SpatialReference& srs)
+        { construct(reinterpret_cast<void *>(g), srs); }
     Polygon(const Polygon& poly);
     Polygon& operator=(const Polygon& src);
 
@@ -85,11 +87,17 @@ public:
     void initGrids() const;
 
 private:
+    void construct(void *geom);  // geom is an OGR Geometry
+    void construct(void *geom, const SpatialReference& srs);  // geom is an OGR Geometry
     void init();
     void removeSmallRings(double tolerance);
     void removeSmallHoles(double tolerance);
 
-    std::unique_ptr<PrivateData> m_pd;
+    struct PDAL_EXPORT PrivateDataDeleter
+    {
+        void operator()(PrivateData *pd);
+    };
+    std::unique_ptr<PrivateData, PrivateDataDeleter> m_pd;
 };
 
 } // namespace pdal

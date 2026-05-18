@@ -179,4 +179,27 @@ TEST(OptionsTest, doublepreicison)
     EXPECT_EQ(value, testVal);
 }
 
+// Test that JSON metadata gets output correctly (no escaped quotes).
+TEST(OptionsTest, issue_4751)
+{
+    ProgramArgs args;
+    NL::json json;
+    args.add("test", "json test", json);
+
+    Options ops;
+    NL::json inJson = { { "key", "foo" } };
+    ops.add("test", inJson);
+
+    MetadataNode m;
+    ops.toMetadata(m);
+    MetadataNode node = m.findChild("test");
+    EXPECT_EQ(node.type(), "json");
+
+    std::ostringstream os;
+    Utils::toJSON(node, os);
+    // toJson adds newlines. Better to compare json than strings
+    NL::json compare = NL::json::parse(os.str());
+    EXPECT_EQ(compare["test"], inJson);
+}
+
 } // namespace pdal

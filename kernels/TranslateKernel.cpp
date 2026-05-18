@@ -59,7 +59,7 @@ static StaticPluginInfo const s_info
         "Any supported stage type can be specified from the command " \
         "line, reducing the need to create custom kernels for every " \
         "combination.",
-    "http://pdal.io/apps/translate.html"
+    "https://pdal.org/apps/translate.html"
 };
 
 CREATE_STATIC_KERNEL(TranslateKernel, s_info)

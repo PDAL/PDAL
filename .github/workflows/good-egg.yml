@@ -1,0 +1,18 @@
+name: Good Egg
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  pull-requests: write
+  checks: write
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 2ndSetAI/good-egg@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-known-contributors: 'true'

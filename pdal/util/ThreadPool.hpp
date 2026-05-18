@@ -89,8 +89,14 @@ public:
     PDAL_EXPORT void stop()
     {
         join();
+        clearTasks();
+    }
 
+    // Empty the queue of tasks that may have been waiting to run.
+    PDAL_EXPORT void clearTasks()
+    {
         // Effectively clear the queue.
+        std::lock_guard<std::mutex> lock(m_mutex);
         std::queue<std::function<void()>> q;
         m_tasks.swap(q);
     }

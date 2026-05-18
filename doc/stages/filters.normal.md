@@ -5,9 +5,9 @@
 The **normal filter** returns the estimated normal and curvature for
 a collection
 of points. The algorithm first computes the eigenvalues and eigenvectors of the
-collection of points, which is comprised of the k-nearest neighbors. The normal
-is taken as the eigenvector corresponding to the smallest eigenvalue. The
-curvature is computed as
+collection of points, which is comprised of either the k-nearest neighbors (default),
+or all neighbors within a radius. The normal is taken as the eigenvector corresponding 
+to the smallest eigenvalue. The curvature is computed as
 
 $$
 curvature = \frac{\lambda_0}{\lambda_0 + \lambda_1 + \lambda_2}
@@ -73,6 +73,10 @@ inspection.
 knn
 
 : The number of k-nearest neighbors. \[Default: 8\]
+
+radius
+
+: Radius to use for finding neighbor points, rather than using k-nearest.
 
 viewpoint
 

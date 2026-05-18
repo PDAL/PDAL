@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.locate",
     "Return a single point with min/max value in the named dimension.",
-    "http://pdal.io/stages/filters.locate.html"
+    "https://pdal.org/stages/filters.locate.html"
 };
 
 CREATE_STATIC_STAGE(LocateFilter, s_info)
@@ -71,10 +71,8 @@ void LocateFilter::prepared(PointTableRef table)
 
 PointViewSet LocateFilter::run(PointViewPtr inView)
 {
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
 
+    PointViewSet viewSet;
     PointId minidx(0);
     PointId maxidx(0);
     double minval = (std::numeric_limits<double>::max)();

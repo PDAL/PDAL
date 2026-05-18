@@ -42,10 +42,8 @@ option(BUILD_PLUGIN_OPENSCENEGRAPH
 add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
     "read/write OpenSceneGraph objects")
 
-find_package(PostgreSQL QUIET)
 option(BUILD_PLUGIN_PGPOINTCLOUD
-    "Choose if PostgreSQL PointCloud support should be built"
-    ${POSTGRESQL_FOUND})
+    "Choose if PostgreSQL PointCloud support should be built" FALSE)
 add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
     "read/write PostgreSQL PointCloud objects")
 
@@ -94,11 +92,20 @@ option(BUILD_PLUGIN_ARROW
 add_feature_info("Arrow plugin" BUILD_PLUGIN_ARROW
     "read/write data to and from Arrow format")
 
+option(BUILD_PLUGIN_SPZ
+    "Choose if SPZ support should be built" FALSE)
+add_feature_info("SPZ plugin" BUILD_PLUGIN_SPZ
+    "read/write 3D gaussian splat data to and from SPZ format")
+
+option(BUILD_TOOLS_LASDUMP "Choose if lasdump tool should be built" TRUE)
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 
 option(WITH_TESTS
     "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
+
+option(BUILD_DOCS
+    "Choose if PDAL creates targets for building documentation" FALSE)
 
 # Enable CTest and submissions to PDAL dashboard at CDash
 # http://my.cdash.org/index.php?project=PDAL

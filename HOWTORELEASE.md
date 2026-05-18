@@ -37,7 +37,9 @@ This document describes the process for releasing a new version of PDAL.
       >     set(PDAL_SOLIB_MINOR 0)
       >     set(PDAL_SOLIB_BUILD 0)
 
-    - Update `doc/download.rst` point to new release
+    - Update `_config.yml` `release_date` to today's date
+    - Update `_config.yml` `version` to full version number (ie, 2.9.0)
+    - Update `doc/download.rst` past release pointer with last release date/version
     - Update the `STABLE_BRANCH` pointer in the GitHub variables at <https://github.com/PDAL/PDAL/settings/variables/actions>
     - Update CITATION.cff with release date and version information
 
