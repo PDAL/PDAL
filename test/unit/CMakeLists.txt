@@ -21,6 +21,10 @@ target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
         ${PDAL_LIB_NAME}
         GTest::gtest
+<<<<<<< HEAD
+        GTest::gtest_main
+=======
+>>>>>>> master
 )
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
@@ -202,6 +206,7 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES TIMEOUT 300)
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
@@ -405,8 +410,8 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_labelduplicates_test FILES filters/LabelDuplicatesFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_m3c2_test 
-    FILES 
+PDAL_ADD_TEST(pdal_filters_m3c2_test
+    FILES
         filters/M3C2FilterTest.cpp
     INCLUDES
         ${PDAL_VENDOR_EIGEN_DIR})
