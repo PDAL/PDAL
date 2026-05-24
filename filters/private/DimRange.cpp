@@ -173,9 +173,19 @@ void DimRange::parse(const std::string& r)
 
 bool operator < (const DimRange& r1, const DimRange& r2)
 {
-    return (r1.m_name < r2.m_name ? true :
-        r1.m_name > r2.m_name ? false :
-        &r1 < &r2);
+    return std::tie(
+        r1.m_name,
+        r1.m_lower_bound,
+        r1.m_upper_bound,
+        r1.m_inclusive_lower_bound,
+        r1.m_inclusive_upper_bound,
+        r1.m_negate) < std::tie(
+        r2.m_name,
+        r2.m_lower_bound,
+        r2.m_upper_bound,
+        r2.m_inclusive_lower_bound,
+        r2.m_inclusive_upper_bound,
+        r2.m_negate);
 }
 
 
@@ -202,4 +212,3 @@ std::ostream& operator<<(std::ostream& out, const DimRange& r)
 }
 
 } // namespace pdal
-
