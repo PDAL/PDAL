@@ -5,6 +5,7 @@ dependencies:
   - libgdal=3.11
   - libpq
   - geotiff
+  - gtest
   - curl
   - hdf5
   - tiledb
