@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 set(MIN_GTest_VERSION "1.12.1")
 
 if(NOT CMAKE_REQUIRED_QUIET)
