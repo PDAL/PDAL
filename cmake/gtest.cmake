@@ -64,7 +64,17 @@ else()
         ${ROOT_DIR}/vendor/gtest)
 
     set(GOOGLETEST_VERSION 1.12.1)
-    add_subdirectory(vendor/gtest)
+    set(_pdal_gtest_source_dir "${ROOT_DIR}/vendor/gtest")
+    set(_pdal_gtest_binary_dir "${PROJECT_BINARY_DIR}/vendor/gtest")
+
+    if(NOT EXISTS "${_pdal_gtest_source_dir}/CMakeLists.txt")
+        message(SEND_ERROR
+            "Vendored GTest requested but not available at ${_pdal_gtest_source_dir}. "
+            "Set USE_EXTERNAL_GTEST=ON to use an installed GTest.")
+        return()
+    endif()
+
+    add_subdirectory("${_pdal_gtest_source_dir}" "${_pdal_gtest_binary_dir}")
 
     if(NOT TARGET GTest::gtest)
         add_library(GTest::gtest ALIAS gtest)
