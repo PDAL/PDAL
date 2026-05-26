@@ -104,6 +104,9 @@ option(WITH_TESTS
     "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
 
+option(USE_EXTERNAL_GTEST
+    "Compile against an external GTest installation" OFF)
+
 option(BUILD_DOCS
     "Choose if PDAL creates targets for building documentation" FALSE)
 
