@@ -40,7 +40,7 @@
 //   executables consist of a single source file, but if this isn't the case
 //   you may need to take precautions or define your own main().
 
-GTEST_API_ int main(int argc, char **argv) {
+int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
 
     // Set the locale if requested for the tests,
@@ -68,4 +68,3 @@ GTEST_API_ int main(int argc, char **argv) {
     }
     return RUN_ALL_TESTS();
 }
-
