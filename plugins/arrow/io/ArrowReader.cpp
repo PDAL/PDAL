@@ -399,7 +399,7 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
         auto& dt = f->type();
         arrow::Type::type t = dt->id();
 
-        if (t == arrow::Type::FIXED_SIZE_LIST)
+        if ((t == arrow::Type::FIXED_SIZE_LIST) || (t == arrow::Type::BINARY))
         {
             if (Utils::iequals(name, m_geoArrowDimName))
             {
