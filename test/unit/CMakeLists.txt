@@ -21,10 +21,6 @@ target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
         ${PDAL_LIB_NAME}
         GTest::gtest
-<<<<<<< HEAD
-        GTest::gtest_main
-=======
->>>>>>> master
 )
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
