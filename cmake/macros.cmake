@@ -188,6 +188,10 @@ endmacro(PDAL_ADD_PLUGIN)
 #    INCLUDES header file directories
 #
 
+if(NOT TARGET GTest::gtest)
+    include (${PDAL_CMAKE_DIR}/gtest.cmake)
+endif()
+
 macro(PDAL_ADD_TEST _name)
 
     if (NOT WITH_TESTS)
