@@ -170,22 +170,11 @@ void DimRange::parse(const std::string& r)
         throw error("Invalid characters following valid range.");
 }
 
-
+// Dim ranges sort so that all ranges of a dimension are contiguous.
+// Beyond that we don't care. (See pointPasses)
 bool operator < (const DimRange& r1, const DimRange& r2)
 {
-    return std::tie(
-        r1.m_name,
-        r1.m_lower_bound,
-        r1.m_upper_bound,
-        r1.m_inclusive_lower_bound,
-        r1.m_inclusive_upper_bound,
-        r1.m_negate) < std::tie(
-        r2.m_name,
-        r2.m_lower_bound,
-        r2.m_upper_bound,
-        r2.m_inclusive_lower_bound,
-        r2.m_inclusive_upper_bound,
-        r2.m_negate);
+    return r1.name < r2.name;
 }
 
 
