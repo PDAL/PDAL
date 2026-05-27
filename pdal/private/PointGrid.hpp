@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include <Eigen/Dense>
 
 #include <pdal/PointView.hpp>
@@ -50,10 +52,12 @@ public:
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
     {
-        double cells = std::floor(std::sqrt(static_cast<double>(view.size()) / approxPerCell));
+        int pointsPerCell = (approxPerCell > 0 ? approxPerCell : 1);
+        double cells = std::floor(std::sqrt(static_cast<double>(view.size()) / pointsPerCell));
+        cells = std::max(cells, 1.0);
         if (cells >= (std::numeric_limits<uint16_t>::max)())
            throw pdal_error("PointGrid: Too many cells requested.");
-        m_cells1d = static_cast<uint16_t>(std::max(cells, 1.0));
+        m_cells1d = static_cast<uint16_t>(cells);
 
         // Adding a small amount to make sure the max value is in a cell.
         m_xlen = (m_bounds.maxx - m_bounds.minx) / m_cells1d + .0001;
