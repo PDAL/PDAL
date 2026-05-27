@@ -174,7 +174,7 @@ void DimRange::parse(const std::string& r)
 // Beyond that we don't care. (See pointPasses)
 bool operator < (const DimRange& r1, const DimRange& r2)
 {
-    return r1.name < r2.name;
+    return r1.m_name < r2.m_name;
 }
 
 
