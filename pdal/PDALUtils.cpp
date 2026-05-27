@@ -516,6 +516,7 @@ double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
     KD3Index &candIndex = candView->build3dIndex();
 
     double sum1(0.0);
+
     for (PointRef p : *srcView)
     {
         PointIdList indices(1);

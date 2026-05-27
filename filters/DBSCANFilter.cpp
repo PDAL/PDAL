@@ -103,10 +103,10 @@ void DBSCANFilter::filter(PointView& view)
     // First pass through point cloud precomputes neighbor indices and
     // initializes ClusterID to -2.
     std::vector<PointIdList> neighbors(view.size());
-    for (PointId idx = 0; idx < view.size(); ++idx)
+    for (PointRef p : view)
     {
-        neighbors[idx] = kdfi.radius(idx, m_eps);
-        view.setField(Id::ClusterID, idx, -2);
+        neighbors[p.pointId()] = kdfi.radius(p, m_eps);
+        view.setField(Id::ClusterID, p.pointId(), -2);
     }
 
     // Second pass through point cloud performs DBSCAN clustering.
