@@ -215,6 +215,10 @@ macro(PDAL_ADD_TEST _name)
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
+    if(NOT USE_EXTERNAL_GTEST AND NOT MSVC)
+        target_compile_options(${_name} BEFORE PRIVATE
+            "-iquote${ROOT_DIR}/vendor/gtest/include")
+    endif()
     if (PDAL_ADD_TEST_SYSTEM_INCLUDES)
         target_include_directories(${_name} SYSTEM PRIVATE
             ${PDAL_ADD_TEST_SYSTEM_INCLUDES})
