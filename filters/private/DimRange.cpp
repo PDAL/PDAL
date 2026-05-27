@@ -170,12 +170,11 @@ void DimRange::parse(const std::string& r)
         throw error("Invalid characters following valid range.");
 }
 
-
+// Dim ranges sort so that all ranges of a dimension are contiguous.
+// Beyond that we don't care. (See pointPasses)
 bool operator < (const DimRange& r1, const DimRange& r2)
 {
-    return (r1.m_name < r2.m_name ? true :
-        r1.m_name > r2.m_name ? false :
-        &r1 < &r2);
+    return r1.name < r2.name;
 }
 
 
@@ -202,4 +201,3 @@ std::ostream& operator<<(std::ostream& out, const DimRange& r)
 }
 
 } // namespace pdal
-
