@@ -1,8 +1,6 @@
 #include "TileIndex.hpp"
 #include "Dataset.hpp"
 
-#include <ogr_api.h>
-
 namespace pdal
 {
 namespace tindex

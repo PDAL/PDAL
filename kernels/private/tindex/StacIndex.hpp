@@ -57,6 +57,11 @@ struct StacFileInfo : FileInfo
         return jsonElement(m_root.children("links"));
     }
 
+    std::string datetime()
+    {
+        return getChild(m_properties, "datetime").value();
+    }
+
     StringList extensions() const { return m_extensions; }
 
 private:

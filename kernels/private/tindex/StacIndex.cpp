@@ -1,10 +1,6 @@
 #include "StacIndex.hpp"
 #include "Dataset.hpp"
 
-#include <ogr_api.h>
-#include <gdal_version.h>
-#include <cpl_string.h>
-
 namespace pdal
 {
 namespace tindex
@@ -74,6 +70,7 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     feature.setField(m_pcCountField, stacFileInfo.count());
     feature.setField(m_pcEncodingField, stacFileInfo.encoding());
     feature.setField(m_pcTypeField, m_pcType);
+    feature.setField(m_datetimeField, stacFileInfo.datetime());
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
     feature.setField(m_pcSchemasField, stacFileInfo.schemas());
     feature.setField(m_pcStatsField, stacFileInfo.statistics());
