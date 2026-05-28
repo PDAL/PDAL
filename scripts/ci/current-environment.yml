@@ -4,6 +4,7 @@ channels:
 dependencies:
   - libgdal-core
   - geotiff
+  - gtest
   - libpq
   - curl
   - hdf5
