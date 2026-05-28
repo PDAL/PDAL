@@ -37,6 +37,7 @@
 #include <string>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -71,8 +72,7 @@ struct DimRange
 
     void parse(const std::string& s);
     bool valuePasses(double d) const;
-    static bool pointPasses(const std::vector<DimRange>& ranges,
-        PointRef& point);
+    Utils::StatusWithReason prepare(const PointLayoutPtr layout);
 
     std::string m_name;
     Dimension::Id m_id;
@@ -86,10 +86,10 @@ protected:
     std::string::size_type subParse(const std::string& r);
 };
 
-bool operator < (const DimRange& r1, const DimRange& r2);
 std::istream& operator>>(std::istream& in, DimRange& r);
 std::ostream& operator<<(std::ostream& out, const DimRange& r);
 
+/**
 template <>
 class VArg<DimRange> : public BaseVArg
 {
@@ -157,5 +157,52 @@ private:
     std::vector<DimRange>& m_var;
     std::vector<DimRange> m_defaultVal;
 };
+**/
+
+class DimRangeList
+{
+public:
+    void add(const DimRange& range);
+    bool pointPasses(PointRef& point);
+    Utils::StatusWithReason prepare(const PointLayoutPtr layout);
+    const std::vector<DimRange>& ranges() const;
+    bool empty();
+
+private:
+    std::vector<DimRange> m_ranges;
+
+    friend std::ostream& operator<<(std::ostream& out, const DimRangeList& r);
+};
+
+
+namespace Utils
+{
+    template<>
+    inline StatusWithReason fromString(const std::string& s, DimRangeList& ranges)
+    {
+        try
+        {
+            std::vector<std::string> slist = Utils::split2(s, ',');
+            for (auto& ts : slist)
+                Utils::trim(ts);
+
+            if (slist.empty())
+                return StatusWithReason(-1, "Missing value for DimRange.");
+
+            for (auto& ts : slist)
+            {
+                DimRange dim;
+                dim.parse(ts);
+                ranges.add(dim);
+            }
+        }
+        catch (DimRange::error& error)
+        {
+            std::string msg = "Error parsing '" + s + "': " + error.what();
+            return StatusWithReason(-1, msg);
+        }
+        return true;
+    }
+}
 
 } // namespace pdal

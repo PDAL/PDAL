@@ -44,10 +44,11 @@
 namespace pdal
 {
 
-struct DimRange;
 
 class PDAL_EXPORT RangeFilter : public Filter,  public Streamable
 {
+    struct Private;
+
 public:
     RangeFilter();
     ~RangeFilter();
@@ -55,7 +56,7 @@ public:
     std::string getName() const;
 
 private:
-    std::vector<DimRange> m_ranges;
+    std::unique_ptr<RangeFilter::Private> m_p;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
