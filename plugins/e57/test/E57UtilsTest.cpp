@@ -32,13 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <gtest/gtest.h>
+#include <pdal/pdal_test_main.hpp>
 
 #include "plugins/e57/io/Utils.hpp"
 
 using namespace pdal::e57plugin;
 
-TEST(E57Utils, e57ToPdalTranslation)
+TEST(E57UtilsTest, e57ToPdalTranslation)
 {
     ASSERT_EQ(e57ToPdal("cartesianX"),pdal::Dimension::Id::X);
     ASSERT_EQ(e57ToPdal("fake"),pdal::Dimension::Id::Unknown);
@@ -50,7 +50,7 @@ TEST(E57Utils, e57ToPdalTranslation)
     ASSERT_EQ(e57ToPdal("intensity"),pdal::Dimension::Id::Intensity);
 }
 
-TEST(E57Utils, pdalToE57Translation)
+TEST(E57UtilsTest, pdalToE57Translation)
 {
     ASSERT_EQ(pdalToE57(pdal::Dimension::Id::X),"cartesianX");
     ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Y),"cartesianY");
@@ -61,7 +61,7 @@ TEST(E57Utils, pdalToE57Translation)
     ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Intensity),"intensity");
 }
 
-TEST(E57Utils, getPdalBounds)
+TEST(E57UtilsTest, getPdalBounds)
 {
     using pdal::Dimension::Id;
     auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity, Id::Classification};

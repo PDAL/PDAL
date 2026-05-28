@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <gtest/gtest.h>
+#include <pdal/pdal_test_main.hpp>
 
 #include "plugins/e57/io/Uuid.hpp"
 
@@ -55,7 +55,7 @@ std::vector<std::string> split(const std::string& s, char c)
     return v;
 }
 
-TEST(UUID, uuidGenerate)
+TEST(UUIDTest, uuidGenerate)
 {
     std::string id = generate_uuid();
     ASSERT_EQ(id.size(), (unsigned long)36);
