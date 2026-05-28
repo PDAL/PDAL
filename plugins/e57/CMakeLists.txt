@@ -45,8 +45,6 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_e57_read_test
         FILES
             test/E57ReaderTest.cpp
-            test/E57UtilsTest.cpp
-            test/ScanTest.cpp
         LINK_WITH
             ${e57plugin_reader}
             E57Format
@@ -57,10 +55,30 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_e57_write_test
         FILES
             test/E57WriterTest.cpp
-            test/E57UuidTest.cpp
         LINK_WITH
             ${e57plugin_reader}
             ${e57plugin_writer}
+            E57Format
+        INCLUDES
+            libE57Format/include
+    )
+    PDAL_ADD_TEST(pdal_io_e57_scan_test
+        FILES
+            test/ScanTest.cpp
+            io/Utils.cpp
+        LINK_WITH
+            ${e57plugin_reader}
+            E57Format
+        INCLUDES
+            libE57Format/include
+    )
+
+    PDAL_ADD_TEST(pdal_io_e57_uuid_test
+        FILES
+            test/E57UuidTest.cpp
+            io/Uuid.cpp
+        LINK_WITH
+            ${e57plugin_reader}
             E57Format
         INCLUDES
             libE57Format/include
