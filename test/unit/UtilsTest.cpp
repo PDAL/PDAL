@@ -541,7 +541,7 @@ TEST(UtilsTest, extractor)
 
         std::string s;
         ext.get(s, 5);
-        EXPECT_EQ(s.size(), 0);
+        EXPECT_EQ(s.size(), 0u);
     }
 
     {
@@ -550,22 +550,22 @@ TEST(UtilsTest, extractor)
 
         std::string s;
         ext.get(s, 5);
-        EXPECT_EQ(s.size(), 3);
+        EXPECT_EQ(s.size(), 3u);
         EXPECT_EQ(s, "abc");
 
         ext.seek(0);
         ext.get(s, 3);
-        EXPECT_EQ(s.size(), 3);
+        EXPECT_EQ(s.size(), 3u);
         EXPECT_EQ(s, "abc");
 
         ext.seek(0);
         ext.get(s, 1);
-        EXPECT_EQ(s.size(), 1);
+        EXPECT_EQ(s.size(), 1u);
         EXPECT_EQ(s, "a");
 
         ext.seek(0);
         ext.get(s, 0);
-        EXPECT_EQ(s.size(), 0);
+        EXPECT_EQ(s.size(), 0u);
         EXPECT_TRUE(s.empty());
     }
 }

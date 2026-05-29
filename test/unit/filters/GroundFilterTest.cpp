@@ -79,7 +79,7 @@ class CustomGroundClassTest : public ::testing::TestWithParam<std::string>
             PointTable t;
             filter->prepare(t);
             PointViewSet s = filter->execute(t);
-            
+
             PointViewPtr v = *s.begin();
 
             std::unordered_map<uint8_t, size_t> classCounts;
@@ -121,7 +121,7 @@ TEST_P(CustomGroundClassTest, CustomGroundClass)
     classCounts = this->classCounts(
         filterTypeName, groundClass, otherClass, startingClass, /*onlyGround=*/true);
 
-    EXPECT_EQ(classCounts.size(), 2);
+    EXPECT_EQ(classCounts.size(), 2u);
     EXPECT_GT(classCounts[groundClass], 0u);
     EXPECT_GT(classCounts[startingClass], 0u);
 }
