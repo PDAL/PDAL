@@ -91,7 +91,7 @@ TEST(PipelineManagerTest, serialize)
 
     NL::json filespecJson = readerStage["filename"];
     EXPECT_TRUE(filespecJson.is_object());
-    EXPECT_EQ(filespecJson.at("path").get<std::string>(), 
+    EXPECT_EQ(filespecJson.at("path").get<std::string>(),
         Support::datapath("las/epsg_4326.las"));
 
     // reprojection filter should be at idx 2
@@ -100,14 +100,14 @@ TEST(PipelineManagerTest, serialize)
 
     NL::json projJson = reproStage["out_srs"];
     EXPECT_TRUE(projJson.is_object());
-    EXPECT_EQ(projJson.at("$schema").get<std::string>(), 
+    EXPECT_EQ(projJson.at("$schema").get<std::string>(),
         "https://proj.org/schemas/v0.7/projjson.schema.json");
-    
-    EXPECT_EQ(mgr.execute(), 4775);
+
+    EXPECT_EQ(mgr.execute(), 4775u);
 
     // Make sure the serialized pipeline is valid JSON & creates an identical result
     PipelineManager mgr2;
     std::istringstream iss(oss.str());
     mgr2.readPipeline(iss);
-    EXPECT_EQ(mgr2.execute(), 4775);
+    EXPECT_EQ(mgr2.execute(), 4775u);
 }
