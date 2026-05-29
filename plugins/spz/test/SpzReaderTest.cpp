@@ -14,7 +14,7 @@ TEST(SpzReaderTest, test1)
 {
     Options opts;
     opts.add("filename", Support::datapath("spz/fourth_st.spz"));
-    
+
     SpzReader reader;
     reader.setOptions(opts);
 
@@ -23,7 +23,7 @@ TEST(SpzReaderTest, test1)
     PointViewSet set = reader.execute(table);
     PointViewPtr view = *set.begin();
 
-    EXPECT_EQ(view->size(), 131199);
+    EXPECT_EQ(view->size(), 131199u);
     ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::X));
     //check custom dimensions too
     Dimension::Id rot0 = table.layout()->findProprietaryDim("rot_0");
@@ -36,7 +36,7 @@ TEST(SpzReaderTest, orientation_metadata)
 {
     Options opts;
     opts.add("filename", Support::datapath("spz/fourth_st.spz"));
-    
+
     SpzReader reader;
     reader.setOptions(opts);
 

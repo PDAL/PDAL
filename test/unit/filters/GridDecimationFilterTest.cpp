@@ -140,7 +140,7 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
             // cf. GridDecimationFilter comment
             size_t d_width = std::floor((bounds.maxx - bounds.minx) / res) + 2;
             size_t d_height = std::floor((bounds.maxy - bounds.miny) / res) + 2;
-            EXPECT_LE(nbThreadPts, d_width*d_height); // some cells coul'd be empty
+            EXPECT_LE((size_t)nbThreadPts, d_width*d_height); // some cells coul'd be empty
 
             double xmin = bounds.minx;
             double ymin = bounds.miny;

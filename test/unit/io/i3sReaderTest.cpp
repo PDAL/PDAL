@@ -77,7 +77,7 @@ TEST(i3sReaderTest, density_stream_test)
     Stage& reader = *f.createStage("readers.i3s");
     reader.setOptions(i3s_options);
 
-    int cnt = 0;
+    size_t cnt = 0;
     auto cb = [&cnt](PointRef& f)
     {
         cnt++;

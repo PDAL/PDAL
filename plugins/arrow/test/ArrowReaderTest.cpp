@@ -135,7 +135,7 @@ TEST(ArrowFeatherReaderTest, SRS)
 
     //number of points
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065);
+    EXPECT_EQ(view->size(), 1065u);
 
 
     const SpatialReference utm10("EPSG:26910");
@@ -158,7 +158,7 @@ TEST(ArrowParquetReaderTest, SRS)
 
     //number of points
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065);
+    EXPECT_EQ(view->size(), 1065u);
 
     const SpatialReference utm10("EPSG:26910");
     EXPECT_EQ(m_reader.getSpatialReference(), utm10);

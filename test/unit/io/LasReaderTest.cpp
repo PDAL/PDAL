@@ -62,7 +62,7 @@ TEST(LasReaderTest, string_header_val)
     EXPECT_TRUE(foo.valSet());
     ok = foo.setVal("FOOBAR");
     EXPECT_FALSE(ok);
-    EXPECT_EQ(foo.val().size(), 5);
+    EXPECT_EQ(foo.val().size(), 5u);
     EXPECT_EQ(foo.val(), "FOOBA");
     EXPECT_TRUE(foo.valSet());
 
@@ -80,7 +80,7 @@ TEST(LasReaderTest, string_header_val)
     EXPECT_EQ(baz.val(), "");
     ok = baz.setVal("TESTTEST");
     EXPECT_TRUE(ok);
-    EXPECT_EQ(baz.val().size(), 8);
+    EXPECT_EQ(baz.val().size(), 8u);
 }
 
 TEST(LasReaderTest, create)
@@ -129,10 +129,10 @@ TEST(LasReaderTest, header)
         EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
         EXPECT_EQ(h.compressed(), compressed);
         EXPECT_EQ(h.pointCountByReturn(0), 925u);
-        EXPECT_EQ(h.pointCountByReturn(1), 114);
-        EXPECT_EQ(h.pointCountByReturn(2), 21);
-        EXPECT_EQ(h.pointCountByReturn(3), 5);
-        EXPECT_EQ(h.pointCountByReturn(4), 0);
+        EXPECT_EQ(h.pointCountByReturn(1), 114u);
+        EXPECT_EQ(h.pointCountByReturn(2), 21u);
+        EXPECT_EQ(h.pointCountByReturn(3), 5u);
+        EXPECT_EQ(h.pointCountByReturn(4), 0u);
     };
 
     testLasHeader("las/simple.las", false);

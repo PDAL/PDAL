@@ -118,7 +118,7 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
     *handle << info;
     FileUtils::closeFile(handle);
 
-    EXPECT_EQ(compare(infofile, outinfofile, 1), 0) \
+    EXPECT_EQ(compare(infofile, outinfofile, 1), 0u) \
         << "  (" << infofile << " <-> " << outinfofile << ")";
 }
 
