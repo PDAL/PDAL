@@ -1,13 +1,8 @@
 #pragma once
 
+#include <memory>
+
 #include <pdal/Filter.hpp>
-#include <pdal/KDIndex.hpp>
-#include <unordered_map>
-#include "private/expr/AssignStatement.hpp"
-
-
-extern "C" int32_t RadiusAssignFilter_ExitFunc();
-extern "C" PF_ExitFunc RadiusAssignFilter_InitPlugin();
 
 namespace pdal
 {

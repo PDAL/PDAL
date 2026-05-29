@@ -34,6 +34,8 @@
 
 #include "NeighborClassifierFilter.hpp"
 
+#include <unordered_map>
+
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/ProgramArgs.hpp>
