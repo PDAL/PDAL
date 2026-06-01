@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: ac25c794415c9da89f7f29d828f157bd4b7b21f4
+// Git SHA: 4a70e87485f16451fd1b95e1d0328f2561a49958
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3260,7 +3260,9 @@ private:
     std::vector<Curl> m_curls;
     std::thread m_runner;
     std::size_t m_retry;
-    std::atomic<bool> m_stop;
+    // The explicit initialization is necessary on Linux for C++17.
+    // See the "Note" here: https://en.cppreference.com/cpp/atomic/atomic/atomic
+    std::atomic<bool> m_stop = false;
 
     std::mutex m_mutex;
     // Provide notification between a thread waiting on a Curl and one
