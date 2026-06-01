@@ -34,6 +34,8 @@
 
 #include "NeighborClassifierFilter.hpp"
 
+#include <unordered_map>
+
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -50,9 +52,19 @@ static PluginInfo const s_info
     "https://pdal.org/stages/filters.neighborclassifier.html"
 };
 
+struct NeighborClassifierFilter::Private
+{
+    DimRangeList domain;
+    int k;
+    Dimension::Id dimId;
+    std::string dimName;
+    std::string candidateFile;
+    std::unordered_map<PointId, int> newClass;
+};
+
 CREATE_STATIC_STAGE(NeighborClassifierFilter, s_info)
 
-NeighborClassifierFilter::NeighborClassifierFilter()
+NeighborClassifierFilter::NeighborClassifierFilter() : m_p(new Private())
 {}
 
 
@@ -64,32 +76,18 @@ std::string NeighborClassifierFilter::getName() const
 void NeighborClassifierFilter::addArgs(ProgramArgs& args)
 {
     args.add("domain", "Selects which points will be subject to "
-        "KNN-based assignment", m_domainSpec);
+        "KNN-based assignment", m_p->domain);
     args.add("k", "Number of nearest neighbors to consult",
-        m_k).setPositional();
-    args.add("candidate", "candidate file name", m_candidateFile);
+        m_p->k).setPositional();
+    args.add("candidate", "candidate file name", m_p->candidateFile);
     args.add("dimension", "Dimension on which votes are calculated (treated as an integer).",
-        m_dimName, "Classification");
+        m_p->dimName, "Classification");
 }
 
 void NeighborClassifierFilter::initialize()
 {
-    for (auto const& r : m_domainSpec)
-    {
-        try
-        {
-            DimRange range;
-            range.parse(r);
-            m_domain.push_back(range);
-        }
-        catch (const DimRange::error& err)
-        {
-            throwError("Invalid 'domain' option: '" + r + "': " + err.what());
-        }
-    }
-    if (m_k < 1)
-        throwError("Invalid 'k' option: " + std::to_string(m_k) +
-            ", must be > 0");
+    if (m_p->k < 1)
+        throwError("Invalid 'k' option: " + std::to_string(m_p->k) + ", must be > 0");
 }
 
 
@@ -97,41 +95,35 @@ void NeighborClassifierFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
 
-    m_dimId = layout->findDim(m_dimName);
-    if (m_dimId == Dimension::Id::Unknown)
-        throwError("Dimension '" + m_dimName + "' does not exist.");
+    m_p->dimId = layout->findDim(m_p->dimName);
+    if (m_p->dimId == Dimension::Id::Unknown)
+        throwError("Dimension '" + m_p->dimName + "' does not exist.");
 
-    for (auto& r : m_domain)
-    {
-        r.m_id = layout->findDim(r.m_name);
-        if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'domain' option: '" +
-                r.m_name + "'.");
-    }
-    std::sort(m_domain.begin(), m_domain.end());
+    Utils::StatusWithReason status = m_p->domain.prepare(layout);
+    if (!status)
+        throwError("Invalid dimension name in 'domain': " + status.what());
 }
 
 
 void NeighborClassifierFilter::ready(PointTableRef)
 {
-    m_newClass.clear();
+    m_p->newClass.clear();
 }
 
 
 void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     KD3Index &kdi)
 {
-    PointIdList iSrc = kdi.neighbors(point, m_k);
+    PointIdList iSrc = kdi.neighbors(point, m_p->k);
     double thresh = iSrc.size()/2.0;
 
     // vote NNs
     using CountMap = std::map<int, unsigned int>;
     CountMap counts;
-    //std::map<int, unsigned int> counts;
     for (PointId id : iSrc)
     {
         temp.setPointId(id);
-        counts[temp.getFieldAs<int>(m_dimId)]++;
+        counts[temp.getFieldAs<int>(m_p->dimId)]++;
     }
 
     // pick winner of the vote
@@ -140,20 +132,20 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
         { return p1.second < p2.second; });
 
     // update point
-    auto oldclass = point.getFieldAs<int>(m_dimId);
+    auto oldclass = point.getFieldAs<int>(m_p->dimId);
     auto newclass = pr.first;
     if (pr.second > thresh && oldclass != newclass)
-        m_newClass[point.pointId()] = newclass;
+        m_p->newClass[point.pointId()] = newclass;
 }
 
 // update point.  kdi and temp both reference the NN point cloud
 bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp,
     KD3Index &kdi)
 {
-    if (m_domain.empty())  // No domain, process all points
+    if (m_p->domain.empty())  // No domain, process all points
         doOneNoDomain(point, temp, kdi);
 
-    for (DimRange& r : m_domain)
+    for (const DimRange& r : m_p->domain.ranges())
     {   // process only points that satisfy a domain condition
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
         {
@@ -180,7 +172,7 @@ PointViewPtr NeighborClassifierFilter::loadSet(const std::string& filename,
 void NeighborClassifierFilter::filter(PointView& view)
 {
     PointRef point_src(view, 0);
-    if (m_candidateFile.empty())
+    if (m_p->candidateFile.empty())
     {   // No candidate file so NN comes from src file
         KD3Index& kdiSrc = view.build3dIndex();
         PointRef point_nn(view, 0);
@@ -193,7 +185,7 @@ void NeighborClassifierFilter::filter(PointView& view)
     else
     {   // NN comes from candidate file
         ColumnPointTable candTable;
-        PointViewPtr candView = loadSet(m_candidateFile, candTable);
+        PointViewPtr candView = loadSet(m_p->candidateFile, candTable);
         KD3Index& kdiCand = candView->build3dIndex();
         PointRef point_nn(*candView, 0);
         for (PointId id = 0; id < view.size(); ++id)
@@ -203,8 +195,8 @@ void NeighborClassifierFilter::filter(PointView& view)
         }
     }
 
-    for (auto& [pointId, classification] : m_newClass)
-        view.setField(m_dimId, pointId, classification);
+    for (auto& [pointId, classification] : m_p->newClass)
+        view.setField(m_p->dimId, pointId, classification);
 }
 
 } // namespace pdal

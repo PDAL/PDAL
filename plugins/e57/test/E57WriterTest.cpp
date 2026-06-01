@@ -32,8 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Support.hpp"
 #include <pdal/pdal_test_main.hpp>
+#include "Support.hpp"
 #include <stdio.h>
 
 #include "io/LasReader.hpp"
@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-TEST(E57Writer, testCtr)
+TEST(E57WriterTest, testCtr)
 {
     Options ops;
     std::string outfile = Support::datapath("e57/test.e57");
@@ -66,7 +66,7 @@ PointViewSet writertest_readE57(std::string filename, PointTableRef table)
     return reader.execute(table);
 }
 
-TEST(E57Writer, testWrite)
+TEST(E57WriterTest, testWrite)
 {
     std::string outfile(Support::datapath("e57/test.e57"));
     std::string infile(Support::datapath("e57/A4.e57"));
@@ -165,13 +165,13 @@ void writerTest_testColorRanges(pdal::Reader* r, std::string infile, int min, in
     remove(outfile.c_str());
 }
 
-TEST(E57Writer, testWriteRanges)
+TEST(E57WriterTest, testWriteRanges)
 {
     writerTest_testColorRanges(new LasReader(), Support::datapath("las/autzen_trim.las"), 0, 255);
     writerTest_testColorRanges(new E57Reader(), Support::datapath("e57/A4.e57"), 0, 65535);
 }
 
-TEST(E57Writer, testExtraDims)
+TEST(E57WriterTest, testExtraDims)
 {
     std::string infile = Support::datapath("las/autzen_trim.las");
     std::string outfile(Support::datapath("e57/test.e57"));

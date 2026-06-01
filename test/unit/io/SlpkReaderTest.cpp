@@ -55,7 +55,7 @@ TEST(SlpkReaderTest, read_stream_local)
     reader.setOptions(slpk_options);
 
     StreamCallbackFilter filt;
-    int cnt = 0;
+    size_t cnt = 0;
     auto cb = [&cnt](PointRef& p)
     {
         cnt++;

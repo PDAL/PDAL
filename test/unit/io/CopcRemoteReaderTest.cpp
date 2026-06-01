@@ -77,7 +77,7 @@ void testURLs(const std::string& url, const BOX2D& bounds)
     }
 
     pdal::QuickInfo qi(reader.preview());
-    EXPECT_EQ(61201, qi.m_pointCount);
+    EXPECT_EQ(61201u, qi.m_pointCount);
 
     pdal::BOX3D bounds3d = qi.m_bounds;
     EXPECT_EQ(pdal::Bounds(bounds).to2d(), pdal::Bounds(bounds3d).to2d());

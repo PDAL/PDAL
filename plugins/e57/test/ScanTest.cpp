@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <gtest/gtest.h>
+#include <pdal/pdal_test_main.hpp>
 #include "Support.hpp"
 
 #include "plugins/e57/io/Scan.hpp"

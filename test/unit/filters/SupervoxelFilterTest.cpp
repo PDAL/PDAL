@@ -125,7 +125,7 @@ TEST(SuperVoxelFilterTest, BasicTest)
         double cid = p.getFieldAs<uint64_t>(Id::ClusterID);
         clusters.insert(cid);
     }
-    EXPECT_EQ(clusters.size(), 4);
+    EXPECT_EQ(clusters.size(), (size_t)4);
 
     for (PointId idx = 0; idx < outView->size(); idx += 2)
     {

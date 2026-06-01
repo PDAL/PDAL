@@ -135,16 +135,64 @@ bool DimRange::valuePasses(double v) const
     return !fail;
 }
 
+
+void DimRange::parse(const std::string& r)
+{
+    std::string::size_type pos = subParse(r);
+    if (pos != r.size())
+        throw error("Invalid characters following valid range.");
+}
+
+Utils::StatusWithReason DimRange::prepare(const PointLayoutPtr layout)
+{
+    m_id = layout->findDim(m_name);
+    if (m_id == Dimension::Id::Unknown)
+    {
+        std::string msg = "Invalid dimension name '" + m_name + "' in range.";
+        return Utils::StatusWithReason(-1, msg);
+    }
+    return true;
+}
+
+std::istream& operator>>(std::istream& in, DimRange& r)
+{
+    std::string s;
+
+    std::getline(in, s);
+    r.parse(s);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const DimRange& r)
+{
+    out << (r.m_inclusive_lower_bound ? '[' : '(');
+    if (r.m_lower_bound != std::numeric_limits<double>::lowest())
+        out << r.m_lower_bound;
+    out << ':';
+    if (r.m_upper_bound != (std::numeric_limits<double>::max)())
+        out << r.m_upper_bound;
+    out << (r.m_inclusive_upper_bound ? ']' : ')');
+    return out;
+}
+
+void DimRangeList::add(const DimRange& range)
+{
+    m_ranges.push_back(range);
+    // Sort so that 'pointPasses' works.
+    std::sort(m_ranges.begin(), m_ranges.end(),
+        [](const DimRange& r1, const DimRange& r2){ return r1.m_name < r2.m_name; });
+}
+
 // Important - range list must be sorted.
 // This applies OR logic when there are multiple ranges for the same
 // dimension and AND logic for different dimensions.  It depends on
 // the range list being sorted such that ranges for the same dimension
 // are contiguous.
-bool DimRange::pointPasses(const std::vector<DimRange>& ranges, PointRef& point)
+bool DimRangeList::pointPasses(PointRef& point)
 {
-    Dimension::Id lastId = ranges.front().m_id;
+    Dimension::Id lastId = m_ranges.front().m_id;
     bool passes = false;
-    for (auto const& r : ranges)
+    for (auto const& r : m_ranges)
     {
         // If we're at a new dimension, return false if we haven't passed
         // the dimension, otherwise reset lastId and keep checking.
@@ -163,43 +211,39 @@ bool DimRange::pointPasses(const std::vector<DimRange>& ranges, PointRef& point)
     return passes;
 }
 
-void DimRange::parse(const std::string& r)
+Utils::StatusWithReason DimRangeList::prepare(const PointLayoutPtr layout)
 {
-    std::string::size_type pos = subParse(r);
-    if (pos != r.size())
-        throw error("Invalid characters following valid range.");
+    for (DimRange& r : m_ranges)
+    {
+        Utils::StatusWithReason ret = r.prepare(layout);
+        if (!ret)
+            return ret;
+    }
+    return true;
 }
 
-
-bool operator < (const DimRange& r1, const DimRange& r2)
+bool DimRangeList::empty()
 {
-    return (r1.m_name < r2.m_name ? true :
-        r1.m_name > r2.m_name ? false :
-        &r1 < &r2);
+    return m_ranges.empty();
 }
 
-
-std::istream& operator>>(std::istream& in, DimRange& r)
+const std::vector<DimRange>& DimRangeList::ranges() const
 {
-    std::string s;
-
-    std::getline(in, s);
-    r.parse(s);
-    return in;
+    return m_ranges;
 }
 
-
-std::ostream& operator<<(std::ostream& out, const DimRange& r)
+std::ostream& operator<<(std::ostream& out, const DimRangeList& r)
 {
-    out << (r.m_inclusive_lower_bound ? '[' : '(');
-    if (r.m_lower_bound != std::numeric_limits<double>::lowest())
-        out << r.m_lower_bound;
-    out << ':';
-    if (r.m_upper_bound != (std::numeric_limits<double>::max)())
-        out << r.m_upper_bound;
-    out << (r.m_inclusive_upper_bound ? ']' : ')');
+    auto it = r.m_ranges.begin();
+    while (it != r.m_ranges.end())
+    {
+        const DimRange& range = *it;
+        out << range;
+        it++;
+        if (it != r.m_ranges.end())
+            out << ", ";
+    }
     return out;
 }
 
 } // namespace pdal
-

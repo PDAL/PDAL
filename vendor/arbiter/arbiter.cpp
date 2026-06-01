@@ -4393,7 +4393,8 @@ Curl::Curl(const std::string s)
     // Configurable entries are:
     //      - timeout           (CURLOPT_LOW_SPEED_TIME)
     //      - followRedirect    (CURLOPT_FOLLOWLOCATION)
-    //      - caBundle          (CURLOPT_CAPATH)
+    //      - caBundle          (CURLOPT_CAINFO)
+    //      - caPath            (CURLOPT_CAPATH)
     //      - caInfo            (CURLOPT_CAINFO)
     //      - verifyPeer        (CURLOPT_SSL_VERIFYPEER)
     //      - proxy             (CURLOPT_PROXY)
@@ -4429,7 +4430,7 @@ Curl::Curl(const std::string s)
 
             if (h.count("caBundle"))
             {
-                m_caPath = mk(h["caBundle"].get<std::string>());
+                m_caBundle = mk(h["caBundle"].get<std::string>());
             }
             else if (h.count("caPath"))
             {
@@ -4466,7 +4467,8 @@ Curl::Curl(const std::string s)
         "CURL_VERIFY_PEER",
         "ARBITER_VERIFY_PEER"
     };
-    Keys caPathKeys{ "CURL_CA_PATH", "CURL_CA_BUNDLE", "ARBITER_CA_PATH" };
+    Keys caPathKeys{ "CURL_CA_PATH", "ARBITER_CA_PATH" };
+    Keys caBundleKeys{ "CURL_CA_BUNDLE", "ARBITER_CA_BUNDLE" };
     Keys caInfoKeys{ "CURL_CAINFO", "CURL_CA_INFO", "ARBITER_CA_INFO" };
     Keys ProxyKeys{ "CURL_PROXY", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "ARBITER_PROXY"};
 
@@ -4475,6 +4477,7 @@ Curl::Curl(const std::string s)
     if (auto v = find(redirKeys)) m_followRedirect = !!std::stol(*v);
     if (auto v = find(verifyKeys)) m_verifyPeer = !!std::stol(*v);
     if (auto v = find(caPathKeys)) m_caPath = mk(*v);
+    if (auto v = find(caBundleKeys)) m_caBundle = mk(*v);
     if (auto v = find(caInfoKeys)) m_caInfo = mk(*v);
     if (auto v = find(ProxyKeys)) m_proxy = mk(*v);
 
@@ -4486,7 +4489,8 @@ Curl::Curl(const std::string s)
             "\n\ttimeout: " << m_timeout << "s" <<
             "\n\tfollowRedirect: " << m_followRedirect <<
             "\n\tverifyPeer: " << m_verifyPeer <<
-            "\n\tcaBundle: " << (m_caPath ? *m_caPath : "(default)") <<
+            "\n\tcaPath: " << (m_caPath ? *m_caPath : "(default)") <<
+            "\n\tcaBundle: " << (m_caBundle ? *m_caBundle : "(default)") <<
             "\n\tcaInfo: " << (m_caInfo ? *m_caInfo : "(default)") <<
             "\n\tProxy: " << (m_proxy ? *m_proxy : "(default)") <<
             std::endl;
@@ -4549,6 +4553,7 @@ void Curl::init(
     curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, toLong(m_followRedirect));
     curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, toLong(m_verifyPeer));
     if (m_caPath) curl_easy_setopt(m_curl, CURLOPT_CAPATH, m_caPath->c_str());
+    if (m_caBundle) curl_easy_setopt(m_curl, CURLOPT_CAINFO, m_caBundle->c_str());
     if (m_caInfo) curl_easy_setopt(m_curl, CURLOPT_CAINFO, m_caInfo->c_str());
     if (m_proxy) curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy->c_str());
 
@@ -4769,7 +4774,6 @@ Response Curl::post(
 #ifdef ARBITER_CUSTOM_NAMESPACE
 }
 #endif
-
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/curl.cpp
