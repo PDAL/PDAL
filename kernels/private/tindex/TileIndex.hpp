@@ -1,5 +1,5 @@
 
-#include "TIndexBuilder.hpp"
+#include "TIndexProcessor.hpp"
 
 namespace pdal
 {
@@ -8,7 +8,7 @@ namespace tindex
 
 struct field;
 
-class TileIndexBuilder : public TIndexBuilder
+class TileIndexBuilder : public TIndexProcessor
 {
 public:
     TileIndexBuilder(const Args& args, const std::string& tileIndexColumnName,

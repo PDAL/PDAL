@@ -84,16 +84,16 @@ struct FileInfo
 };
 using FileInfoPtr = std::unique_ptr<FileInfo>;
 
-class TIndexBuilder
+class TIndexProcessor
 {
 public:
-    virtual ~TIndexBuilder();
+    virtual ~TIndexProcessor();
 
     void create(const StringList& files, PipelineManager& mgr);
     std::vector<FileInfo> readIndex();
 
 protected:
-    TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
+    TIndexProcessor(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName,
         const std::string& tgtSrs, const std::string& assignSrs);
 

@@ -332,11 +332,11 @@ TEST(TIndex, test9)
     std::string outSpec(Support::temppath("tindex.parquet"));
 
     std::string cmd = Support::binpath("pdal") + " tindex create " +
-        outSpec + " \"" + inSpec + "\" --log=stdout " +
+        outSpec + " \"" + inSpec + "\" --threshold=1 " +
+        "--resolution=1.0 --log=stdout " +
         "--stac-geoparquet=true";
 
     FileUtils::deleteFile(outSpec);
     std::string output;
     Utils::run_shell_command(cmd, output);
-    std::cout << output << std::endl;
 }

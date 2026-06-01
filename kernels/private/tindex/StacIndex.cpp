@@ -7,7 +7,7 @@ namespace tindex
 {
 
 StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType)
-    : TIndexBuilder(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
+    : TIndexProcessor(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
       m_pcType(pcType)
 {
 #if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,9,0)

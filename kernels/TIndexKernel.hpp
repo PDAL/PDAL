@@ -46,7 +46,7 @@ namespace pdal
 
 namespace tindex
 {
-    class TIndexBuilder;
+    class TIndexProcessor;
     struct Args;
 }
 
@@ -87,7 +87,7 @@ private:
     std::string m_pcType;
 
     std::unique_ptr<tindex::Args> m_args;
-    std::unique_ptr<tindex::TIndexBuilder> m_tindex;
+    std::unique_ptr<tindex::TIndexProcessor> m_tindex;
 
     std::string m_tgtSrsString;
     std::string m_assignSrsString;

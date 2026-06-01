@@ -9,7 +9,7 @@ namespace tindex
 TileIndexBuilder::TileIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs)
-    : TIndexBuilder(args, tileIndexColumnName, srsColumnName, driverName, tgtSrs, assignSrs)
+    : TIndexProcessor(args, tileIndexColumnName, srsColumnName, driverName, tgtSrs, assignSrs)
 {
     m_mtimeField = m_dataset->defineField("modified", OFTDateTime);
     m_ctimeField = m_dataset->defineField("created", OFTDateTime);

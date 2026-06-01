@@ -1,4 +1,4 @@
-#include "TIndexBuilder.hpp"
+#include "TIndexProcessor.hpp"
 #include "TIndexBoundary.hpp"
 #include "Dataset.hpp"
 #include "TIndexError.hpp"
@@ -21,7 +21,7 @@ namespace tindex
 // Base class
 //
 
-TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
+TIndexProcessor::TIndexProcessor(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs)
     : m_dataset(new Dataset(args.idxFilename, driverName)),
@@ -37,10 +37,10 @@ TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColum
     m_srsColumnNameField = m_dataset->defineField(m_srsColumnName, OFTString);
 }
 
-TIndexBuilder::~TIndexBuilder()
+TIndexProcessor::~TIndexProcessor()
 {}
 
-void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
+void TIndexProcessor::create(const StringList& files, PipelineManager& mgr)
 {
     const std::string filename = files.front();
     m_infos.reserve(files.size());
@@ -107,7 +107,7 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
         throw TIndexError("Couldn't index any files.");
 }
 
-std::vector<FileInfo> TIndexBuilder::readIndex()
+std::vector<FileInfo> TIndexProcessor::readIndex()
 {
     if (!m_dataset->openDataset())
     {
@@ -151,7 +151,7 @@ std::vector<FileInfo> TIndexBuilder::readIndex()
     return files;
 }
 
-bool TIndexBuilder::createFeature(const FileInfoPtr& fileInfo)
+bool TIndexProcessor::createFeature(const FileInfoPtr& fileInfo)
 {
 
     if (fileInfo->m_srs.empty() || m_args.overrideASrs)
@@ -193,7 +193,7 @@ bool TIndexBuilder::createFeature(const FileInfoPtr& fileInfo)
 }
 
 
-bool TIndexBuilder::isFileIndexed(const FileInfoPtr& fileInfo)
+bool TIndexProcessor::isFileIndexed(const FileInfoPtr& fileInfo)
 {
     std::ostringstream qstring;
 
@@ -216,7 +216,7 @@ bool TIndexBuilder::isFileIndexed(const FileInfoPtr& fileInfo)
     return output;
 }
 
-bool TIndexBuilder::runBoundary(Stage& stage, FileInfo& fileInfo,
+bool TIndexProcessor::runBoundary(Stage& stage, FileInfo& fileInfo,
     PipelineManager& manager)
 {
     // If we aren't able to make a hexbin filter, we
@@ -257,7 +257,7 @@ bool TIndexBuilder::runBoundary(Stage& stage, FileInfo& fileInfo,
     return true;
 }
 
-bool TIndexBuilder::fastBoundary(Stage& reader, FileInfo& fileInfo)
+bool TIndexProcessor::fastBoundary(Stage& reader, FileInfo& fileInfo)
 {
     QuickInfo qi = reader.preview();
     if (!qi.valid())
@@ -270,7 +270,7 @@ bool TIndexBuilder::fastBoundary(Stage& reader, FileInfo& fileInfo)
     return true;
 }
 
-pdal::Polygon TIndexBuilder::prepareGeometry(const FileInfo& fileInfo)
+pdal::Polygon TIndexProcessor::prepareGeometry(const FileInfo& fileInfo)
 {
     auto makeMultiPolygon = [](std::string poly) -> std::string
     {

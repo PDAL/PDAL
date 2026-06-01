@@ -1,6 +1,6 @@
 
 #include <kernels/private/stac/StacInfo.hpp>
-#include "TIndexBuilder.hpp"
+#include "TIndexProcessor.hpp"
 
 namespace pdal
 {
@@ -78,7 +78,7 @@ private:
     StringList m_extensions;
 };
 
-class StacIndexBuilder : public TIndexBuilder
+class StacIndexBuilder : public TIndexProcessor
 {
 public:
     StacIndexBuilder(const Args& args, const std::string& pcType);
