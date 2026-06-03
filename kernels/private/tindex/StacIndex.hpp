@@ -22,8 +22,6 @@ struct StacFileInfo : FileInfo
         self.add("rel", "derived_from");
         self.add("href", filename);
         m_properties = m_root.add("properties");
-        m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
-            "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
     }
 
     void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
@@ -54,7 +52,7 @@ struct StacFileInfo : FileInfo
 
     std::string links()
     {
-        return jsonElement(m_root.children("links"));
+        return jsonElement(getChild(m_root, "links"));
     }
 
     std::string datetime()
@@ -67,10 +65,25 @@ struct StacFileInfo : FileInfo
 private:
     std::string jsonElement(MetadataNodeList node)
     {
-        std::string jsonStr = Utils::toJSON(node);
+        MetadataNode topLevel;
+        for (auto& n: node)
+            topLevel.add(n);
+        std::string jsonStr = Utils::toJSON(topLevel);
         jsonStr.erase(std::remove_if(jsonStr.begin(), jsonStr.end(), 
             [](char c) { return c == '\n' || c == '\r'; }), jsonStr.end());
 
+        std::cout << jsonStr << std::endl;
+        return jsonStr;
+    }
+    std::string jsonElement(MetadataNode node)
+    {
+        MetadataNode topLevel;
+        topLevel.add(node);
+        std::string jsonStr = Utils::toJSON(topLevel);
+        jsonStr.erase(std::remove_if(jsonStr.begin(), jsonStr.end(), 
+            [](char c) { return c == '\n' || c == '\r'; }), jsonStr.end());
+
+        std::cout << jsonStr << std::endl;
         return jsonStr;
     }
     MetadataNode m_root;
@@ -85,7 +98,7 @@ public:
 
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
-    void getFileInfo(FileInfoPtr& fileInfo) override;
+    void fillFileInfo(FileInfoPtr& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) override;
 

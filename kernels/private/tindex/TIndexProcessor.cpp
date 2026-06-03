@@ -9,9 +9,6 @@
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <pdal/Polygon.hpp>
 
-#include <ogr_api.h>
-#include <cpl_string.h>
-
 namespace pdal
 {
 namespace tindex
@@ -25,7 +22,7 @@ TIndexProcessor::TIndexProcessor(const Args& args, const std::string& tileIndexC
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs)
     : m_dataset(new Dataset(args.idxFilename, driverName)),
-      m_args(std::move(args)),
+      m_args(args),
       m_tileIndexColumnName(tileIndexColumnName),
       m_srsColumnName(srsColumnName),
       m_driverName(driverName),
@@ -45,10 +42,8 @@ void TIndexProcessor::create(const StringList& files, PipelineManager& mgr)
     const std::string filename = files.front();
     m_infos.reserve(files.size());
 
-    //!! could just pass these in directly
     m_commonOptions = mgr.commonOptions();
     m_stageOptions = mgr.stageOptions();
-    //!! Remove log use if possible
     m_log = mgr.log();
 
     if (m_layerName.empty())
@@ -84,7 +79,7 @@ void TIndexProcessor::create(const StringList& files, PipelineManager& mgr)
     {
         pool.add([this, &info]()
         {
-            getFileInfo(info);
+            fillFileInfo(info);
         });
     }
     pool.await();
@@ -209,8 +204,7 @@ bool TIndexProcessor::isFileIndexed(const FileInfoPtr& fileInfo)
     catch(TIndexError& e)
     {
         std::ostringstream out;
-        out << "Unable to query layer for file '" << fileInfo->m_filename << "': "
-            << e.what();
+        out << "Unable to execute OGR attribute query: " << e.what();
         throw TIndexError(out.str());
     }
     return output;

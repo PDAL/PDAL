@@ -20,7 +20,7 @@ FileInfoPtr TileIndexBuilder::makeFileInfo(const std::string& filename)
     return std::make_unique<FileInfo>(filename);
 }
 
-void TileIndexBuilder::getFileInfo(FileInfoPtr& fileInfo)
+void TileIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
 {
     PipelineManager manager;
     manager.commonOptions() = m_commonOptions;

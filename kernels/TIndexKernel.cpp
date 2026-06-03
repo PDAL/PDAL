@@ -63,7 +63,6 @@ CREATE_STATIC_KERNEL(TIndexKernel, s_info)
 std::string TIndexKernel::getName() const { return s_info.name; }
 
 TIndexKernel::TIndexKernel() : SubcommandKernel()
-//ABELL - need to option this.
     , m_srsColumnName("srs")
     , m_args(new tindex::Args())
     , m_maxFieldSize(0)
@@ -235,8 +234,7 @@ void TIndexKernel::mergeFile()
     std::vector<tindex::FileInfo> files;
     try
     {
-        // this should just be the base class but it's pure virtual
-        m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
+        m_tindex.reset(new tindex::TIndexProcessor(*m_args, m_tileIndexColumnName,
             m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
         files = m_tindex->readIndex();
     }

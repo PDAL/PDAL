@@ -1,22 +1,10 @@
 #pragma once
 
-#include <ogr_api.h>
-
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/Options.hpp>
 
 #include "TIndexBoundary.hpp"
-
-// Get GDAL's forward decls if available
-// otherwise make our own
-#if __has_include(<gdal_fwd.h>)
-#include <gdal_fwd.h>
-#else
-using OGRDataSourceH = void *;
-using OGRLayerH = void *;
-using OGRFeatureH = void *;
-#endif
 
 namespace pdal
 {
@@ -36,15 +24,12 @@ struct Field;
 class Dataset;
 class Feature;
 
-// messy - only includes some args because we need to have defaults for stac
+// Only includes some args because we need to have defaults for stac
 // (column names, SRS) & don't want to override them if they come from here
 struct Args
 {
     std::string idxFilename;
     std::string layerName;
-    //std::string tileIndexColumnName;
-    //std::string srsColumnName;
-    //std::string driverName;
     std::string wkt;
     StringList lcOptions;
     std::string pathPrefix;
@@ -60,9 +45,6 @@ struct Args
     double edgeLength;
     uint32_t sampleSize;
     std::string boundaryExpr;
-
-    // stac-specific
-    //std::string pcType;
 };
 
 struct FileInfo
@@ -87,16 +69,15 @@ using FileInfoPtr = std::unique_ptr<FileInfo>;
 class TIndexProcessor
 {
 public:
+    TIndexProcessor(const Args& args, const std::string& tileIndexColumnName,
+        const std::string& srsColumnName, const std::string& driverName,
+        const std::string& tgtSrs, const std::string& assignSrs);
     virtual ~TIndexProcessor();
 
     void create(const StringList& files, PipelineManager& mgr);
     std::vector<FileInfo> readIndex();
 
 protected:
-    TIndexProcessor(const Args& args, const std::string& tileIndexColumnName,
-        const std::string& srsColumnName, const std::string& driverName,
-        const std::string& tgtSrs, const std::string& assignSrs);
-
     bool runBoundary(Stage& stage, FileInfo& fileInfo,
         PipelineManager& manager);
 
@@ -106,10 +87,11 @@ protected:
     OptionsMap m_stageOptions;
 
 private:
-    virtual FileInfoPtr makeFileInfo(const std::string& filename) = 0;
-    virtual void getFileInfo(FileInfoPtr& fileInfo) = 0;
+    virtual FileInfoPtr makeFileInfo(const std::string& filename) 
+        { return nullptr; }
+    virtual void fillFileInfo(FileInfoPtr& fileInfo) {}
     virtual void createExtraFields(const FileInfoPtr& fileInfo,
-        Feature& feature) = 0;
+        Feature& feature) {}
 
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
     bool createFeature(const FileInfoPtr& fileInfo);
@@ -128,11 +110,7 @@ private:
     Field *m_tindexColumnNameField;
     Field *m_srsColumnNameField;
 
-    //
-    // Only used in create()
-    //
     LogPtr m_log;
-    //StringList m_files;
 };
 
 } // namespace tindex

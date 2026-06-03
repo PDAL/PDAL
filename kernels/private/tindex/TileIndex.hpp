@@ -17,7 +17,7 @@ public:
     //void create(const StringList& files) override;
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
-    void getFileInfo(FileInfoPtr& fileInfo) override;
+    void fillFileInfo(FileInfoPtr& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) override;
 

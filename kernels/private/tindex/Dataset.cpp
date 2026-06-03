@@ -53,10 +53,11 @@ void Feature::setField(Field *field, const std::string& value)
 
 void Feature::setField(Field *field, const StringList& values)
 {
-    char** csl = NULL;
+    std::vector<char *> sl;
     for (const std::string& s : values)
-        csl = CSLAddString(csl, s.c_str());
-    OGR_F_SetFieldStringList(m_feature, field->m_index, csl);
+        sl.push_back(const_cast<char *>(s.data()));
+    sl.push_back(nullptr);
+    OGR_F_SetFieldStringList(m_feature, field->m_index, sl.data());
 }
 
 void Feature::setField(Field *field, const int value)
@@ -95,12 +96,6 @@ Dataset::Dataset(const std::string& idxFilename, const std::string& driverName)
         m_maxFieldSize = 254;
 }
 
-Dataset::~Dataset()
-{
-    if (m_dataset)
-        OGR_DS_Destroy(m_dataset);
-}
-
 Field *Dataset::defineField(const std::string& name, const OGRFieldType fieldType)
 {
     return &m_fields.emplace_back(name, fieldType);
@@ -120,10 +115,10 @@ bool Dataset::openDataset()
 
 bool Dataset::openLayer(const std::string& layerName)
 {
-    if (OGR_DS_GetLayerCount(m_dataset) == 1)
-        m_layer = OGR_DS_GetLayer(m_dataset, 0);
-    else if (layerName.size())
+    if (layerName.size())
         m_layer = OGR_DS_GetLayerByName(m_dataset, layerName.c_str());
+    else if (OGR_DS_GetLayerCount(m_dataset) == 1)
+        m_layer = OGR_DS_GetLayer(m_dataset, 0);
 
     return (bool)m_layer;
 }
@@ -148,18 +143,16 @@ bool Dataset::createLayer(const std::string& layerName, const std::string& srsSt
     const StringList& lcOptions)
 {
     gdal::SpatialRef srs(srsString);
-    // This used to just write to log w/ LogLevel::Error
     if (!srs)
         throw TIndexError("Unable to import srs for layer creation");
 
-    char** papszOptions = NULL;
+    std::vector<char *> opts;
     for (const std::string& s : lcOptions)
-        papszOptions = CSLAddString(papszOptions, s.c_str());
+        opts.push_back(const_cast<char *>(s.data()));
+    opts.push_back(nullptr);
 
     m_layer = OGR_DS_CreateLayer(m_dataset, layerName.c_str(),
-        srs.get(), wkbMultiPolygon, papszOptions);
-
-    CSLDestroy(papszOptions);
+        srs.get(), wkbMultiPolygon, opts.data());
 
     return (bool)m_layer;
 }
@@ -224,14 +217,12 @@ bool Dataset::queryLayer(const std::string& query)
         throw TIndexError(oss.str());
     }
 
-    bool output(false);
     OGR_L_ResetReading(m_layer);
     auto hFeat = OGR_L_GetNextFeature(m_layer);
-    if( hFeat )
-    {
+    bool output = (bool)hFeat;
+    if(hFeat)
         OGR_F_Destroy(hFeat);
-        output = true;
-    }
+
     OGR_L_ResetReading(m_layer);
     OGR_L_SetAttributeFilter(m_layer, NULL);
     return output;

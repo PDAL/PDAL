@@ -36,7 +36,7 @@ FileInfoPtr StacIndexBuilder::makeFileInfo(const std::string& filename)
     return std::make_unique<StacFileInfo>(filename);
 }
 
-void StacIndexBuilder::getFileInfo(FileInfoPtr& fileInfo)
+void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
 {
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
