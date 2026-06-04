@@ -48,6 +48,8 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
+#include <curl/curl.h>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -97,6 +99,7 @@ TEST(CopcRemoteReaderTest, vsi)
           "minz": 406.56
     */
 
+    curl_global_init(CURL_GLOBAL_ALL);
     BOX2D bounds(635700,848900, 637000, 853300);
     std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
     std::string vsi ("/vsicurl/"+url);
