@@ -52,7 +52,7 @@ struct StacFileInfo : FileInfo
 
     std::string links()
     {
-        return jsonElement(getChild(m_root, "links"));
+        return jsonElement(m_root.children("links"));
     }
 
     std::string datetime()
@@ -63,29 +63,18 @@ struct StacFileInfo : FileInfo
     StringList extensions() const { return m_extensions; }
 
 private:
-    std::string jsonElement(MetadataNodeList node)
+    std::string jsonElement(MetadataNodeList nodeList)
     {
-        MetadataNode topLevel;
-        for (auto& n: node)
-            topLevel.add(n);
-        std::string jsonStr = Utils::toJSON(topLevel);
+        MetadataNode root(MetadataType::Array);
+        for (auto n: nodeList)
+            root.add(n);
+        std::string jsonStr = Utils::toJSON(root);
         jsonStr.erase(std::remove_if(jsonStr.begin(), jsonStr.end(), 
             [](char c) { return c == '\n' || c == '\r'; }), jsonStr.end());
 
-        std::cout << jsonStr << std::endl;
         return jsonStr;
     }
-    std::string jsonElement(MetadataNode node)
-    {
-        MetadataNode topLevel;
-        topLevel.add(node);
-        std::string jsonStr = Utils::toJSON(topLevel);
-        jsonStr.erase(std::remove_if(jsonStr.begin(), jsonStr.end(), 
-            [](char c) { return c == '\n' || c == '\r'; }), jsonStr.end());
 
-        std::cout << jsonStr << std::endl;
-        return jsonStr;
-    }
     MetadataNode m_root;
     MetadataNode m_properties;
     StringList m_extensions;

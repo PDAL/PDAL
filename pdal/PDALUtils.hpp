@@ -264,8 +264,6 @@ inline void writeProgress(int fd, const std::string& type,
 
 std::string dllDir();
 std::string PDAL_EXPORT toJSON(const MetadataNode& m);
-std::string PDAL_EXPORT toJSON(const MetadataNodeList& mList);
-std::string PDAL_EXPORT subnodesToJSON(const MetadataNode& m);
 void PDAL_EXPORT toJSON(const MetadataNode& m, std::ostream& o);
 bool PDAL_EXPORT isJSON(const std::string& value);
 uintmax_t PDAL_EXPORT fileSize(const std::string& path);
