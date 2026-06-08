@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#pragma once
+
 #include <ctime>
 
 #include <io/FauxReader.hpp>
