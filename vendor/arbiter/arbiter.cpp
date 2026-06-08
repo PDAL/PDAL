@@ -77,10 +77,8 @@ namespace
 {
     const std::string delimiter("://");
 
-#ifdef ARBITER_CURL
     const std::size_t concurrentHttpReqs(32);
     const std::size_t httpRetryCount(8);
-#endif
 
     json getConfig(const std::string& s)
     {
@@ -105,14 +103,12 @@ Arbiter::Arbiter() : Arbiter("") { }
 
 Arbiter::Arbiter(const std::string s)
     : m_config(s)
-#ifdef ARBITER_CURL
     , m_pool(
             new http::Pool(
                 concurrentHttpReqs,
                 httpRetryCount,
                 getConfig(s).dump()))
-#endif
-{ }
+{}
 
 void Arbiter::addDriver(const std::string type, std::shared_ptr<Driver> driver)
 {
@@ -383,7 +379,7 @@ std::shared_ptr<drivers::Http> Arbiter::getHttpDriver(const std::string path) co
 
 LocalHandle Arbiter::getLocalHandle(
         const std::string path,
-        const Endpoint& tempEndpoint) const
+        const Endpoint& /*tempEndpoint*/) const
 {
     const Endpoint fromEndpoint(getEndpoint(getDirname(path)));
     return fromEndpoint.getLocalHandle(getBasename(path));
@@ -457,7 +453,6 @@ std::shared_ptr<Driver> Driver::create(
 
     if (type == "file") return Fs::create();
     if (type == "test") return Test::create();
-#ifdef ARBITER_CURL
     if (type == "http") return Http::create(pool);
     if (type == "https") return Https::create(pool);
     if (type == "s3") return S3::create(pool, entry.dump(), profile);
@@ -465,7 +460,6 @@ std::shared_ptr<Driver> Driver::create(
     if (type == "dbx") return Dropbox::create(pool, entry.dump(), profile);
 #ifdef ARBITER_OPENSSL
     if (type == "gs") return Google::create(pool, entry.dump(), profile);
-#endif
 #endif
     return std::shared_ptr<Driver>();
 }
@@ -551,7 +545,7 @@ std::vector<std::string> Driver::resolve(
     return results;
 }
 
-std::vector<std::string> Driver::glob(std::string path, bool verbose) const
+std::vector<std::string> Driver::glob(std::string path, bool /*verbose*/) const
 {
     throw ArbiterError("Cannot glob driver for: " + path);
 }
@@ -1067,7 +1061,7 @@ void Fs::copy(std::string src, std::string dst) const
     outstream << instream.rdbuf();
 }
 
-std::vector<std::string> Fs::glob(std::string path, bool verbose) const
+std::vector<std::string> Fs::glob(std::string path, bool /*verbose*/) const
 {
     return arbiter::glob(path);
 }
@@ -1394,11 +1388,7 @@ Http::Http(
     : Driver(driverProtocol, profile)
     , m_pool(pool)
     , m_httpProtocol(httpProtocol)
-{
-#ifndef ARBITER_CURL
-    throw ArbiterError("Cannot create HTTP driver - no curl support was built");
-#endif
-}
+{}
 
 std::unique_ptr<Http> Http::create(Pool& pool)
 {
@@ -1507,17 +1497,11 @@ bool Http::get(
         const Headers headers,
         const Query query) const
 {
-    bool good(false);
-
-    auto http(m_pool.acquire());
+    Resource http(m_pool.acquire());
     Response res(http.get(typedPath(path), headers, query));
 
-
     data = res.data();
-    if (res.ok())
-        good = true;
-
-    return good;
+    return res.ok();
 }
 
 std::vector<char> Http::put(
@@ -1526,8 +1510,8 @@ std::vector<char> Http::put(
         const Headers headers,
         const Query query) const
 {
-    auto http(m_pool.acquire());
-    auto res(http.put(typedPath(path), data, headers, query));
+    Resource http(m_pool.acquire());
+    Response res(http.put(typedPath(path), data, headers, query));
 
     if (!res.ok())
     {
@@ -1552,8 +1536,8 @@ void Http::post(
         const Headers headers,
         const Query query) const
 {
-    auto http(m_pool.acquire());
-    auto res(http.post(typedPath(path), data, headers, query));
+    Resource http(m_pool.acquire());
+    Response res(http.post(typedPath(path), data, headers, query));
 
     if (!res.ok())
     {
@@ -1684,11 +1668,9 @@ using namespace internal;
 
 namespace
 {
-#ifdef ARBITER_CURL
     // Re-fetch credentials when there are less than 4 minutes remaining.  New
     // ones are guaranteed by AWS to be available within 5 minutes remaining.
     constexpr int64_t reauthSeconds(60 * 4);
-#endif
 
     // See:
     // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
@@ -1864,7 +1846,6 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
         }
     }
 
-#ifdef ARBITER_CURL
     http::Pool pool;
     drivers::Http httpDriver(pool);
 
@@ -1929,7 +1910,7 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
             // which only support v1, this request will fail.  That's ok, the
             // next request looks the same anyway (except without the token of
             // course), and that corresponds to the IMDSv1 flow as a fallback.
-            const auto res = httpDriver.internalPut(
+            auto res = httpDriver.internalPut(
                 ec2TokenBase,
                 std::vector<char>(),
                 {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
@@ -1940,15 +1921,14 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
 
             if (!res.ok()) throw ArbiterError("Failed to get IMDSv2 token");
 
-            const auto tokenvec = res.data();
-            token = std::string(tokenvec.data(), tokenvec.size());
+            token = res.str();
         }
         catch (...) { }
 
         http::Headers headers;
         if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
 
-        const auto res = httpDriver.internalGet(
+        auto res = httpDriver.internalGet(
             ec2CredBase,
             headers,
             {{ }},
@@ -1957,8 +1937,7 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
             1);
         if (!res.ok()) throw ArbiterError("Failed to get IAM role");
 
-        const auto rolevec = res.data();
-        const auto iamRole = std::string(rolevec.begin(), rolevec.end());
+        std::string iamRole = res.str();
 
         if (!iamRole.empty())
         {
@@ -1974,7 +1953,6 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     {
         return makeUnique<Auth>(fargateCredIp + "/" + *relUri, ReauthMethod::IMDS_V2);
     }
-#endif
 
     return std::unique_ptr<Auth>();
 }
@@ -2128,7 +2106,6 @@ std::string S3::Config::extractBaseUrl(
 
 S3::AuthFields S3::Auth::fields() const
 {
-#ifdef ARBITER_CURL
     if (m_credUrl)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -2145,7 +2122,7 @@ S3::AuthFields S3::Auth::fields() const
             {
                 try
                 {
-                    const auto res = httpDriver.internalPut(
+                    Response res = httpDriver.internalPut(
                         ec2TokenBase,
                         std::vector<char>(),
                         {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
@@ -2158,8 +2135,7 @@ S3::AuthFields S3::Auth::fields() const
                         throw ArbiterError("Failed to get IMDSv2 token");
                     }
 
-                    const auto tokenvec = res.data();
-                    token = std::string(tokenvec.data(), tokenvec.size());
+                    token = res.str();
                 }
                 catch (...) { }
             }
@@ -2167,12 +2143,13 @@ S3::AuthFields S3::Auth::fields() const
             http::Headers headers;
             if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
 
-            const auto res = httpDriver.internalGet(*m_credUrl, headers);
+            Response res = httpDriver.internalGet(*m_credUrl, headers);
             if (!res.ok())
             {
                 throw ArbiterError("Failed to get token");
             }
-            std::vector<char> data(res.data());
+
+            std::vector<char> data = res.data();
             data.push_back('\0');
 
             if (m_reauthMethod == ReauthMethod::ASSUME_ROLE_WITH_WEB_IDENTITY)
@@ -2239,7 +2216,6 @@ S3::AuthFields S3::Auth::fields() const
         // releasing the lock.
         return S3::AuthFields(m_access, m_hidden, m_token);
     }
-#endif
 
     return S3::AuthFields(m_access, m_hidden, m_token);
 }
@@ -2806,15 +2782,18 @@ namespace
 
     std::string makeLower(const std::string& in)
     {
-        return std::accumulate(
-                in.begin(),
-                in.end(),
-                std::string(),
-                [](const std::string& out, const char c) -> std::string
-                {
-                    return out + static_cast<char>(::tolower(c));
-                });
+        std::string out;
+        for (char c : in)
+            out += (char)std::tolower(c);
+        return out;
     }
+
+    std::string extractBaseUrl(const std::string& service, const std::string& endpoint,
+        const std::string& account)
+    {
+        return account + "." + service + "." + endpoint + "/";
+    }
+
 }
 
 namespace drivers
@@ -2848,7 +2827,7 @@ AZ::Config::Config(const std::string s)
     , m_storageAccount(extractStorageAccount(s))
     , m_storageAccessKey(extractStorageAccessKey(s))
     , m_endpoint(extractEndpoint(s))
-    , m_baseUrl(extractBaseUrl(s, m_service, m_endpoint, m_storageAccount))
+    , m_baseUrl(extractBaseUrl(m_service, m_endpoint, m_storageAccount))
 {
     const std::string sasString = extractSasToken(s);
     if (!sasString.empty())
@@ -3007,18 +2986,9 @@ std::string AZ::Config::extractEndpoint(const std::string s)
     return "core.windows.net";
 }
 
-std::string AZ::Config::extractBaseUrl(
-     const std::string s,
-     const std::string service,
-     const std::string endpoint,
-     const std::string account)
-{
-    return account + "." + service + "." + endpoint + "/";
-}
-
 std::unique_ptr<std::size_t> AZ::tryGetSize(
     const std::string rawPath,
-    const http::Headers userHeaders,
+    const http::Headers /*userHeaders*/,
     const http::Query query) const
 {
     Headers headers(m_config->baseHeaders());
@@ -3609,8 +3579,7 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     const GResource resource(path);
 
     drivers::Https https(m_pool);
-    const auto res(
-            https.internalHead(resource.endpoint(), headers, altMediaQuery));
+    http::Response res(https.internalHead(resource.endpoint(), headers, altMediaQuery));
 
     if (res.ok())
     {
@@ -3625,14 +3594,14 @@ bool Google::get(
         const std::string path,
         std::vector<char>& data,
         const http::Headers userHeaders,
-        const http::Query query) const
+        const http::Query /*query*/) const
 {
     http::Headers headers(m_auth->headers());
     headers.insert(userHeaders.begin(), userHeaders.end());
     const GResource resource(path);
 
     drivers::Https https(m_pool);
-    const auto res(
+    http::Response res(
             https.internalGet(resource.endpoint(), headers, altMediaQuery));
 
     if (res.ok())
@@ -3666,12 +3635,13 @@ std::vector<char> Google::put(
     query["name"] = http::sanitize(resource.object(), GResource::exclusions);
 
     drivers::Https https(m_pool);
-    const auto res(https.internalPost(url, data, headers, query));
-    if (!res.ok()) throw ArbiterError(res.str());
+    http::Response res(https.internalPost(url, data, headers, query));
+    if (!res.ok())
+        throw ArbiterError(res.str());
     return res.data();
 }
 
-std::vector<std::string> Google::glob(std::string path, bool verbose) const
+std::vector<std::string> Google::glob(std::string path, bool /*verbose*/) const
 {
     std::vector<std::string> results;
 
@@ -3696,12 +3666,10 @@ std::vector<std::string> Google::glob(std::string path, bool verbose) const
     {
         if (pageToken.size()) query["pageToken"] = pageToken;
 
-        const auto res(https.internalGet(url, m_auth->headers(), query));
+        http::Response res(https.internalGet(url, m_auth->headers(), query));
 
         if (!res.ok())
-        {
             throw ArbiterError(std::to_string(res.code()) + ": " + res.str());
-        }
 
         const json j(json::parse(res.str()));
         for (const json& item : j.at("items"))
@@ -3802,7 +3770,7 @@ void Google::Auth::maybeRefresh() const
 
     http::Pool pool;
     drivers::Https https(pool);
-    const auto res(https.internalPost(tokenRequestUrl, body, headers));
+    http::Response res(https.internalPost(tokenRequestUrl, body, headers));
 
     if (!res.ok())
     {
@@ -4065,20 +4033,21 @@ bool Dropbox::get(
     headers["Dropbox-API-Arg"] = json{{ "path", "/" + path }}.dump();
     headers.insert(userHeaders.begin(), userHeaders.end());
 
-    const Response res(Http::internalGet(getUrl, headers, query));
+    Response res(Http::internalGet(getUrl, headers, query));
 
     if (res.ok())
     {
         if (!userHeaders.count("Range"))
         {
-            if (!res.headers().count("dropbox-api-result"))
+            Headers headers = res.headers();
+            if (!headers.count("dropbox-api-result"))
             {
                 std::cout << "No dropbox-api-result header found" << std::endl;
                 return false;
             }
 
             json rx;
-            try { rx = json::parse(res.headers().at("dropbox-api-result")); }
+            try { rx = json::parse(headers.at("dropbox-api-result")); }
             catch (...) { std::cout << "Failed to parse result" << std::endl; }
 
             if (!rx.is_null())
@@ -4133,9 +4102,10 @@ std::vector<char> Dropbox::put(
 
     headers.insert(userHeaders.begin(), userHeaders.end());
 
-    const Response res(Http::internalPost(putUrl, data, headers, query));
+    Response res(Http::internalPost(putUrl, data, headers, query));
 
-    if (!res.ok()) throw ArbiterError(res.str());
+    if (!res.ok())
+        throw ArbiterError(res.str());
     return res.data();
 }
 
@@ -4291,9 +4261,7 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <arbiter/util/json.hpp>
 #endif
 
-#ifdef ARBITER_CURL
 #include <curl/curl.h>
-#endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -4308,84 +4276,8 @@ using namespace internal;
 namespace http
 {
 
-namespace
+Curl::Curl(std::size_t id, const std::string& s) : m_id(id)
 {
-#ifdef ARBITER_CURL
-    struct PutData
-    {
-        PutData(const std::vector<char>& data)
-            : data(data)
-            , offset(0)
-        { }
-
-        const std::vector<char>& data;
-        std::size_t offset;
-    };
-
-    std::size_t getCb(
-            const char* in,
-            std::size_t size,
-            std::size_t num,
-            std::vector<char>* out)
-    {
-        const std::size_t fullBytes(size * num);
-        const std::size_t startSize(out->size());
-
-        out->resize(out->size() + fullBytes);
-        std::memcpy(out->data() + startSize, in, fullBytes);
-
-        return fullBytes;
-    }
-
-    std::size_t putCb(
-            char* out,
-            std::size_t size,
-            std::size_t num,
-            PutData* in)
-    {
-        const std::size_t fullBytes(
-                (std::min)(
-                    size * num,
-                    in->data.size() - in->offset));
-        std::memcpy(out, in->data.data() + in->offset, fullBytes);
-
-        in->offset += fullBytes;
-        return fullBytes;
-    }
-
-    std::size_t headerCb(
-            const char *buffer,
-            std::size_t size,
-            std::size_t num,
-            http::Headers* out)
-    {
-        const std::size_t fullBytes(size * num);
-
-        std::string data(buffer, fullBytes);
-        data.erase(std::remove(data.begin(), data.end(), '\n'), data.end());
-        data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
-
-        const std::size_t split(data.find_first_of(":"));
-
-        // No colon means it isn't a header with data.
-        if (split == std::string::npos) return fullBytes;
-
-        const std::string key(data.substr(0, split));
-        const std::string val(data.substr(split + 1, data.size()));
-
-        (*out)[key] = val;
-
-        return fullBytes;
-    }
-
-#else
-    const std::string fail("Arbiter was built without curl");
-#endif // ARBITER_CURL
-} // unnamed namespace
-
-Curl::Curl(const std::string s)
-{
-#ifdef ARBITER_CURL
     const json c(s.size() ? json::parse(s) : json::object());
 
     m_curl = curl_easy_init();
@@ -4495,25 +4387,42 @@ Curl::Curl(const std::string s)
             "\n\tProxy: " << (m_proxy ? *m_proxy : "(default)") <<
             std::endl;
     }
-#endif
 }
 
 Curl::~Curl()
 {
-#ifdef ARBITER_CURL
-    curl_easy_cleanup(m_curl);
-    curl_slist_free_all(m_headers);
-    m_headers = nullptr;
-#endif
+    if (m_curl)
+        curl_easy_cleanup(m_curl);
+    if (m_headers)
+        curl_slist_free_all(m_headers);
+}
+
+// The only time this should be invoked is when things are moving in a vector of Curls.
+Curl::Curl(Curl&& other)
+{
+    m_curl = other.m_curl; other.m_curl = nullptr;
+    m_headers = other.m_headers; other.m_headers = nullptr;
+    m_id = other.m_id;
+    m_code = other.m_code;
+    m_state = other.m_state; other.m_state = State::UNUSED;
+    m_verbose = other.m_verbose;
+    m_timeout = other.m_timeout;
+    m_followRedirect = other.m_followRedirect;
+    m_verifyPeer = other.m_verifyPeer;
+    m_caPath = std::move(other.m_caPath);
+    m_caInfo = std::move(other.m_caInfo);
+    m_proxy = std::move(other.m_proxy);
+    m_response = std::move(other.m_response);
+    m_putData = std::move(other.m_putData);
 }
 
 void Curl::init(
-        const std::string rawPath,
+        const std::string& rawPath,
         const Headers& headers,
         const Query& query)
 {
-#ifdef ARBITER_CURL
     // Reset our curl instance and header list.
+    curl_easy_reset(m_curl);
     curl_slist_free_all(m_headers);
     m_headers = nullptr;
 
@@ -4564,143 +4473,86 @@ void Curl::init(
                 m_headers,
                 (h.first + ": " + h.second).c_str());
     }
-#else
-    throw ArbiterError(fail);
-#endif
 }
 
-int Curl::perform()
-{
-#ifdef ARBITER_CURL
-    long httpCode(0);
-
-    const auto code(curl_easy_perform(m_curl));
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
-    curl_easy_reset(m_curl);
-
-    if (code != CURLE_OK)
-    {
-        if (m_verbose)
-        {
-            std::cout << "Curl failure: " << curl_easy_strerror(code) << 
-                std::endl;
-        }
-        httpCode = 550;
-    }
-
-    return httpCode;
-#else
-    throw ArbiterError(fail);
-#endif
-}
-
-Response Curl::get(
+void Curl::prepareGet(
         std::string path,
         Headers headers,
         Query query,
         const std::size_t reserve,
         const std::size_t timeout)
 {
-#ifdef ARBITER_CURL
-    std::vector<char> data;
-
-    if (reserve) data.reserve(reserve);
+    m_response.init(reserve);
 
     init(path, headers, query);
     if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, Response::getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_response);
 
     // Insert all headers into the request.
     curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
-
-    // Run the command.
-    const int httpCode(perform());
-
-    for (auto& h : receivedHeaders)
-    {
-        std::string& v(h.second);
-        while (v.size() && v.front() == ' ') v = v.substr(1);
-        while (v.size() && v.back() == ' ') v.pop_back();
-    }
-
-    return Response(httpCode, data, receivedHeaders);
-#else
-    throw ArbiterError(fail);
-#endif
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, Response::headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &m_response);
 }
 
-Response Curl::head(
+void Curl::prepareHead(
     std::string path,
     Headers headers,
     Query query,
     const std::size_t timeout)
 {
-#ifdef ARBITER_CURL
-    std::vector<char> data;
+    m_response.init();
 
     init(path, headers, query);
-    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
+    if (timeout)
+        curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, Response::getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_response);
 
     // Insert all headers into the request.
     curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, Response::headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &m_response);
 
     // Specify a HEAD request.
     curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
-
-    // Run the command.
-    const int httpCode(perform());
-    return Response(httpCode, data, receivedHeaders);
-#else
-    throw ArbiterError(fail);
-#endif
 }
 
-Response Curl::put(
+void Curl::preparePut(
         std::string path,
         const std::vector<char>& data,
         Headers headers,
         Query query,
         const std::size_t timeout)
 {
-#ifdef ARBITER_CURL
+    m_response.init();
+    m_putData.init(data);
     init(path, headers, query);
     if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
-    std::unique_ptr<PutData> putData(new PutData(data));
-    std::vector<char> writeData;
 
     // Register callback function and data pointer to create the request.
-    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
-    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
+    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, PutData::putCb);
+    curl_easy_setopt(m_curl, CURLOPT_READDATA, &m_putData);
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, Response::getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_response);
 
     // Insert all headers into the request.
     curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, Response::headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &m_response);
 
     // Specify that this is a PUT request.
     curl_easy_setopt(m_curl, CURLOPT_PUT, 1L);
@@ -4711,44 +4563,34 @@ Response Curl::put(
             m_curl,
             CURLOPT_INFILESIZE_LARGE,
             static_cast<curl_off_t>(data.size()));
-
-    // Run the command.
-    const int httpCode(perform());
-    return Response(httpCode, writeData, receivedHeaders);
-#else
-    throw ArbiterError(fail);
-#endif
 }
 
-Response Curl::post(
+void Curl::preparePost(
         std::string path,
         const std::vector<char>& data,
         Headers headers,
         Query query,
         const std::size_t timeout)
 {
-#ifdef ARBITER_CURL
+    m_response.init();
+    m_putData.init(data);
     init(path, headers, query);
     if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
-    std::unique_ptr<PutData> putData(new PutData(data));
-    std::vector<char> writeData;
-
     // Register callback function and data pointer to create the request.
-    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
-    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
+    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, PutData::putCb);
+    curl_easy_setopt(m_curl, CURLOPT_READDATA, &m_putData);
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, Response::getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_response);
 
     // Insert all headers into the request.
     curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, Response::headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &m_response);
 
     // Specify that this is a POST request.
     curl_easy_setopt(m_curl, CURLOPT_POST, 1L);
@@ -4759,13 +4601,6 @@ Response Curl::post(
             m_curl,
             CURLOPT_INFILESIZE_LARGE,
             static_cast<curl_off_t>(data.size()));
-
-    // Run the command.
-    const int httpCode(perform());
-    return Response(httpCode, writeData, receivedHeaders);
-#else
-    throw ArbiterError(fail);
-#endif
 }
 
 } // namepace http
@@ -4793,9 +4628,7 @@ Response Curl::post(
 #include <arbiter/util/json.hpp>
 #endif
 
-#ifdef ARBITER_CURL
 #include <curl/curl.h>
-#endif
 
 #include <cctype>
 #include <chrono>
@@ -4816,17 +4649,25 @@ namespace arbiter
 namespace http
 {
 
-std::string sanitize(const std::string path, const std::string excStr)
+std::string sanitize(const std::string& path, const std::string& excStr)
 {
-    static const std::set<char> unreserved = { '-', '.', '_', '~' };
-    const std::set<char> exclusions(excStr.begin(), excStr.end());
+    auto ispunct = [](char c) -> bool
+    {
+        return c == '-' || c == '.' || c == '_' || c == '~';
+    };
+
+    auto isexclusion = [&excStr](char c) -> bool
+    {
+        return excStr.find(c) != std::string::npos;
+    };
+
     std::ostringstream result;
     result.fill('0');
     result << std::hex;
 
-    for (const auto c : path)
+    for (char c : path)
     {
-        if (std::isalnum(c) || unreserved.count(c) || exclusions.count(c))
+        if (std::isalnum(c) || ispunct(c) || isexclusion(c))
         {
             result << c;
         }
@@ -4844,31 +4685,30 @@ std::string sanitize(const std::string path, const std::string excStr)
 
 std::string buildQueryString(const Query& query)
 {
-    return std::accumulate(
-            query.begin(),
-            query.end(),
-            std::string(),
-            [](const std::string& out, const Query::value_type& keyVal)
-            {
-                const char sep(out.empty() ? '?' : '&');
-                return out + sep + keyVal.first + '=' + keyVal.second;
-            });
+    if (query.empty())
+        return std::string();
+
+    std::string out;
+    for (auto &[key, val] : query)
+    {
+        const char sep(out.empty() ? '?' : '&');
+        out += sep + key + '=' + val;
+    }
+    return out;
 }
 
 Resource::Resource(
         Pool& pool,
         Curl& curl,
-        const std::size_t id,
         const std::size_t retry)
     : m_pool(pool)
     , m_curl(curl)
-    , m_id(id)
     , m_retry(retry)
 { }
 
 Resource::~Resource()
 {
-    m_pool.release(m_id);
+    m_pool.release(m_curl);
 }
 
 Response Resource::get(
@@ -4881,7 +4721,9 @@ Response Resource::get(
 {
     return exec([this, path, headers, query, reserve, timeout]()->Response
     {
-        return m_curl.get(path, headers, query, reserve, timeout);
+        m_curl.prepareGet(path, headers, query, reserve, timeout);
+        m_pool.perform(m_curl);
+        return m_curl.response();
     }, retry);
 }
 
@@ -4892,7 +4734,9 @@ Response Resource::head(
 {
     return exec([this, path, headers, query]()->Response
     {
-        return m_curl.head(path, headers, query);
+        m_curl.prepareHead(path, headers, query);
+        m_pool.perform(m_curl);
+        return m_curl.response();
     });
 }
 
@@ -4906,7 +4750,9 @@ Response Resource::put(
 {
     return exec([this, path, &data, headers, query, timeout]()->Response
     {
-        return m_curl.put(path, data, headers, query, timeout);
+        m_curl.preparePut(path, data, headers, query, timeout);
+        m_pool.perform(m_curl);
+        return m_curl.response();
     }, retry);
 }
 
@@ -4918,7 +4764,9 @@ Response Resource::post(
 {
     return exec([this, path, &data, headers, query]()->Response
     {
-        return m_curl.post(path, data, headers, query);
+        m_curl.preparePost(path, data, headers, query);
+        m_pool.perform(m_curl);
+        return m_curl.response();
     });
 }
 
@@ -4951,53 +4799,175 @@ Response Resource::exec(std::function<Response()> f, const int userRetry)
 Pool::Pool(
         const std::size_t concurrent,
         const std::size_t retry,
-        const std::string s)
-    : m_curls(concurrent)
-    , m_available(concurrent)
-    , m_retry(retry)
-    , m_mutex()
-    , m_cv()
+        const std::string& config)
+    : m_retry(retry)
 {
-#ifdef ARBITER_CURL
     curl_global_init(CURL_GLOBAL_ALL);
-
-    const json config(s.size() ? json::parse(s) : json::object());
-
-    for (std::size_t i(0); i < concurrent; ++i)
-    {
-        m_available[i] = i;
-        m_curls[i].reset(new Curl(config.dump()));
-    }
-#endif
+    for (std::size_t i = 0; i < concurrent; ++i)
+        m_curls.emplace_back(i, config);
+    m_multi = curl_multi_init();
+    m_runner = std::thread(&Pool::run, this);
 }
 
-Pool::~Pool() { }
+Pool::~Pool()
+{
+    m_stop = true;
+    wakeup();
+    m_runner.join();
 
+    std::lock_guard l(m_mutex);
+    for (size_t i = 0; i < m_curls.size(); ++i)
+        curl_multi_remove_handle(m_multi, m_curls[i].m_curl);
+
+    // This deletes all the curl objects and does curl_easy_cleanup.
+    m_curls.clear();
+    curl_multi_cleanup(m_multi);
+}
+
+// Thread that performs the curl activity. Runs until told to stop.
+void Pool::run()
+{
+    while (true)
+    {
+        // Add ready transfers to the multi handle to run.
+        handleReady();
+
+        int still_running;
+        CURLMcode result = curl_multi_perform(m_multi, &still_running);
+        if (result == CURLM_OK)
+            result = curl_multi_poll(m_multi, NULL, 0, 200, NULL);
+
+        bool notify;
+        if (result != CURLM_OK)
+            notify = handleFailure();
+        else
+            notify = handleCompleted();
+
+        // If any threads have completed, notify waiters.
+        if (notify)
+            m_poolCv.notify_all();
+        if (m_stop)
+            break;
+    }
+}
+
+// For any any transfers that are ready, set the state to running, clear the code and
+// add the handle.
+void Pool::handleReady()
+{
+    std::lock_guard l(m_mutex);
+
+    for (Curl& curl : m_curls)
+        if (curl.m_state == Curl::State::READY)
+        {
+            curl.m_state = Curl::State::RUNNING;
+            curl.m_code = 0;
+            curl_multi_add_handle(m_multi, curl.m_curl);
+        }
+}
+
+// See if any curl requests completed. If so, mark the state as DONE.
+bool Pool::handleCompleted()
+{
+    bool notify = false;
+    while (true)
+    {
+        int msgCnt;
+        CURLMsg *m = curl_multi_info_read(m_multi, &msgCnt);
+        if (!m)
+            break;
+        if (m->msg != CURLMSG_DONE)
+            continue;
+
+        // If we have a completed transfer, set the state to done, update the http code
+        // and say we should notify.
+        curl_multi_remove_handle(m_multi, m->easy_handle);
+        std::lock_guard l(m_mutex);
+        for (Curl& curl : m_curls)
+            if (curl.m_curl == m->easy_handle)
+            {
+                curl.m_state = Curl::State::DONE;
+                curl_easy_getinfo(curl.m_curl, CURLINFO_RESPONSE_CODE, &curl.m_code);
+                notify = true;
+            }
+    }
+    return notify;
+}
+
+// Abort all the running transfers as curl has failed internally. Remove the handle.
+// Set the state to done. Update the http code and return the notification state.
+bool Pool::handleFailure()
+{
+    bool notify = false;
+
+    std::lock_guard l(m_mutex);
+    for (Curl& curl : m_curls)
+        if (curl.m_state == Curl::State::RUNNING)
+        {
+            curl_multi_remove_handle(m_multi, curl.m_curl);
+            curl.m_state = Curl::State::DONE;
+            curl.m_code = 550;  // Made-up error code.
+            notify = true;
+        }
+    return notify;
+}
+
+// Wakeup the run thread.
+void Pool::wakeup()
+{
+    curl_multi_wakeup(m_multi);
+}
+
+// Acquire a resource (a curl easy handle) from the pool.
 Resource Pool::acquire()
 {
     if (m_curls.empty())
-    {
         throw std::runtime_error("Cannot acquire from empty pool");
-    }
 
+    Curl *foundCurl = nullptr;
+
+    // Wait until we find an unused Curl object. If we find one, mark
+    // it acquired.
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_cv.wait(lock, [this]()->bool { return !m_available.empty(); });
+    m_cv.wait(lock, [this, &foundCurl]()
+    {
+        for (Curl& curl : m_curls)
+        {
+            if (curl.m_state == Curl::State::UNUSED)
+            {
+                curl.m_state = Curl::State::ACQUIRED;
+                foundCurl = &curl;
+                return true;
+            }
+        }
+        return false;
+     });
 
-    const std::size_t id(m_available.back());
-    Curl& curl(*m_curls[id]);
-
-    m_available.pop_back();
-
-    return Resource(*this, curl, id, m_retry);
+    // Return the resource with the acquired Curl.
+    return Resource(*this, *foundCurl, m_retry);
 }
 
-void Pool::release(const std::size_t id)
+// Release a curl handle.
+void Pool::release(Curl& curl)
 {
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_available.push_back(id);
-    lock.unlock();
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_curls[curl.id()].m_state = Curl::State::UNUSED;
+    }
 
     m_cv.notify_one();
+}
+
+void Pool::perform(Curl& curl)
+{
+    std::unique_lock l(m_mutex);
+    curl.m_state = Curl::State::READY;
+    wakeup();
+    // Wait until the operation is done or a non-recoverable error occurs.
+    m_poolCv.wait(l, [&curl]()
+    {
+        return curl.m_state == Curl::State::DONE;
+    });
 }
 
 } // namepace http
