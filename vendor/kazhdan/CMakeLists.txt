@@ -3,7 +3,7 @@ if (EXISTS)
     return()
 endif()
 
-PDAL_ADD_FREE_LIBRARY(${PDAL_KAZHDAN_LIB_NAME} STATIC
+PDAL_ADD_FREE_LIBRARY(${PDAL_KAZHDAN_LIB_NAME} STATIC ${PDAL_LIB_TYPE}
     Factor.cpp
     Geometry.cpp
     MarchingCubes.cpp
