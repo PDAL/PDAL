@@ -16,7 +16,12 @@ macro(PDAL_CREATE_PLUGIN)
         message(FATAL_ERROR "Invalid plugin type '${TYPE}'. Must be 'reader', 'writer', 'filter' or 'kernel'.")
     endif()
     set(PROJECT_NAME ${NAME}_${TYPE})
-    set(TARGET libpdal_plugin_${TYPE}_${NAME})
+
+    if(MSVC)
+        set(${_name} "libpdal_plugin_${TYPE}_${NAME}")
+    else()
+        set(${_name} "pdal_plugin_${TYPE}_${NAME}")
+    endif()
 
     project(${PROJECT_NAME} VERSION ${VERSION} LANGUAGES CXX)
 
