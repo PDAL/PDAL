@@ -18,9 +18,9 @@ macro(PDAL_CREATE_PLUGIN)
     set(PROJECT_NAME ${NAME}_${TYPE})
 
     if(MSVC)
-        set(${_name} "libpdal_plugin_${TYPE}_${NAME}")
+        set(TARGET "libpdal_plugin_${TYPE}_${NAME}")
     else()
-        set(${_name} "pdal_plugin_${TYPE}_${NAME}")
+        set(TARGET "pdal_plugin_${TYPE}_${NAME}")
     endif()
 
     project(${PROJECT_NAME} VERSION ${VERSION} LANGUAGES CXX)
