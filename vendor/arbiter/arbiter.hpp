@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 50468134c949dae3cfe4d2921ad6db6068786297
+// Git SHA: 4a70e87485f16451fd1b95e1d0328f2561a49958
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2757,6 +2757,7 @@ namespace Xml = rapidxml;
 
 #pragma once
 
+#include <cstring>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -2788,44 +2789,136 @@ using Query = std::map<std::string, std::string>;
 
 /** @cond arbiter_internal */
 
+class PutData
+{
+public:
+    void init(const std::vector<char>& data)
+    {
+        m_data = data;
+        m_offset = 0;
+    }
+
+    void init(std::vector<char>&& data)
+    {
+        m_data = std::move(data);
+        m_offset = 0;
+    }
+
+    static size_t putCb(char* out, std::size_t size, std::size_t num, void *cbData)
+    {
+        PutData& putData = *static_cast<PutData *>(cbData);
+
+        size *= num;  // Size is really size * num;
+        return putData.extract(out, size);
+    }
+
+private:
+    size_t extract(char *out, size_t size)
+    {
+        size_t remaining = m_data.size() - m_offset;
+        size_t extractCount = (std::min)(size, remaining);
+
+        std::memcpy(out, m_data.data() + m_offset, extractCount);
+        m_offset += extractCount;
+        return extractCount;
+    }
+
+    std::vector<char> m_data;
+    size_t m_offset = 0;
+};
+
 class Response
 {
 public:
-    Response(int code = 0)
-        : m_code(code)
-        , m_data()
-    { }
+    void init(std::size_t reserve)
+    {
+        m_data.reserve(reserve);
+        init();
+    }
 
-    Response(int code, std::vector<char> data)
-        : m_code(code)
-        , m_data(data)
-    { }
-
-    Response(
-            int code,
-            const std::vector<char>& data,
-            const Headers& headers)
-        : m_code(code)
-        , m_data(data)
-        , m_headers(headers)
-    { }
-
-    ~Response() { }
+    void init()
+    {
+        m_code = 0;
+        m_data.clear();
+        m_headers.clear();
+    }
 
     bool ok() const             { return m_code / 100 == 2; }
     bool clientError() const    { return m_code / 100 == 4; }
     bool serverError() const    { return m_code / 100 == 5; }
     int code() const            { return m_code; }
+    void setCode(long code)     { m_code = code; }
 
-    std::vector<char> data() const { return m_data; }
-    const Headers& headers() const { return m_headers; }
-    std::string str() const
+    // We move data out of the response, so only call once.
+    std::vector<char>&& data() { return std::move(m_data); }
+    Headers headers() { return std::move(m_headers); }
+    std::string str()
     {
-        return std::string(data().data(), data().size());
+        std::string s(m_data.data(), m_data.size());
+        // Clear data for consistency with data().
+        m_data.clear();
+        return s;
+    }
+
+    static size_t getCb(const char *in, size_t size, size_t num, void *cbData)
+    {
+        Response& response = *static_cast<Response *>(cbData);
+
+        size *= num;  // Size is really size * num.
+        response.append(in, size);
+        return size;
+    }
+
+    static size_t headerCb(const char *in, std::size_t size, std::size_t num, void *cbData)
+    {
+        Response& response = *static_cast<Response *>(cbData);
+
+        size *= num;  // Size is really size * num.
+        response.addHeaders(in, size);
+        return size;
     }
 
 private:
-    int m_code;
+    void append(const char *in, size_t size)
+    {
+        std::size_t startSize = m_data.size();
+        m_data.resize(startSize + size);
+        std::memcpy(m_data.data() + startSize, in, size);
+    }
+
+    void addHeaders(const char *in, size_t size)
+    {
+        // Not sure the case where we'd have \r\n where we'd also have a valid
+        // header, but older code handled this.
+        // Remove leading \r or \n
+        while (size && (*in == '\n' || *in == '\r'))
+        {
+            in++;
+            size--;
+        }
+
+        // Remove trailing \r or \n
+        const char *end = in + size - 1;
+        while (size && (*end == '\n' || *end == '\r'))
+        {
+            end--;
+            size--;
+        }
+
+        std::string_view data(in, size);
+
+        const std::size_t split(data.find_first_of(":"));
+
+        // No colon means it isn't a header with data.
+        if (split != std::string::npos)
+        {
+            std::string_view key(data.substr(0, split));
+            std::string_view val(data.substr(split + 1));
+            m_headers.emplace(key, val);
+        }
+    }
+
+    long m_code;
     std::vector<char> m_data;
     Headers m_headers;
 };
@@ -2939,11 +3032,7 @@ inline json merge(const json& a, const json& b)
 #include <arbiter/util/types.hpp>
 #endif
 
-#ifdef ARBITER_CURL
 #include <curl/curl.h>
-#else
-typedef void CURL;
-#endif
 
 struct curl_slist;
 
@@ -2967,60 +3056,76 @@ class ARBITER_DLL Curl
 
     static constexpr std::size_t defaultHttpTimeout = 5;
 
+    enum class State
+    {
+        UNUSED,     // Waiting to be used for a request.
+        ACQUIRED,   // Acquired by a Resource.
+        READY,      // Initialization complete. Ready to be run.
+        RUNNING,    // Running.
+        DONE        // Operation completed
+    };
+
 public:
+    Curl(std::size_t id, const std::string& config);
+    Curl(Curl&& curl);
     ~Curl();
 
-    http::Response get(
+    void prepareGet(
             std::string path,
             Headers headers,
             Query query,
             std::size_t reserve,
             std::size_t timeout = 0);
 
-    http::Response head(
+    void prepareHead(
             std::string path,
             Headers headers,
             Query query,
             std::size_t timeout = 0);
 
-    http::Response put(
+    void preparePut(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
             Query query,
             std::size_t timeout = 0);
 
-    http::Response post(
+    void preparePost(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
             Query query,
             std::size_t timeout = 0);
+
+    // Note that the response is *moved*.
+    Response response()
+    {
+        m_response.setCode(m_code);
+        return std::move(m_response);
+    }
+
+    std::size_t id() const
+    { return m_id; }
 
 private:
-    Curl(std::string j);
-
-    void init(std::string path, const Headers& headers, const Query& query);
-
-    // Returns HTTP status code.
-    int perform();
-
-    Curl(const Curl&);
-    Curl& operator=(const Curl&);
+    void init(const std::string& path, const Headers& headers, const Query& query);
 
     CURL* m_curl = nullptr;
     curl_slist* m_headers = nullptr;
 
+    std::size_t m_id;
+    State m_state = State::UNUSED;
     bool m_verbose = false;
     long m_timeout = defaultHttpTimeout;
     bool m_followRedirect = true;
     bool m_verifyPeer = true;
+    int m_code = 0;
     std::unique_ptr<std::string> m_caPath;
     std::unique_ptr<std::string> m_caBundle;
     std::unique_ptr<std::string> m_caInfo;
     std::unique_ptr<std::string> m_proxy;
-
-    std::vector<char> m_data;
+    Response m_response;
+    PutData m_putData;
 };
 
 /** @endcond */
@@ -3047,6 +3152,7 @@ private:
 
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
@@ -3054,6 +3160,7 @@ private:
 #include <memory>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 #ifndef ARBITER_IS_AMALGAMATION
@@ -3075,7 +3182,7 @@ namespace http
 /** Perform URI percent-encoding, without encoding characters included in
  * @p exclusions.
  */
-ARBITER_DLL std::string sanitize(std::string path, std::string exclusions = "/");
+ARBITER_DLL std::string sanitize(const std::string& path, const std::string& exclusions = "/");
 
 /** Build a query string from key-value pairs.  If @p query is empty, the
  * result is an empty string.  Otherwise, the result will start with the
@@ -3090,7 +3197,7 @@ class ARBITER_DLL Pool;
 class ARBITER_DLL Resource
 {
 public:
-    Resource(Pool& pool, Curl& curl, std::size_t id, std::size_t retry);
+    Resource(Pool& pool, Curl& curl, std::size_t retry);
     ~Resource();
 
     http::Response get(
@@ -3123,7 +3230,6 @@ public:
 private:
     Pool& m_pool;
     Curl& m_curl;
-    std::size_t m_id;
     std::size_t m_retry;
 
     http::Response exec(std::function<http::Response()> f, int retry = -1);
@@ -3136,20 +3242,34 @@ class ARBITER_DLL Pool
 
 public:
     Pool() : Pool(4, 4, "") { }
-    Pool(std::size_t concurrent, std::size_t retry, std::string j);
+    Pool(std::size_t concurrent, std::size_t retry, const std::string& config);
     ~Pool();
 
     Resource acquire();
+    void wakeup();
+    void perform(Curl& curl);
 
 private:
-    void release(std::size_t id);
+    void run();
+    void release(Curl& curl);
+    void handleReady();
+    bool handleFailure();
+    bool handleCompleted();
 
-    std::vector<std::unique_ptr<Curl>> m_curls;
-    std::vector<std::size_t> m_available;
+    CURL *m_multi;
+    std::vector<Curl> m_curls;
+    std::thread m_runner;
     std::size_t m_retry;
+    // The explicit initialization is necessary on Linux for C++17.
+    // See the "Note" here: https://en.cppreference.com/cpp/atomic/atomic/atomic
+    std::atomic<bool> m_stop = false;
 
     std::mutex m_mutex;
+    // Provide notification between a thread waiting on a Curl and one
+    // making one available.
     std::condition_variable m_cv;
+    // Provide notification between the run thread and those waiting.
+    std::condition_variable m_poolCv;
 };
 
 /** @endcond */
@@ -3498,7 +3618,7 @@ inline bool isDirectory(std::string path)
     return (path.size() && isSlash(path.back())) || isGlob(path);
 }
 
-inline std::string joinImpl(bool first = false) { return std::string(); }
+inline std::string joinImpl(bool /* first */) { return std::string(); }
 
 template <typename ...Paths>
 inline std::string joinImpl(
@@ -4571,7 +4691,6 @@ public:
 private:
     static std::string extractService(std::string j);
     static std::string extractEndpoint(std::string j);
-    static std::string extractBaseUrl(std::string j, std::string endpoint, std::string service, std::string account);
     static std::string extractStorageAccount(std::string j);
     static std::string extractStorageAccessKey(std::string j);
     static std::string extractSasToken(std::string j);
