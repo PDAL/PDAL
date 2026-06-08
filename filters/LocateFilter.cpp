@@ -40,18 +40,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const LocateFilter_info
 {
     "filters.locate",
     "Return a single point with min/max value in the named dimension.",
     "https://pdal.org/stages/filters.locate.html"
 };
 
-CREATE_STATIC_STAGE(LocateFilter, s_info)
+CREATE_STATIC_STAGE(LocateFilter, LocateFilter_info)
 
 std::string LocateFilter::getName() const
 {
-    return s_info.name;
+    return LocateFilter_info.name;
 }
 
 void LocateFilter::addArgs(ProgramArgs& args)

@@ -56,16 +56,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const NitfWriter_info
 {
     "writers.nitf",
     "NITF Writer",
     "https://pdal.org/stages/writers.nitf.html"
 };
 
-CREATE_SHARED_STAGE(NitfWriter, s_info)
+CREATE_SHARED_STAGE(NitfWriter, NitfWriter_info)
 
-std::string NitfWriter::getName() const { return s_info.name; }
+std::string NitfWriter::getName() const { return NitfWriter_info.name; }
 
 BOX3D NitfWriter::reprojectBoxToDD(const SpatialReference& reference,
     const BOX3D& box)

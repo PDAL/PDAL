@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#pragma once
+
 #include <Eigen/Dense>
 #include <cmath>
 #include <limits>

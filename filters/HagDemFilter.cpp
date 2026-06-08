@@ -40,18 +40,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const HagDemFilter_info
 {
     "filters.hag_dem",
     "Computes height above ground using a DEM raster.",
     "https://pdal.org/stages/filters.hag_dem.html"
 };
 
-CREATE_STATIC_STAGE(HagDemFilter, s_info)
+CREATE_STATIC_STAGE(HagDemFilter, HagDemFilter_info)
 
 std::string HagDemFilter::getName() const
 {
-    return s_info.name;
+    return HagDemFilter_info.name;
 }
 
 

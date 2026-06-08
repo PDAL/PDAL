@@ -53,7 +53,7 @@ namespace pdal
 {
 using namespace Dimension;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const CovarianceFeaturesFilter_info
 {
     "filters.covariancefeatures",
     "Filter that calculates local features based on the covariance matrix of a "
@@ -61,11 +61,11 @@ static StaticPluginInfo const s_info
     "https://pdal.org/stages/filters.covariancefeatures.html"
 };
 
-CREATE_STATIC_STAGE(CovarianceFeaturesFilter, s_info)
+CREATE_STATIC_STAGE(CovarianceFeaturesFilter, CovarianceFeaturesFilter_info)
 
 std::string CovarianceFeaturesFilter::getName() const
 {
-    return s_info.name;
+    return CovarianceFeaturesFilter_info.name;
 }
 
 std::istream& operator>>(std::istream& in, CovarianceFeaturesFilter::Mode& mode)

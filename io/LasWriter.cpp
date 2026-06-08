@@ -61,7 +61,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const LasWriter_info
 {
     "writers.las",
     "ASPRS LAS 1.0 - 1.4 writer",
@@ -69,9 +69,9 @@ static StaticPluginInfo const s_info
     { "las", "laz" }
 };
 
-CREATE_STATIC_STAGE(LasWriter, s_info)
+CREATE_STATIC_STAGE(LasWriter, LasWriter_info)
 
-std::string LasWriter::getName() const { return s_info.name; }
+std::string LasWriter::getName() const { return LasWriter_info.name; }
 
 struct LasWriter::Options
 {

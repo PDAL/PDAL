@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PlyWriter_info
 {
         "writers.ply",
         "ply writer",
@@ -51,9 +51,9 @@ static StaticPluginInfo const s_info
         { "ply" }
 };
 
-CREATE_STATIC_STAGE(PlyWriter, s_info)
+CREATE_STATIC_STAGE(PlyWriter, PlyWriter_info)
 
-std::string PlyWriter::getName() const { return s_info.name; }
+std::string PlyWriter::getName() const { return PlyWriter_info.name; }
 
 
 PlyWriter::PlyWriter()

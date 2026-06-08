@@ -100,7 +100,7 @@ double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
 } // unnamed namespace
 
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const HagDelaunayFilter_info
 {
     "filters.hag_delaunay",
     "Computes height above ground using delaunay interpolation of "
@@ -108,11 +108,11 @@ static StaticPluginInfo const s_info
     "https://pdal.org/stages/filters.hag_delaunay.html"
 };
 
-CREATE_STATIC_STAGE(HagDelaunayFilter, s_info)
+CREATE_STATIC_STAGE(HagDelaunayFilter, HagDelaunayFilter_info)
 
 std::string HagDelaunayFilter::getName() const
 {
-    return s_info.name;
+    return HagDelaunayFilter_info.name;
 }
 
 

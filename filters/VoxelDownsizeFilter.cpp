@@ -39,14 +39,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const VoxelDownsizeFilter_info
 {
     "filters.voxeldownsize",
     "First Entry Voxel Filter", 
     "https://pdal.org/stages/filters.voxeldownsize.html"
 };
 
-CREATE_STATIC_STAGE(VoxelDownsizeFilter, s_info)
+CREATE_STATIC_STAGE(VoxelDownsizeFilter, VoxelDownsizeFilter_info)
 
 std::istream& operator>>(std::istream& in, VoxelDownsizeFilter::Mode& mode)
 {
@@ -87,7 +87,7 @@ VoxelDownsizeFilter::VoxelDownsizeFilter()
 
 std::string VoxelDownsizeFilter::getName() const
 {
-    return s_info.name;
+    return VoxelDownsizeFilter_info.name;
 }
 
 void VoxelDownsizeFilter::addArgs(ProgramArgs& args)

@@ -42,15 +42,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const MatlabReader_info
 {
     "readers.matlab",
     "Matlab Reader",
     "https://pdal.org/stages/readers.matlab.html"
 };
 
-CREATE_SHARED_STAGE(MatlabReader, s_info)
-std::string MatlabReader::getName() const { return s_info.name; }
+CREATE_SHARED_STAGE(MatlabReader, MatlabReader_info)
+std::string MatlabReader::getName() const { return MatlabReader_info.name; }
 
 void MatlabReader::initialize(PointTableRef table)
 {
@@ -190,4 +190,3 @@ void MatlabReader::done(PointTableRef table)
 
 
 } // namespace pdal
-

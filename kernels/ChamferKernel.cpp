@@ -43,14 +43,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{"kernels.chamfer", "Chamfer Kernel [DEPRECATED]",
+static StaticPluginInfo const ChamferKernel_info{"kernels.chamfer", "Chamfer Kernel [DEPRECATED]",
                                      "https://pdal.org/apps/chamfer.html"};
 
-CREATE_STATIC_KERNEL(ChamferKernel, s_info)
+CREATE_STATIC_KERNEL(ChamferKernel, ChamferKernel_info)
 
 std::string ChamferKernel::getName() const
 {
-    return s_info.name;
+    return ChamferKernel_info.name;
 }
 
 void ChamferKernel::addSwitches(ProgramArgs& args)

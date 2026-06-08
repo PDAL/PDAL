@@ -42,15 +42,15 @@
 
 namespace pdal {
 
-static PluginInfo const s_info
+static PluginInfo const DracoReader_info
 {
         "readers.draco",
         "Read data from a Draco array.",
         "https://pdal.org/stages/readers.draco.html"
 };
 
-CREATE_SHARED_STAGE(DracoReader, s_info)
-std::string DracoReader::getName() const { return s_info.name; }
+CREATE_SHARED_STAGE(DracoReader, DracoReader_info)
+std::string DracoReader::getName() const { return DracoReader_info.name; }
 
 Dimension::Type getPdalType(draco::DataType t)
 {

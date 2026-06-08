@@ -55,7 +55,7 @@ const char pathSeparator =
 namespace pdal
 {
 
-static PluginInfo const s_info{
+static PluginInfo const TileDBWriter_info{
     "writers.tiledb", "Write data using TileDB.",
     "https://pdal.org/stages/drivers.tiledb.writer.html"};
 
@@ -93,7 +93,7 @@ struct TileDBWriter::Args
     uint64_t m_timeStamp = UINT64_MAX;
 };
 
-CREATE_SHARED_STAGE(TileDBWriter, s_info)
+CREATE_SHARED_STAGE(TileDBWriter, TileDBWriter_info)
 
 TileDBWriter::TileDBWriter() : m_args(new TileDBWriter::Args) {}
 
@@ -101,7 +101,7 @@ TileDBWriter::~TileDBWriter() {}
 
 std::string TileDBWriter::getName() const
 {
-    return s_info.name;
+    return TileDBWriter_info.name;
 }
 
 void TileDBWriter::addArgs(ProgramArgs& args)

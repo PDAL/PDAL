@@ -39,15 +39,15 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const ReturnsFilter_info{
     "filters.returns", "Split data by return order",
     "https://pdal.org/stages/filters.returns.html"};
 
-CREATE_STATIC_STAGE(ReturnsFilter, s_info)
+CREATE_STATIC_STAGE(ReturnsFilter, ReturnsFilter_info)
 
 std::string ReturnsFilter::getName() const
 {
-    return s_info.name;
+    return ReturnsFilter_info.name;
 }
 
 void ReturnsFilter::addArgs(ProgramArgs& args)

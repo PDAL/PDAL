@@ -36,18 +36,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TailFilter_info
 {
     "filters.tail",
     "Return N points from end of the point cloud.",
     "https://pdal.org/stages/filters.tail.html"
 };
 
-CREATE_STATIC_STAGE(TailFilter, s_info)
+CREATE_STATIC_STAGE(TailFilter, TailFilter_info)
 
 std::string TailFilter::getName() const
 {
-    return s_info.name;
+    return TailFilter_info.name;
 }
 
 } // namespace pdal

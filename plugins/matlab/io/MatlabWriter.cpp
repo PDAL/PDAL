@@ -40,15 +40,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const MatlabWriter_info
 {
     "writers.matlab",
     "Matlab .mat file writer.",
     "https://pdal.org/stages/writers.matlab.html"
 };
 
-CREATE_SHARED_STAGE(MatlabWriter, s_info)
-std::string MatlabWriter::getName() const { return s_info.name; }
+CREATE_SHARED_STAGE(MatlabWriter, MatlabWriter_info)
+std::string MatlabWriter::getName() const { return MatlabWriter_info.name; }
 
 void MatlabWriter::addArgs(ProgramArgs& args)
 {

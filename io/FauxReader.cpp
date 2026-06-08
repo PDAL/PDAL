@@ -43,16 +43,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const FauxReader_info
 {
     "readers.faux",
     "Faux Reader",
     "https://pdal.org/stages/readers.faux.html"
 };
 
-CREATE_STATIC_STAGE(FauxReader, s_info)
+CREATE_STATIC_STAGE(FauxReader, FauxReader_info)
 
-std::string FauxReader::getName() const { return s_info.name; }
+std::string FauxReader::getName() const { return FauxReader_info.name; }
 
 void FauxReader::addArgs(ProgramArgs& args)
 {

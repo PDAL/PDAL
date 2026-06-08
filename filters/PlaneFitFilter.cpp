@@ -55,18 +55,18 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PlaneFitFilter_info
 {
     "filters.planefit",
     "Plane Fit (Kutz et al., 2003)",
     "https://pdal.org/stages/filters.planefit.html"
 };
 
-CREATE_STATIC_STAGE(PlaneFitFilter, s_info)
+CREATE_STATIC_STAGE(PlaneFitFilter, PlaneFitFilter_info)
 
 std::string PlaneFitFilter::getName() const
 {
-    return s_info.name;
+    return PlaneFitFilter_info.name;
 }
 
 void PlaneFitFilter::addArgs(ProgramArgs& args)

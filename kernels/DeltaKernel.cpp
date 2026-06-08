@@ -40,16 +40,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const DeltaKernel_info
 {
     "kernels.delta",
     "Delta Kernel [DEPRECATED]",
     "https://pdal.org/apps/delta.html"
 };
 
-CREATE_STATIC_KERNEL(DeltaKernel, s_info)
+CREATE_STATIC_KERNEL(DeltaKernel, DeltaKernel_info)
 
-std::string DeltaKernel::getName() const { return s_info.name; }
+std::string DeltaKernel::getName() const { return DeltaKernel_info.name; }
 
 DeltaKernel::DeltaKernel() : m_detail(false), m_allDims(false)
 {}

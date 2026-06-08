@@ -38,14 +38,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{"readers.XYZTimeFauxReader",
+static StaticPluginInfo const XYZTimeFauxReader_info{"readers.XYZTimeFauxReader",
                                      "XYZ time Faux Reader", "none"};
 
-CREATE_STATIC_STAGE(XYZTimeFauxReader, s_info);
+CREATE_STATIC_STAGE(XYZTimeFauxReader, XYZTimeFauxReader_info);
 
 std::string XYZTimeFauxReader::getName() const
 {
-    return s_info.name;
+    return XYZTimeFauxReader_info.name;
 }
 
 void XYZTimeFauxReader::addArgs(ProgramArgs& args)

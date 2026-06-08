@@ -39,18 +39,18 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const DelaunayFilter_info
 {
     "filters.delaunay",
     "Perform Delaunay triangulation of a pointcloud",
     "https://pdal.org/stages/filters.delaunay.html"
 };
 
-CREATE_STATIC_STAGE(DelaunayFilter, s_info)
+CREATE_STATIC_STAGE(DelaunayFilter, DelaunayFilter_info)
 
 std::string DelaunayFilter::getName() const
 {
-    return s_info.name;
+    return DelaunayFilter_info.name;
 }
 
 

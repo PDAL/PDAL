@@ -44,14 +44,14 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const EvalKernel_info{
     "kernels.eval", "Eval Kernel [DEPRECATED]", "https://pdal.org/kernels/kernels.eval.html"};
 
-CREATE_STATIC_KERNEL(EvalKernel, s_info)
+CREATE_STATIC_KERNEL(EvalKernel, EvalKernel_info)
 
 std::string EvalKernel::getName() const
 {
-    return s_info.name;
+    return EvalKernel_info.name;
 }
 
 void EvalKernel::addSwitches(ProgramArgs& args)

@@ -201,16 +201,16 @@ void LasReader::addArgs(ProgramArgs& args)
 }
 
 
-static StaticPluginInfo const s_info {
+static StaticPluginInfo const LasReader_info {
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support",
     "https://pdal.org/stages/readers.las.html",
     { "las", "laz" }
 };
 
-CREATE_STATIC_STAGE(LasReader, s_info)
+CREATE_STATIC_STAGE(LasReader, LasReader_info)
 
-std::string LasReader::getName() const { return s_info.name; }
+std::string LasReader::getName() const { return LasReader_info.name; }
 
 const LasHeader& LasReader::header() const
 {

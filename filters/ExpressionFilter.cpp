@@ -49,18 +49,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ExpressionFilter_info
 {
     "filters.expression",
     "Pass only points given an expression",
     "https://pdal.org/stages/filters.expression.html"
 };
 
-CREATE_STATIC_STAGE(ExpressionFilter, s_info)
+CREATE_STATIC_STAGE(ExpressionFilter, ExpressionFilter_info)
 
 std::string ExpressionFilter::getName() const
 {
-    return s_info.name;
+    return ExpressionFilter_info.name;
 }
 
 struct ExpressionFilter::Args

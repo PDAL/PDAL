@@ -43,18 +43,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const HausdorffKernel_info
 {
     "kernels.hausdorff",
     "Hausdorff Kernel [DEPRECATED]",
     "https://pdal.org/apps/hausdorff.html"
 };
 
-CREATE_STATIC_KERNEL(HausdorffKernel, s_info)
+CREATE_STATIC_KERNEL(HausdorffKernel, HausdorffKernel_info)
 
 std::string HausdorffKernel::getName() const
 {
-    return s_info.name;
+    return HausdorffKernel_info.name;
 }
 
 void HausdorffKernel::addSwitches(ProgramArgs& args)

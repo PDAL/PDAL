@@ -43,18 +43,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ClusterFilter_info
 {
     "filters.cluster",
     "Extract and label clusters using Euclidean distance.",
     "https://pdal.org/stages/filters.cluster.html"
 };
 
-CREATE_STATIC_STAGE(ClusterFilter, s_info)
+CREATE_STATIC_STAGE(ClusterFilter, ClusterFilter_info)
 
 std::string ClusterFilter::getName() const
 {
-    return s_info.name;
+    return ClusterFilter_info.name;
 }
 
 void ClusterFilter::addArgs(ProgramArgs& args)

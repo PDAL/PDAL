@@ -46,16 +46,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PipelineKernel_info
 {
     "kernels.pipeline",
     "Pipeline Kernel",
     "https://pdal.org/apps/pipeline.html"
 };
 
-CREATE_STATIC_KERNEL(PipelineKernel, s_info)
+CREATE_STATIC_KERNEL(PipelineKernel, PipelineKernel_info)
 
-std::string PipelineKernel::getName() const { return s_info.name; }
+std::string PipelineKernel::getName() const { return PipelineKernel_info.name; }
 
 PipelineKernel::PipelineKernel() : m_validate(false), m_progressFd(-1)
 {}

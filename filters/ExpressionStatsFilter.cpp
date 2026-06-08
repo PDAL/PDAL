@@ -49,18 +49,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ExpressionStatsFilter_info
 {
     "filters.expressionstats",
     "Accumulate count statistics for a given dimension for an array of expressions",
     "https://pdal.org/stages/filters.expressionstats.html"
 };
 
-CREATE_STATIC_STAGE(ExpressionStatsFilter, s_info)
+CREATE_STATIC_STAGE(ExpressionStatsFilter, ExpressionStatsFilter_info)
 
 std::string ExpressionStatsFilter::getName() const
 {
-    return s_info.name;
+    return ExpressionStatsFilter_info.name;
 }
 
 struct ExpressionStatsFilter::Args

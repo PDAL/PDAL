@@ -38,16 +38,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const NitfReader_info
 {
     "readers.nitf",
     "NITF Reader",
     "https://pdal.org/stages/readers.nitf.html"
 };
 
-CREATE_SHARED_STAGE(NitfReader, s_info)
+CREATE_SHARED_STAGE(NitfReader, NitfReader_info)
 
-std::string NitfReader::getName() const { return s_info.name; }
+std::string NitfReader::getName() const { return NitfReader_info.name; }
 
 //
 // References:
@@ -122,4 +122,3 @@ void NitfReader::initialize(PointTableRef table)
 }
 
 } // namespace pdal
-

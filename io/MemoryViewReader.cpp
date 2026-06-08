@@ -37,7 +37,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const MemoryViewReader_info
 {
     "readers.memoryview",
     "Memory View Reader",
@@ -45,9 +45,9 @@ static StaticPluginInfo const s_info
     {}
 };
 
-CREATE_STATIC_STAGE(MemoryViewReader, s_info)
+CREATE_STATIC_STAGE(MemoryViewReader, MemoryViewReader_info)
 
-std::string MemoryViewReader::getName() const { return s_info.name; }
+std::string MemoryViewReader::getName() const { return MemoryViewReader_info.name; }
 
 MemoryViewReader::MemoryViewReader() : m_prepared(false)
 {}

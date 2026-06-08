@@ -48,14 +48,14 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const EigenvaluesFilter_info
 {
     "filters.eigenvalues",
     "Returns the eigenvalues for a given point, based on its k-nearest neighbors.",
     "https://pdal.org/stages/filters.eigenvalues.html"
 };
 
-CREATE_STATIC_STAGE(EigenvaluesFilter, s_info)
+CREATE_STATIC_STAGE(EigenvaluesFilter, EigenvaluesFilter_info)
 
 struct EigenvalueArgs
 {
@@ -71,7 +71,7 @@ EigenvaluesFilter::EigenvaluesFilter() : m_args(new EigenvalueArgs) {}
 
 std::string EigenvaluesFilter::getName() const
 {
-    return s_info.name;
+    return EigenvaluesFilter_info.name;
 }
 
 void EigenvaluesFilter::addArgs(ProgramArgs& args)

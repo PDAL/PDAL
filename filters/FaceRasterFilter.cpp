@@ -41,18 +41,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const FaceRasterFilter_info
 {
     "filters.faceraster",
     "Face Raster Filter",
     "https://pdal.org/stages/filters.faceraster.html"
 };
 
-CREATE_STATIC_STAGE(FaceRasterFilter, s_info)
+CREATE_STATIC_STAGE(FaceRasterFilter, FaceRasterFilter_info)
 
 std::string FaceRasterFilter::getName() const
 {
-    return s_info.name;
+    return FaceRasterFilter_info.name;
 }
 
 

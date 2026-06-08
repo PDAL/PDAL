@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SmrmsgReader_info
 {
     "readers.smrmsg",
     "SBET smrmsg Reader",
@@ -51,9 +51,9 @@ static StaticPluginInfo const s_info
     { "smrmsg" }
 };
 
-CREATE_STATIC_STAGE(SmrmsgReader, s_info)
+CREATE_STATIC_STAGE(SmrmsgReader, SmrmsgReader_info)
 
-std::string SmrmsgReader::getName() const { return s_info.name; }
+std::string SmrmsgReader::getName() const { return SmrmsgReader_info.name; }
 
 void SmrmsgReader::addArgs(ProgramArgs& args)
 {

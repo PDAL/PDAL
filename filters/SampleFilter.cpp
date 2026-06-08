@@ -43,15 +43,15 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const SampleFilter_info{
     "filters.sample", "Subsampling filter",
     "https://pdal.org/stages/filters.sample.html"};
 
-CREATE_STATIC_STAGE(SampleFilter, s_info)
+CREATE_STATIC_STAGE(SampleFilter, SampleFilter_info)
 
 std::string SampleFilter::getName() const
 {
-    return s_info.name;
+    return SampleFilter_info.name;
 }
 
 void SampleFilter::addArgs(ProgramArgs& args)

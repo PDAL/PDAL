@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TextWriter_info
 {
     "writers.text",
     "Text Writer",
@@ -53,9 +53,9 @@ static StaticPluginInfo const s_info
     { "csv", "txt", "json", "xyz", "" }
 };
 
-CREATE_STATIC_STAGE(TextWriter, s_info)
+CREATE_STATIC_STAGE(TextWriter, TextWriter_info)
 
-std::string TextWriter::getName() const { return s_info.name; }
+std::string TextWriter::getName() const { return TextWriter_info.name; }
 
 std::istream& operator >> (std::istream& in, TextWriter::OutputType& type)
 {

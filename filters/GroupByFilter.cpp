@@ -39,20 +39,20 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GroupByFilter_info
 {
     "filters.groupby",
     "Split data categorically by dimension.",
     "https://pdal.org/stages/filters.groupby.html"
 };
-CREATE_STATIC_STAGE(GroupByFilter, s_info)
+CREATE_STATIC_STAGE(GroupByFilter, GroupByFilter_info)
 
 GroupByFilter::GroupByFilter() : m_viewMap()
 {}
 
 std::string GroupByFilter::getName() const
 {
-    return s_info.name;
+    return GroupByFilter_info.name;
 }
 
 void GroupByFilter::addArgs(ProgramArgs& args)

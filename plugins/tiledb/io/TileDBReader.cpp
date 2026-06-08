@@ -50,7 +50,7 @@ const char pathSeparator =
 namespace pdal
 {
 
-static PluginInfo const s_info{"readers.tiledb",
+static PluginInfo const TileDBReader_info{"readers.tiledb",
                                "Read data from a TileDB array.",
                                "https://pdal.org/stages/readers.tiledb.html"};
 
@@ -65,11 +65,11 @@ struct TileDBReader::Args
     bool m_strict;
 };
 
-CREATE_SHARED_STAGE(TileDBReader, s_info)
+CREATE_SHARED_STAGE(TileDBReader, TileDBReader_info)
 
 std::string TileDBReader::getName() const
 {
-    return s_info.name;
+    return TileDBReader_info.name;
 }
 
 TileDBReader::TileDBReader() : m_args(new TileDBReader::Args) {}

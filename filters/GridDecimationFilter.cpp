@@ -48,16 +48,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GridDecimationFilter_info
 {
     "filters.gridDecimation",
     "keep max or min points in a grid",
     "https://pdal.org/stages/filters.GridDecimation.html"
 };
 
-CREATE_STATIC_STAGE(GridDecimationFilter, s_info)
+CREATE_STATIC_STAGE(GridDecimationFilter, GridDecimationFilter_info)
 
-std::string GridDecimationFilter::getName() const { return s_info.name; }
+std::string GridDecimationFilter::getName() const { return GridDecimationFilter_info.name; }
 
 GridDecimationFilter::GridDecimationFilter() : m_args(new GridDecimationFilter::GridArgs)
 {}

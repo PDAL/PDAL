@@ -41,7 +41,7 @@ namespace pdal {
 
 namespace
 {
-    const StaticPluginInfo s_info
+    const StaticPluginInfo FbiWriter_info
     {
         "writers.fbi",
         "FBI Writer",
@@ -49,7 +49,7 @@ namespace
     };
 }
 
-CREATE_STATIC_STAGE(FbiWriter, s_info)
+CREATE_STATIC_STAGE(FbiWriter, FbiWriter_info)
 
 FbiWriter::FbiWriter():
 hdr(new fbi::FbiHdr())
@@ -58,7 +58,7 @@ hdr(new fbi::FbiHdr())
 FbiWriter::~FbiWriter()
 {}
 
-std::string FbiWriter::getName() const { return s_info.name; }
+std::string FbiWriter::getName() const { return FbiWriter_info.name; }
 
 void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
 {

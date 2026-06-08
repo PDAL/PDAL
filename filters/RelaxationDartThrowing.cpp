@@ -48,15 +48,15 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const RelaxationDartThrowing_info{
     "filters.relaxationdartthrowing", "Subsampling filter",
     "https://pdal.org/stages/filters.relaxationdartthrowing.html"};
 
-CREATE_STATIC_STAGE(RelaxationDartThrowing, s_info)
+CREATE_STATIC_STAGE(RelaxationDartThrowing, RelaxationDartThrowing_info)
 
 std::string RelaxationDartThrowing::getName() const
 {
-    return s_info.name;
+    return RelaxationDartThrowing_info.name;
 }
 
 void RelaxationDartThrowing::addArgs(ProgramArgs& args)

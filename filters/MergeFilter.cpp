@@ -37,16 +37,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const MergeFilter_info
 {
     "filters.merge",
     "Merge data from two different readers into a single stream.",
     "https://pdal.org/stages/filters.merge.html"
 };
 
-CREATE_STATIC_STAGE(MergeFilter, s_info)
+CREATE_STATIC_STAGE(MergeFilter, MergeFilter_info)
 
-std::string MergeFilter::getName() const { return s_info.name; }
+std::string MergeFilter::getName() const { return MergeFilter_info.name; }
 
 void MergeFilter::ready(PointTableRef table)
 {

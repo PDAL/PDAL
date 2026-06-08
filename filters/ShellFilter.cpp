@@ -49,16 +49,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ShellFilter_info
 {
     "filters.shell",
     "Execute a shell operation inline with PDAL pipeline steps",
     "https://pdal.org/stages/filters.shell.html"
 };
 
-CREATE_STATIC_STAGE(ShellFilter, s_info)
+CREATE_STATIC_STAGE(ShellFilter, ShellFilter_info)
 
-std::string ShellFilter::getName() const { return s_info.name; }
+std::string ShellFilter::getName() const { return ShellFilter_info.name; }
 
 void ShellFilter::addArgs(ProgramArgs& args)
 {

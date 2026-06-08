@@ -42,14 +42,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TransformationFilter_info
 {
     "filters.transformation",
     "Transform each point using a 4x4 transformation matrix",
     "https://pdal.org/stages/filters.transformation.html"
 };
 
-CREATE_STATIC_STAGE(TransformationFilter, s_info)
+CREATE_STATIC_STAGE(TransformationFilter, TransformationFilter_info)
 
 TransformationFilter::Transform::Transform()
 {}
@@ -129,7 +129,7 @@ TransformationFilter::~TransformationFilter()
 {}
 
 
-std::string TransformationFilter::getName() const { return s_info.name; }
+std::string TransformationFilter::getName() const { return TransformationFilter_info.name; }
 
 void TransformationFilter::addArgs(ProgramArgs& args)
 {

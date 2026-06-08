@@ -70,18 +70,18 @@ struct GroundKernel::Args
     std::vector<DimRange> ignored;
 };
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GroundKernel_info
 {
     "kernels.ground",
     "Ground Kernel [DEPRECATED]",
     "https://pdal.org/apps/ground.html"
 };
 
-CREATE_STATIC_KERNEL(GroundKernel, s_info)
+CREATE_STATIC_KERNEL(GroundKernel, GroundKernel_info)
 
 std::string GroundKernel::getName() const
 {
-    return s_info.name;
+    return GroundKernel_info.name;
 }
 
 GroundKernel::GroundKernel() : m_args(new GroundKernel::Args)

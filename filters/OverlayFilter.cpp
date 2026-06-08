@@ -47,7 +47,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const OverlayFilter_info
 {
     "filters.overlay",
     "Assign values to a dimension based on the extent of an OGR-readable data "
@@ -55,7 +55,7 @@ static StaticPluginInfo const s_info
     "https://pdal.org/stages/filters.overlay.html"
 };
 
-CREATE_STATIC_STAGE(OverlayFilter, s_info)
+CREATE_STATIC_STAGE(OverlayFilter, OverlayFilter_info)
 
 
 void OverlayFilter::addArgs(ProgramArgs& args)

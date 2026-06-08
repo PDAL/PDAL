@@ -42,16 +42,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const DensityKernel_info
 {
     "kernels.density",
     "Density Kernel [DEPRECATED]",
     "https://pdal.org/apps/density.html"
 };
 
-CREATE_STATIC_KERNEL(DensityKernel, s_info)
+CREATE_STATIC_KERNEL(DensityKernel, DensityKernel_info)
 
-std::string DensityKernel::getName() const { return s_info.name; }
+std::string DensityKernel::getName() const { return DensityKernel_info.name; }
 
 void DensityKernel::addSwitches(ProgramArgs& args)
 {

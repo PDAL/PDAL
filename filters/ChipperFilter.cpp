@@ -67,16 +67,16 @@ blocks.
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ChipperFilter_info
 {
     "filters.chipper",
     "Organize points into spatially contiguous, squarish, and non-overlapping chips.",
     "https://pdal.org/stages/filters.chipper.html"
 };
 
-CREATE_STATIC_STAGE(ChipperFilter, s_info)
+CREATE_STATIC_STAGE(ChipperFilter, ChipperFilter_info)
 
-std::string ChipperFilter::getName() const { return s_info.name; }
+std::string ChipperFilter::getName() const { return ChipperFilter_info.name; }
 
 void ChipperFilter::addArgs(ProgramArgs& args)
 {

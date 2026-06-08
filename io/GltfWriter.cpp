@@ -50,7 +50,7 @@ const size_t JsonChunkDataSize = 5000;
 const size_t ChunkHeaderSize = 8;
 }
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GltfWriter_info
 {
     "writers.gltf",
     "Gltf Writer",
@@ -58,7 +58,7 @@ static StaticPluginInfo const s_info
     { "gltf", "glb" }
 };
 
-CREATE_STATIC_STAGE(GltfWriter, s_info)
+CREATE_STATIC_STAGE(GltfWriter, GltfWriter_info)
 
 GltfWriter::GltfWriter()
 {}
@@ -68,7 +68,7 @@ GltfWriter::~GltfWriter()
 
 std::string GltfWriter::getName() const
 {
-    return s_info.name;
+    return GltfWriter_info.name;
 }
 
 void GltfWriter::addArgs(ProgramArgs& args)

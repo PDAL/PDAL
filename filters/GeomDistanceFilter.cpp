@@ -49,14 +49,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GeomDistanceFilter_info
 {
     "filters.geomdistance",
     "Compute the distance for points to a given geometry",
     "https://pdal.org/stages/filters.geomdistance.html"
 };
 
-CREATE_STATIC_STAGE(GeomDistanceFilter, s_info)
+CREATE_STATIC_STAGE(GeomDistanceFilter, GeomDistanceFilter_info)
 
 
 struct GeomDistanceArgs
@@ -78,7 +78,7 @@ GeomDistanceFilter::~GeomDistanceFilter()
 
 std::string GeomDistanceFilter::getName() const
 {
-    return s_info.name;
+    return GeomDistanceFilter_info.name;
 }
 
 void GeomDistanceFilter::addDimensions(PointLayoutPtr layout)

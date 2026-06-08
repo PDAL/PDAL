@@ -40,18 +40,18 @@
 namespace pdal
 {
 using namespace e57;
-static PluginInfo const s_info
+static PluginInfo const E57Reader_info
 {
     "readers.e57",
     "Reader for E57 files",
     "https://pdal.org/stages/reader.e57.html"
 };
 
-CREATE_SHARED_STAGE(E57Reader, s_info)
+CREATE_SHARED_STAGE(E57Reader, E57Reader_info)
 
 std::string E57Reader::getName() const
 {
-    return s_info.name;
+    return E57Reader_info.name;
 }
 
 E57Reader::E57Reader()

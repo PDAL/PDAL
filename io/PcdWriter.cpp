@@ -44,7 +44,7 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PcdWriter_info
 {
     "writers.pcd",
     "Write data in the Point Cloud Library (PCL) format.",
@@ -52,11 +52,11 @@ static StaticPluginInfo const s_info
     {"pcd"}
 };
 
-CREATE_STATIC_STAGE(PcdWriter, s_info)
+CREATE_STATIC_STAGE(PcdWriter, PcdWriter_info)
 
 std::string PcdWriter::getName() const
 {
-    return s_info.name;
+    return PcdWriter_info.name;
 }
 
 PcdWriter::PcdWriter()

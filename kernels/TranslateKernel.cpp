@@ -51,7 +51,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TranslateKernel_info
 {
     "kernels.translate",
     "The Translate kernel allows users to construct a pipeline " \
@@ -62,11 +62,11 @@ static StaticPluginInfo const s_info
     "https://pdal.org/apps/translate.html"
 };
 
-CREATE_STATIC_KERNEL(TranslateKernel, s_info)
+CREATE_STATIC_KERNEL(TranslateKernel, TranslateKernel_info)
 
 std::string TranslateKernel::getName() const
 {
-    return s_info.name;
+    return TranslateKernel_info.name;
 }
 
 TranslateKernel::TranslateKernel()

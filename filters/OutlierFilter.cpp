@@ -44,18 +44,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const OutlierFilter_info
 {
     "filters.outlier",
     "Outlier removal",
     "https://pdal.org/stages/filters.outlier.html"
 };
 
-CREATE_STATIC_STAGE(OutlierFilter, s_info)
+CREATE_STATIC_STAGE(OutlierFilter, OutlierFilter_info)
 
 std::string OutlierFilter::getName() const
 {
-    return s_info.name;
+    return OutlierFilter_info.name;
 }
 
 void OutlierFilter::addArgs(ProgramArgs& args)

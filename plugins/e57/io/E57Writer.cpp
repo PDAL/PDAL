@@ -42,14 +42,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const E57Writer_info
 {
     "writers.e57",
     "E57 format support.",
     "http://libe57.org/"
 };
 
-CREATE_SHARED_STAGE(E57Writer, s_info)
+CREATE_SHARED_STAGE(E57Writer, E57Writer_info)
 
 E57Writer::ChunkWriter::ChunkWriter
 (const std::vector<std::string>& dimensionsToWrite,
@@ -141,7 +141,7 @@ E57Writer::~E57Writer()
 
 std::string E57Writer::getName() const
 {
-    return s_info.name;
+    return E57Writer_info.name;
 }
 
 void E57Writer::addArgs(ProgramArgs& args)

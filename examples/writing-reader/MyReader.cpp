@@ -5,16 +5,16 @@
 
 namespace pdal
 {
-  static PluginInfo const s_info
+  static PluginInfo const MyReader_info
   {
     "readers.myreader",
     "My Awesome Reader",
     "http://link/to/documentation"
   };
 
-  CREATE_SHARED_STAGE(MyReader, s_info)
+  CREATE_SHARED_STAGE(MyReader, MyReader_info)
 
-  std::string MyReader::getName() const { return s_info.name; }
+  std::string MyReader::getName() const { return MyReader_info.name; }
 
   void MyReader::addArgs(ProgramArgs& args)
   {

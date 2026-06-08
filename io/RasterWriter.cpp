@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const RasterWriter_info
 {
     "writers.raster",
     "Write a raster.",
@@ -49,11 +49,11 @@ static StaticPluginInfo const s_info
     {}
 };
 
-CREATE_STATIC_STAGE(RasterWriter, s_info)
+CREATE_STATIC_STAGE(RasterWriter, RasterWriter_info)
 
 std::string RasterWriter::getName() const
 {
-    return s_info.name;
+    return RasterWriter_info.name;
 }
 
 RasterWriter::RasterWriter()

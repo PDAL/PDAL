@@ -61,7 +61,7 @@ namespace
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const IcebridgeReader_info
 {
     "readers.icebridge",
     "NASA HDF5-based IceBridge ATM reader. \n" \
@@ -70,9 +70,9 @@ static PluginInfo const s_info
     "https://pdal.org/stages/readers.icebridge.html"
 };
 
-CREATE_SHARED_STAGE(IcebridgeReader, s_info)
+CREATE_SHARED_STAGE(IcebridgeReader, IcebridgeReader_info)
 
-std::string IcebridgeReader::getName() const { return s_info.name; }
+std::string IcebridgeReader::getName() const { return IcebridgeReader_info.name; }
 
 namespace
 {

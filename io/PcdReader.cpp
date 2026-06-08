@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PcdReader_info
 {
     "readers.pcd",
     "Read data in the Point Cloud Library (PCL) format.",
@@ -49,11 +49,11 @@ static StaticPluginInfo const s_info
     {"pcd"}
 };
 
-CREATE_STATIC_STAGE(PcdReader, s_info)
+CREATE_STATIC_STAGE(PcdReader, PcdReader_info)
 
 std::string PcdReader::getName() const
 {
-    return s_info.name;
+    return PcdReader_info.name;
 }
 
 PcdReader::PcdReader()

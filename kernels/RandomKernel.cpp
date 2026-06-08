@@ -39,16 +39,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const RandomKernel_info
 {
     "kernels.random",
     "Random Kernel [DEPRECATED]",
     "https://pdal.org/apps/random.html"
 };
 
-CREATE_STATIC_KERNEL(RandomKernel, s_info)
+CREATE_STATIC_KERNEL(RandomKernel, RandomKernel_info)
 
-std::string RandomKernel::getName() const { return s_info.name; }
+std::string RandomKernel::getName() const { return RandomKernel_info.name; }
 
 RandomKernel::RandomKernel()
     : m_bCompress(false)

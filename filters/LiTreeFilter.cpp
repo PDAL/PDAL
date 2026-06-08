@@ -48,14 +48,14 @@ namespace pdal
 
 using namespace Dimension;
 
-static PluginInfo const s_info{"filters.litree", "Li Tree Filter",
+static PluginInfo const LiTreeFilter_info{"filters.litree", "Li Tree Filter",
                                "https://pdal.org/stages/filters.litree.html"};
 
-CREATE_STATIC_STAGE(LiTreeFilter, s_info)
+CREATE_STATIC_STAGE(LiTreeFilter, LiTreeFilter_info)
 
 std::string LiTreeFilter::getName() const
 {
-    return s_info.name;
+    return LiTreeFilter_info.name;
 }
 
 void LiTreeFilter::addArgs(ProgramArgs& args)

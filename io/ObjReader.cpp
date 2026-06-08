@@ -37,7 +37,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ObjReader_info
 {
     "readers.obj",
     "Obj Reader",
@@ -45,9 +45,9 @@ static StaticPluginInfo const s_info
     { "obj" }
 };
 
-CREATE_STATIC_STAGE(ObjReader, s_info)
+CREATE_STATIC_STAGE(ObjReader, ObjReader_info)
 
-std::string ObjReader::getName() const { return s_info.name; }
+std::string ObjReader::getName() const { return ObjReader_info.name; }
 
 void ObjReader::addDimensions(PointLayoutPtr layout)
 {

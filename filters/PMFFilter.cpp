@@ -51,7 +51,7 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info{"filters.pmf",
+static StaticPluginInfo const PMFFilter_info{"filters.pmf",
                                      "Progressive morphological filter",
                                      "https://pdal.org/stages/filters.pmf.html"};
 
@@ -67,7 +67,7 @@ struct PMFArgs
     double m_slope;
 };
 
-CREATE_STATIC_STAGE(PMFFilter, s_info)
+CREATE_STATIC_STAGE(PMFFilter, PMFFilter_info)
 
 PMFFilter::PMFFilter() : m_args(new PMFArgs) {}
 
@@ -75,7 +75,7 @@ PMFFilter::~PMFFilter() {}
 
 std::string PMFFilter::getName() const
 {
-    return s_info.name;
+    return PMFFilter_info.name;
 }
 
 void PMFFilter::addArgs(ProgramArgs& args)

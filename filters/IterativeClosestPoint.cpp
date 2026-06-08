@@ -48,18 +48,18 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const IterativeClosestPoint_info
 {
     "filters.icp",
     "Iterative Closest Point (ICP) registration.",
     "https://pdal.org/stages/filters.icp.html"
 };
 
-CREATE_STATIC_STAGE(IterativeClosestPoint, s_info)
+CREATE_STATIC_STAGE(IterativeClosestPoint, IterativeClosestPoint_info)
 
 std::string IterativeClosestPoint::getName() const
 {
-    return s_info.name;
+    return IterativeClosestPoint_info.name;
 }
 
 void IterativeClosestPoint::addArgs(ProgramArgs& args)

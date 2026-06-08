@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const PgReader_info
 {
     "readers.pgpointcloud",
     "Read data from pgpointcloud format. \"query\" option needs to be a \n" \
@@ -51,9 +51,9 @@ static PluginInfo const s_info
     "https://pdal.org/stages/readers.pgpointcloud.html"
 };
 
-CREATE_SHARED_STAGE(PgReader, s_info)
+CREATE_SHARED_STAGE(PgReader, PgReader_info)
 
-std::string PgReader::getName() const { return s_info.name; }
+std::string PgReader::getName() const { return PgReader_info.name; }
 
 PgReader::PgReader() : m_session(NULL), m_pcid(0), m_cached_point_count(0),
     m_cached_max_points(0)

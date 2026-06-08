@@ -43,16 +43,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ColorizationFilter_info
 {
     "filters.colorization",
     "Fetch and assign RGB color information from a GDAL-readable datasource.",
     "https://pdal.org/stages/filters.colorization.html"
 };
 
-CREATE_STATIC_STAGE(ColorizationFilter, s_info)
+CREATE_STATIC_STAGE(ColorizationFilter, ColorizationFilter_info)
 
-std::string ColorizationFilter::getName() const { return s_info.name; }
+std::string ColorizationFilter::getName() const { return ColorizationFilter_info.name; }
 
 namespace
 {

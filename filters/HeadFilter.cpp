@@ -36,18 +36,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const HeadFilter_info
 {
     "filters.head",
     "Return N points from beginning of the point cloud.",
     "https://pdal.org/stages/filters.head.html"
 };
 
-CREATE_STATIC_STAGE(HeadFilter, s_info)
+CREATE_STATIC_STAGE(HeadFilter, HeadFilter_info)
 
 std::string HeadFilter::getName() const
 {
-    return s_info.name;
+    return HeadFilter_info.name;
 }
 
 void HeadFilter::addArgs(ProgramArgs& args)

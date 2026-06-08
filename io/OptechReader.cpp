@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const OptechReader_info
 {
     "readers.optech",
     "Optech reader support.",
@@ -53,11 +53,11 @@ static StaticPluginInfo const s_info
     { "csd" }
 };
 
-CREATE_STATIC_STAGE(OptechReader, s_info)
+CREATE_STATIC_STAGE(OptechReader, OptechReader_info)
 
 std::string OptechReader::getName() const
 {
-    return s_info.name;
+    return OptechReader_info.name;
 }
 
 #ifndef _MSC_VER

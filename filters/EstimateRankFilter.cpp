@@ -45,18 +45,18 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const EstimateRankFilter_info
 {
     "filters.estimaterank",
     "Computes the rank of a neighborhood of points.",
     "https://pdal.org/stages/filters.estimaterank.html"
 };
 
-CREATE_STATIC_STAGE(EstimateRankFilter, s_info)
+CREATE_STATIC_STAGE(EstimateRankFilter, EstimateRankFilter_info)
 
 std::string EstimateRankFilter::getName() const
 {
-    return s_info.name;
+    return EstimateRankFilter_info.name;
 }
 
 

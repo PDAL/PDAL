@@ -67,7 +67,7 @@ namespace pdal
 namespace
 {
 
-const StaticPluginInfo s_info
+const StaticPluginInfo CopcReader_info
 {
     "readers.copc",
     "COPC Reader",
@@ -200,7 +200,7 @@ std::string toString(const SrsOrderSpec& srsOrder)
 
 } // namespace Utils
 
-CREATE_STATIC_STAGE(CopcReader, s_info);
+CREATE_STATIC_STAGE(CopcReader, CopcReader_info);
 
 struct PolyXform
 {
@@ -274,7 +274,7 @@ CopcReader::~CopcReader()
 
 std::string CopcReader::getName() const
 {
-    return s_info.name;
+    return CopcReader_info.name;
 }
 
 

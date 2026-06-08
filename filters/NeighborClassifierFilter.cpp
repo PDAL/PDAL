@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const NeighborClassifierFilter_info
 {
     "filters.neighborclassifier",
     "Re-assign some point attributes based KNN voting",
@@ -62,7 +62,7 @@ struct NeighborClassifierFilter::Private
     std::unordered_map<PointId, int> newClass;
 };
 
-CREATE_STATIC_STAGE(NeighborClassifierFilter, s_info)
+CREATE_STATIC_STAGE(NeighborClassifierFilter, NeighborClassifierFilter_info)
 
 NeighborClassifierFilter::NeighborClassifierFilter() : m_p(new Private())
 {}
@@ -70,7 +70,7 @@ NeighborClassifierFilter::NeighborClassifierFilter() : m_p(new Private())
 
 std::string NeighborClassifierFilter::getName() const
 {
-    return s_info.name;
+    return NeighborClassifierFilter_info.name;
 }
 
 void NeighborClassifierFilter::addArgs(ProgramArgs& args)
@@ -200,4 +200,3 @@ void NeighborClassifierFilter::filter(PointView& view)
 }
 
 } // namespace pdal
-

@@ -42,18 +42,18 @@ namespace pdal
 {
 using namespace Dimension;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const LloydKMeansFilter_info{
     "filters.lloydkmeans",
     "Extract and label clusters using K-means (Lloyd's algorithm).",
     "https://pdal.org/stages/filters.lloydkmeans.html"};
 
-CREATE_STATIC_STAGE(LloydKMeansFilter, s_info)
+CREATE_STATIC_STAGE(LloydKMeansFilter, LloydKMeansFilter_info)
 
 LloydKMeansFilter::LloydKMeansFilter() {}
 
 std::string LloydKMeansFilter::getName() const
 {
-    return s_info.name;
+    return LloydKMeansFilter_info.name;
 }
 
 void LloydKMeansFilter::addArgs(ProgramArgs& args)

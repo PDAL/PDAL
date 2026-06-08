@@ -43,19 +43,19 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SplitterFilter_info
 {
     "filters.splitter",
     "Split data based on a X/Y box length.",
     "https://pdal.org/stages/filters.splitter.html"
 };
 
-CREATE_STATIC_STAGE(SplitterFilter, s_info)
+CREATE_STATIC_STAGE(SplitterFilter, SplitterFilter_info)
 
 SplitterFilter::SplitterFilter() : m_viewMap(CoordCompare())
 {}
 
-std::string SplitterFilter::getName() const { return s_info.name; }
+std::string SplitterFilter::getName() const { return SplitterFilter_info.name; }
 
 
 PointViewPtr SplitterFilter::view(const Coord& coord)

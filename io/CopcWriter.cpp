@@ -56,7 +56,7 @@ namespace pdal
 namespace
 {
 
-const StaticPluginInfo s_info
+const StaticPluginInfo CopcWriter_info
 {
     "writers.copc",
     "COPC Writer",
@@ -66,7 +66,7 @@ const StaticPluginInfo s_info
 
 }
 
-CREATE_STATIC_STAGE(CopcWriter, s_info);
+CREATE_STATIC_STAGE(CopcWriter, CopcWriter_info);
 
 CopcWriter::CopcWriter() : b(new copcwriter::BaseInfo), isRemote(false)
 {}
@@ -74,7 +74,7 @@ CopcWriter::CopcWriter() : b(new copcwriter::BaseInfo), isRemote(false)
 CopcWriter::~CopcWriter()
 {}
 
-std::string CopcWriter::getName() const { return s_info.name; }
+std::string CopcWriter::getName() const { return CopcWriter_info.name; }
 
 void CopcWriter::initialize(PointTableRef table)
 {

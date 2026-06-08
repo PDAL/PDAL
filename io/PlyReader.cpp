@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PlyReader_info
 {
         "readers.ply",
         "Read ply files.",
@@ -51,7 +51,7 @@ static StaticPluginInfo const s_info
         { "ply" }
 };
 
-CREATE_STATIC_STAGE(PlyReader, s_info)
+CREATE_STATIC_STAGE(PlyReader, PlyReader_info)
 
 
 PlyReader::PlyReader() : m_vertexElt(nullptr)
@@ -286,7 +286,7 @@ void PlyReader::extractHeader()
 
 std::string PlyReader::getName() const
 {
-    return s_info.name;
+    return PlyReader_info.name;
 }
 
 QuickInfo PlyReader::inspect()

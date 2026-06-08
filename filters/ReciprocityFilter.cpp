@@ -51,7 +51,7 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ReciprocityFilter_info
 {
     "filters.reciprocity",
     "Returns the percentage of neighbors that do NOT have the query point as a "
@@ -59,11 +59,11 @@ static StaticPluginInfo const s_info
     "https://pdal.org/stages/filters.reciprocity.html"
 };
 
-CREATE_STATIC_STAGE(ReciprocityFilter, s_info)
+CREATE_STATIC_STAGE(ReciprocityFilter, ReciprocityFilter_info)
 
 std::string ReciprocityFilter::getName() const
 {
-    return s_info.name;
+    return ReciprocityFilter_info.name;
 }
 
 void ReciprocityFilter::addArgs(ProgramArgs& args)

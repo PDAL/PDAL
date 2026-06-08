@@ -228,16 +228,16 @@ private:
     bool m_doColor;
 };
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PoissonFilter_info
 {
     "filters.poisson",
     "Poisson Surface Reconstruction Filter",
     "https://pdal.org/stages/filters.poisson.html"
 };
 
-CREATE_STATIC_STAGE(PoissonFilter, s_info)
+CREATE_STATIC_STAGE(PoissonFilter, PoissonFilter_info)
 
-std::string PoissonFilter::getName() const { return s_info.name; }
+std::string PoissonFilter::getName() const { return PoissonFilter_info.name; }
 
 void PoissonFilter::addDimensions(PointLayoutPtr layout)
 {

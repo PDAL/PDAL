@@ -50,18 +50,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const H3Filter_info
 {
     "filters.h3",
     "Compute H3 indexes for points",
     "https://pdal.org/stages/filters.h3.html"
 };
 
-CREATE_STATIC_STAGE(H3Filter, s_info)
+CREATE_STATIC_STAGE(H3Filter, H3Filter_info)
 
 std::string H3Filter::getName() const
 {
-    return s_info.name;
+    return H3Filter_info.name;
 }
 
 struct H3Filter::Args

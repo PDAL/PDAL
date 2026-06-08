@@ -40,18 +40,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const MADFilter_info
 {
     "filters.mad",
     "Median Absolute Deviation Filter",
     "https://pdal.org/stages/filters.mad.html"
 };
 
-CREATE_STATIC_STAGE(MADFilter, s_info)
+CREATE_STATIC_STAGE(MADFilter, MADFilter_info)
 
 std::string MADFilter::getName() const
 {
-    return s_info.name;
+    return MADFilter_info.name;
 }
 
 void MADFilter::addArgs(ProgramArgs& args)

@@ -43,16 +43,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const MbReader_info
 {
     "readers.mbio",
     "MBSystem Reader",
     "https://pdal.org/stages/readers.mbio.html"
 };
 
-CREATE_SHARED_STAGE(MbReader, s_info)
+CREATE_SHARED_STAGE(MbReader, MbReader_info)
 
-std::string MbReader::getName() const { return s_info.name; }
+std::string MbReader::getName() const { return MbReader_info.name; }
 
 MbReader::MbReader() : m_bath(nullptr), m_bathlon(nullptr),
     m_bathlat(nullptr), m_amp(nullptr), m_bathflag(nullptr), m_ss(nullptr),

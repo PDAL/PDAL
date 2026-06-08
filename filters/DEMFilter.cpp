@@ -43,14 +43,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const DEMFilter_info
 {
     "filters.dem",
     "Filter points about an elevation surface",
     "https://pdal.org/stages/filters.dem.html"
 };
 
-CREATE_STATIC_STAGE(DEMFilter, s_info)
+CREATE_STATIC_STAGE(DEMFilter, DEMFilter_info)
 
 
 struct DEMArgs
@@ -70,7 +70,7 @@ DEMFilter::~DEMFilter()
 
 std::string DEMFilter::getName() const
 {
-    return s_info.name;
+    return DEMFilter_info.name;
 }
 
 void DEMFilter::addDimensions(PointLayoutPtr layout)

@@ -46,16 +46,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const HdfReader_info
 {
     "readers.hdf",
     "HDF Reader",
     "https://pdal.org/stages/readers.hdf.html"
 };
 
-CREATE_SHARED_STAGE(HdfReader, s_info)
+CREATE_SHARED_STAGE(HdfReader, HdfReader_info)
 
-std::string HdfReader::getName() const { return s_info.name; }
+std::string HdfReader::getName() const { return HdfReader_info.name; }
 
 HdfReader::HdfReader()
     : m_hdf5Handler(new hdf5::Handler())

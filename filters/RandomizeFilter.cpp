@@ -37,15 +37,15 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const RandomizeFilter_info{
     "filters.randomize", "Randomize points in a view.",
     "https://pdal.org/stages/filters.randomize.html"};
 
-CREATE_STATIC_STAGE(RandomizeFilter, s_info)
+CREATE_STATIC_STAGE(RandomizeFilter, RandomizeFilter_info)
 
 std::string RandomizeFilter::getName() const
 {
-    return s_info.name;
+    return RandomizeFilter_info.name;
 }
 
 void RandomizeFilter::addArgs(ProgramArgs& args)

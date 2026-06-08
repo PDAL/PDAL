@@ -58,11 +58,11 @@ namespace pdal
 using namespace Eigen;
 using namespace Dimension;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const NormalFilter_info{
     "filters.normal", "Normal Filter",
     "https://pdal.org/stages/filters.normal.html"};
 
-CREATE_STATIC_STAGE(NormalFilter, s_info)
+CREATE_STATIC_STAGE(NormalFilter, NormalFilter_info)
 
 struct NormalArgs
 {
@@ -79,7 +79,7 @@ NormalFilter::~NormalFilter() {}
 
 std::string NormalFilter::getName() const
 {
-    return s_info.name;
+    return NormalFilter_info.name;
 }
 
 void NormalFilter::addArgs(ProgramArgs& args)

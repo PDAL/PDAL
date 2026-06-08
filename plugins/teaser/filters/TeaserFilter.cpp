@@ -55,14 +55,14 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static PluginInfo const s_info{"filters.teaser", "TEASER++ registration.",
+static PluginInfo const TeaserFilter_info{"filters.teaser", "TEASER++ registration.",
                                "https://pdal.org/stages/filters.teaser.html"};
 
-CREATE_SHARED_STAGE(TeaserFilter, s_info)
+CREATE_SHARED_STAGE(TeaserFilter, TeaserFilter_info)
 
 std::string TeaserFilter::getName() const
 {
-    return s_info.name;
+    return TeaserFilter_info.name;
 }
 
 void TeaserFilter::addArgs(ProgramArgs& args)

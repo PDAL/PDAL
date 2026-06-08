@@ -73,14 +73,14 @@ const std::map<pdal::Dimension::Id, draco::GeometryAttribute::Type> dimMap =
     { pdal::Dimension::Id::TextureW,  draco::GeometryAttribute::TEX_COORD }
 };
 
-static PluginInfo const s_info
+static PluginInfo const DracoWriter_info
 {
     "writers.draco",
     "Write data using Draco.",
     "https://pdal.org/stages/writers.draco.html"
 };
 
-CREATE_SHARED_STAGE(DracoWriter, s_info)
+CREATE_SHARED_STAGE(DracoWriter, DracoWriter_info)
 
 DracoWriter::DracoWriter()
 {
@@ -88,7 +88,7 @@ DracoWriter::DracoWriter()
 
 DracoWriter::~DracoWriter(){}
 
-std::string DracoWriter::getName() const { return s_info.name; }
+std::string DracoWriter::getName() const { return DracoWriter_info.name; }
 
 void DracoWriter::addArgs(ProgramArgs& args)
 {

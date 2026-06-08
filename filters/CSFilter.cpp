@@ -63,11 +63,11 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const CSFilter_info{
     "filters.csf", "Cloth Simulation Filter (Zhang et al., 2016)",
     "https://pdal.org/stages/filters.csf.html"};
 
-CREATE_STATIC_STAGE(CSFilter, s_info)
+CREATE_STATIC_STAGE(CSFilter, CSFilter_info)
 
 struct CSArgs
 {
@@ -93,7 +93,7 @@ CSFilter::~CSFilter()
 
 std::string CSFilter::getName() const
 {
-    return s_info.name;
+    return CSFilter_info.name;
 }
 
 void CSFilter::addArgs(ProgramArgs& args)

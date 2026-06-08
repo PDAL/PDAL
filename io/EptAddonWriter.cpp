@@ -50,7 +50,7 @@ namespace pdal
 
 namespace
 {
-    const StaticPluginInfo s_info
+    const StaticPluginInfo EptAddonWriter_info
     {
         "writers.ept_addon",
         "EPT Writer",
@@ -114,7 +114,7 @@ void EptAddonWriter::HierarchyWriter::write(const std::string& hierarchyDir, NL:
     }
 }
 
-CREATE_STATIC_STAGE(EptAddonWriter, s_info)
+CREATE_STATIC_STAGE(EptAddonWriter, EptAddonWriter_info)
 
 struct EptAddonWriter::Args
 {
@@ -128,7 +128,7 @@ EptAddonWriter::EptAddonWriter() : m_args(new Args)
 EptAddonWriter::~EptAddonWriter()
 {}
 
-std::string EptAddonWriter::getName() const { return s_info.name; }
+std::string EptAddonWriter::getName() const { return EptAddonWriter_info.name; }
 
 void EptAddonWriter::addArgs(ProgramArgs& args)
 {

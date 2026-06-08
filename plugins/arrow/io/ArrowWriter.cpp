@@ -59,14 +59,14 @@ namespace pdal
 
 using namespace arrowsupport;
 
-static PluginInfo const s_info
+static PluginInfo const ArrowWriter_info
 {
     "writers.arrow",
     "Arrow Writer",
     "https://pdal.org/stages/writers.arrow.html"
 };
 
-CREATE_SHARED_STAGE(ArrowWriter, s_info)
+CREATE_SHARED_STAGE(ArrowWriter, ArrowWriter_info)
 
 class BaseDimHandler
 {
@@ -257,7 +257,7 @@ private:
 };
 
 
-std::string ArrowWriter::getName() const { return s_info.name; }
+std::string ArrowWriter::getName() const { return ArrowWriter_info.name; }
 
 
 ArrowWriter::ArrowWriter() :

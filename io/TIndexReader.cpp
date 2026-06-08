@@ -49,7 +49,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TIndexReader_info
 {
     "readers.tindex",
     "TileIndex Reader",
@@ -57,9 +57,9 @@ static StaticPluginInfo const s_info
     { "tindex" }
 };
 
-CREATE_STATIC_STAGE(TIndexReader, s_info)
+CREATE_STATIC_STAGE(TIndexReader, TIndexReader_info)
 
-std::string TIndexReader::getName() const { return s_info.name; }
+std::string TIndexReader::getName() const { return TIndexReader_info.name; }
 
 
 struct TIndexReader::Args

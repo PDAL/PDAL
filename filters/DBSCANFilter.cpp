@@ -47,15 +47,15 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const DBSCANFilter_info{
     "filters.dbscan", "DBSCAN Clustering.",
     "https://pdal.org/stages/filters.dbscan.html"};
 
-CREATE_STATIC_STAGE(DBSCANFilter, s_info)
+CREATE_STATIC_STAGE(DBSCANFilter, DBSCANFilter_info)
 
 std::string DBSCANFilter::getName() const
 {
-    return s_info.name;
+    return DBSCANFilter_info.name;
 }
 
 DBSCANFilter::DBSCANFilter() : Filter()

@@ -41,14 +41,14 @@
 namespace pdal
 {
 
-static const StaticPluginInfo s_info
+static const StaticPluginInfo MongoExpressionFilter_info
 {
     "filters.mongo",
     "Pass only points that pass a logic filter.",
     "https://pdal.org/stages/filters.mongo.html"
 };
 
-CREATE_STATIC_STAGE(MongoExpressionFilter, s_info);
+CREATE_STATIC_STAGE(MongoExpressionFilter, MongoExpressionFilter_info);
 
 struct MongoExpressionFilter::Args
 {
@@ -62,7 +62,7 @@ struct MongoExpressionFilter::Private
 
 std::string MongoExpressionFilter::getName() const
 {
-    return s_info.name;
+    return MongoExpressionFilter_info.name;
 }
 
 MongoExpressionFilter::MongoExpressionFilter() :

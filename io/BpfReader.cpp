@@ -48,7 +48,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const BpfReader_info
 {
     "readers.bpf",
     "\"Binary Point Format\" (BPF) reader support. BPF is a simple \n" \
@@ -58,14 +58,14 @@ static StaticPluginInfo const s_info
     { "bpf" }
 };
 
-CREATE_STATIC_STAGE(BpfReader, s_info)
+CREATE_STATIC_STAGE(BpfReader, BpfReader_info)
 
 struct BpfReader::Args
 {
     bool m_fixNames;
 };
 
-std::string BpfReader::getName() const { return s_info.name; }
+std::string BpfReader::getName() const { return BpfReader_info.name; }
 
 BpfReader::BpfReader() : m_args(new BpfReader::Args)
 {}

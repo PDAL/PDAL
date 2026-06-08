@@ -44,16 +44,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const PgWriter_info
 {
     "writers.pgpointcloud",
     "Write points to PostgreSQL pgpointcloud output",
     "https://pdal.org/stages/writers.pgpointcloud.html"
 };
 
-CREATE_SHARED_STAGE(PgWriter, s_info)
+CREATE_SHARED_STAGE(PgWriter, PgWriter_info)
 
-std::string PgWriter::getName() const { return s_info.name; }
+std::string PgWriter::getName() const { return PgWriter_info.name; }
 
 // TO DO:
 // - change INSERT into COPY

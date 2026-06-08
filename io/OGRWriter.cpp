@@ -54,7 +54,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const OGRWriter_info
 {
     "writers.ogr",
     "Write a point cloud as a set of OGR points/multipoints",
@@ -62,7 +62,7 @@ static StaticPluginInfo const s_info
     { "shp", "geojson" }
 };
 
-CREATE_STATIC_STAGE(OGRWriter, s_info)
+CREATE_STATIC_STAGE(OGRWriter, OGRWriter_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
     m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown),
@@ -72,7 +72,7 @@ OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
 
 std::string OGRWriter::getName() const
 {
-    return s_info.name;
+    return OGRWriter_info.name;
 }
 
 

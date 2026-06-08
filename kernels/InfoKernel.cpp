@@ -53,16 +53,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const InfoKernel_info
 {
     "kernels.info",
     "Info Kernel",
     "https://pdal.org/apps/info.html"
 };
 
-CREATE_STATIC_KERNEL(InfoKernel, s_info)
+CREATE_STATIC_KERNEL(InfoKernel, InfoKernel_info)
 
-std::string InfoKernel::getName() const { return s_info.name; }
+std::string InfoKernel::getName() const { return InfoKernel_info.name; }
 
 InfoKernel::InfoKernel() : m_showStats(false), m_showSchema(false),
     m_showAll(false), m_showMetadata(false), m_boundary(false),

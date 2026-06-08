@@ -53,18 +53,18 @@ struct RangeFilter::Private
     DimRangeList ranges;
 };
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const RangeFilter_info
 {
     "filters.range",
     "Pass only points given a dimension/range.",
     "https://pdal.org/stages/filters.range.html"
 };
 
-CREATE_STATIC_STAGE(RangeFilter, s_info)
+CREATE_STATIC_STAGE(RangeFilter, RangeFilter_info)
 
 std::string RangeFilter::getName() const
 {
-    return s_info.name;
+    return RangeFilter_info.name;
 }
 
 

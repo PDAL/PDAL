@@ -4,7 +4,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const NullWriter_info
 {
     "writers.null",
     "Null writer.  Provides a sink for points in a pipeline.  "\
@@ -12,8 +12,8 @@ static StaticPluginInfo const s_info
     "https://pdal.org/stages/writers.null.html"
 };
 
-CREATE_STATIC_STAGE(NullWriter, s_info)
+CREATE_STATIC_STAGE(NullWriter, NullWriter_info)
 
-std::string NullWriter::getName() const { return s_info.name; }
+std::string NullWriter::getName() const { return NullWriter_info.name; }
 
 } // namespace pdal

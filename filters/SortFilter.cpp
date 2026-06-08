@@ -37,16 +37,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SortFilter_info
 {
     "filters.sort",
     "Sort data based on a given dimension.",
     "https://pdal.org/stages/filters.sort.html"
 };
 
-CREATE_STATIC_STAGE(SortFilter, s_info)
+CREATE_STATIC_STAGE(SortFilter, SortFilter_info)
 
-std::string SortFilter::getName() const { return s_info.name; }
+std::string SortFilter::getName() const { return SortFilter_info.name; }
 
 void SortFilter::addArgs(ProgramArgs& args)
 {

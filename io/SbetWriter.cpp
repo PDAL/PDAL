@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SbetWriter_info
 {
     "writers.sbet",
     "SBET Writer",
@@ -50,9 +50,9 @@ static StaticPluginInfo const s_info
     { "sbet" }
 };
 
-CREATE_STATIC_STAGE(SbetWriter, s_info)
+CREATE_STATIC_STAGE(SbetWriter, SbetWriter_info)
 
-std::string SbetWriter::getName() const { return s_info.name; }
+std::string SbetWriter::getName() const { return SbetWriter_info.name; }
 
 void SbetWriter::addArgs(ProgramArgs& args)
 {

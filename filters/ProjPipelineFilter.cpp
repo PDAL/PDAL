@@ -43,16 +43,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ProjPipelineFilter_info
 {
     "filters.projpipeline",
     "Transform coordinates using Proj pipeline string, WKT2 coordinate operations or URN definition",
     "https://pdal.org/stages/filters.projpipeline.html"
 };
 
-CREATE_STATIC_STAGE(ProjPipelineFilter, s_info)
+CREATE_STATIC_STAGE(ProjPipelineFilter, ProjPipelineFilter_info)
 
-std::string ProjPipelineFilter::getName() const { return s_info.name; }
+std::string ProjPipelineFilter::getName() const { return ProjPipelineFilter_info.name; }
 
 ProjPipelineFilter::ProjPipelineFilter()
 {}

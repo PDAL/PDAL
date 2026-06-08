@@ -62,18 +62,18 @@ void addMetadata(CpdFilter* filter, const cpd::Result& result)
 }
 }
 
-static PluginInfo const s_info
+static PluginInfo const CpdFilter_info
 {
     "filters.cpd",
     "CPD filter",
     "https://pdal.org/stages/filters.cpd.html"
 };
 
-CREATE_SHARED_STAGE(CpdFilter, s_info)
+CREATE_SHARED_STAGE(CpdFilter, CpdFilter_info)
 
 std::string CpdFilter::getName() const
 {
-    return s_info.name;
+    return CpdFilter_info.name;
 }
 
 void CpdFilter::addArgs(ProgramArgs& args)

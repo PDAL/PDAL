@@ -37,16 +37,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const FauxPluginKernel_info
 {
     "kernels.fauxplugin",
     "Faux Plugin Kernel",
     "No website"
 };
 
-CREATE_SHARED_KERNEL(FauxPluginKernel, s_info)
+CREATE_SHARED_KERNEL(FauxPluginKernel, FauxPluginKernel_info)
 
-std::string FauxPluginKernel::getName() const { return s_info.name; }
+std::string FauxPluginKernel::getName() const { return FauxPluginKernel_info.name; }
 
 int FauxPluginKernel::execute()
 {

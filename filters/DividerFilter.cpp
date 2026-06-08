@@ -51,7 +51,7 @@ struct DividerFilter::Args
 };
 
 
-static PluginInfo const s_info
+static PluginInfo const DividerFilter_info
 {
     "filters.divider",
     "Divide points into approximately equal sized groups based on a simple "
@@ -59,7 +59,7 @@ static PluginInfo const s_info
     "https://pdal.org/stages/filters.divider.html"
 };
 
-CREATE_STATIC_STAGE(DividerFilter, s_info)
+CREATE_STATIC_STAGE(DividerFilter, DividerFilter_info)
 
 
 DividerFilter::DividerFilter() : m_args(new Args)
@@ -70,7 +70,7 @@ DividerFilter::~DividerFilter()
 {}
 
 
-std::string DividerFilter::getName() const { return s_info.name; }
+std::string DividerFilter::getName() const { return DividerFilter_info.name; }
 
 std::istream& operator>>(std::istream& in, DividerFilter::Mode& mode)
 {

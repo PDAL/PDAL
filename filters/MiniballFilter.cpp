@@ -54,18 +54,18 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const MiniballFilter_info
 {
     "filters.miniball",
     "Miniball (Kutz et al., 2003)",
     "https://pdal.org/stages/filters.miniball.html"
 };
 
-CREATE_STATIC_STAGE(MiniballFilter, s_info)
+CREATE_STATIC_STAGE(MiniballFilter, MiniballFilter_info)
 
 std::string MiniballFilter::getName() const
 {
-    return s_info.name;
+    return MiniballFilter_info.name;
 }
 
 void MiniballFilter::addArgs(ProgramArgs& args)

@@ -59,7 +59,7 @@ namespace pdal
 namespace
 {
 
-const StaticPluginInfo s_info
+const StaticPluginInfo EptReader_info
 {
     "readers.ept",
     "EPT Reader",
@@ -136,7 +136,7 @@ BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, const SrsTransform& xform)
 
 }
 
-CREATE_STATIC_STAGE(EptReader, s_info);
+CREATE_STATIC_STAGE(EptReader, EptReader_info);
 
 struct PolyXform
 {
@@ -198,7 +198,7 @@ EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private
 EptReader::~EptReader()
 {}
 
-std::string EptReader::getName() const { return s_info.name; }
+std::string EptReader::getName() const { return EptReader_info.name; }
 
 void EptReader::addArgs(ProgramArgs& args)
 {

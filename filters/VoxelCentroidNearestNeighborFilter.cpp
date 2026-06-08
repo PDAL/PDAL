@@ -46,18 +46,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const VoxelCentroidNearestNeighborFilter_info
 {
     "filters.voxelcentroidnearestneighbor",
     "Voxel Centroid Nearest Neighbor Filter",
     "https://pdal.org/stages/filters.voxelcentroidnearestneighbor.html"
 };
 
-CREATE_STATIC_STAGE(VoxelCentroidNearestNeighborFilter, s_info)
+CREATE_STATIC_STAGE(VoxelCentroidNearestNeighborFilter, VoxelCentroidNearestNeighborFilter_info)
 
 std::string VoxelCentroidNearestNeighborFilter::getName() const
 {
-    return s_info.name;
+    return VoxelCentroidNearestNeighborFilter_info.name;
 }
 
 void VoxelCentroidNearestNeighborFilter::addArgs(ProgramArgs& args)

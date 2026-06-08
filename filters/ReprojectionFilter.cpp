@@ -43,16 +43,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ReprojectionFilter_info
 {
     "filters.reprojection",
     "Reproject data using GDAL from one coordinate system to another.",
     "https://pdal.org/stages/filters.reprojection.html"
 };
 
-CREATE_STATIC_STAGE(ReprojectionFilter, s_info)
+CREATE_STATIC_STAGE(ReprojectionFilter, ReprojectionFilter_info)
 
-std::string ReprojectionFilter::getName() const { return s_info.name; }
+std::string ReprojectionFilter::getName() const { return ReprojectionFilter_info.name; }
 
 ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true)
 {}

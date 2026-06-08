@@ -179,7 +179,7 @@ Word #       Content
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const QfitReader_info
 {
     "readers.qfit",
     "QFIT Reader",
@@ -187,9 +187,9 @@ static StaticPluginInfo const s_info
     { "qi" }
 };
 
-CREATE_STATIC_STAGE(QfitReader, s_info)
+CREATE_STATIC_STAGE(QfitReader, QfitReader_info)
 
-std::string QfitReader::getName() const { return s_info.name; }
+std::string QfitReader::getName() const { return QfitReader_info.name; }
 
 QfitReader::QfitReader()
     : pdal::Reader()

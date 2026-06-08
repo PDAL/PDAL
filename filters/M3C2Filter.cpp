@@ -70,18 +70,18 @@ struct M3C2Filter::Private
     Dimension::Id n2Dim;
 };
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const M3C2Filter_info
 {
     "filters.m3c2",
     "Compute the 3D distance between two sets of points based on the M3C2 algorithm",
     "http://pdal.io/stages/filters.m3c2.html"
 };
 
-CREATE_STATIC_STAGE(M3C2Filter, s_info)
+CREATE_STATIC_STAGE(M3C2Filter, M3C2Filter_info)
 
 std::string M3C2Filter::getName() const
 {
-    return s_info.name;
+    return M3C2Filter_info.name;
 }
 
 

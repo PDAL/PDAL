@@ -48,7 +48,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const BpfWriter_info
 {
     "writers.bpf",
     "\"Binary Point Format\" (BPF) writer support. BPF is a simple \n" \
@@ -58,9 +58,9 @@ static StaticPluginInfo const s_info
     { "bpf" }
 };
 
-CREATE_STATIC_STAGE(BpfWriter, s_info)
+CREATE_STATIC_STAGE(BpfWriter, BpfWriter_info)
 
-std::string BpfWriter::getName() const { return s_info.name; }
+std::string BpfWriter::getName() const { return BpfWriter_info.name; }
 
 std::istream& operator>>(std::istream& in, BpfWriter::CoordId& id)
 {

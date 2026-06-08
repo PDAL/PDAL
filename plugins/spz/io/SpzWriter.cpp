@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SpzWriter_info
 {
         "writers.spz",
         "SPZ writer",
@@ -50,12 +50,12 @@ static StaticPluginInfo const s_info
         { "spz" }
 };
 
-CREATE_SHARED_STAGE(SpzWriter, s_info)
+CREATE_SHARED_STAGE(SpzWriter, SpzWriter_info)
 
 SpzWriter::SpzWriter() : m_cloud(new spz::GaussianCloud)
 {}
 
-std::string SpzWriter::getName() const { return s_info.name; }
+std::string SpzWriter::getName() const { return SpzWriter_info.name; }
 
 void SpzWriter::addArgs(ProgramArgs& args)
 {

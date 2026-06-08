@@ -6,16 +6,16 @@
 
 namespace pdal
 {
-  static PluginInfo const s_info
+  static PluginInfo const MyWriter_info
   {
     "writers.mywriter",
     "My Awesome Writer",
     "http://path/to/documentation"
   };
 
-  CREATE_SHARED_STAGE(MyWriter, s_info);
+  CREATE_SHARED_STAGE(MyWriter, MyWriter_info);
 
-  std::string MyWriter::getName() const { return s_info.name; }
+  std::string MyWriter::getName() const { return MyWriter_info.name; }
 
   struct FileStreamDeleter
   {

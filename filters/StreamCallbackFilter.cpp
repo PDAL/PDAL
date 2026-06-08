@@ -37,13 +37,13 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const StreamCallbackFilter_info
 {
     "filters.streamcallback",
     "Provide a hook for a simple point-by-point callback.",
     ""
 };
 
-CREATE_STATIC_STAGE(StreamCallbackFilter, s_info)
+CREATE_STATIC_STAGE(StreamCallbackFilter, StreamCallbackFilter_info)
 
 } // namespace pdal

@@ -63,7 +63,7 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const SMRFilter_info{
     "filters.smrf", "Simple Morphological Filter (Pingel et al., 2013)",
     "https://pdal.org/stages/filters.smrf.html"};
 
@@ -77,7 +77,7 @@ template <typename T> T ceil(double d)
 }
 } // namespace
 
-CREATE_STATIC_STAGE(SMRFilter, s_info)
+CREATE_STATIC_STAGE(SMRFilter, SMRFilter_info)
 
 struct SMRArgs
 {
@@ -100,7 +100,7 @@ SMRFilter::~SMRFilter() {}
 
 std::string SMRFilter::getName() const
 {
-    return s_info.name;
+    return SMRFilter_info.name;
 }
 
 void SMRFilter::addArgs(ProgramArgs& args)

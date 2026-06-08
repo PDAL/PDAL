@@ -73,7 +73,7 @@ double neighbor_interp_ground(PointViewPtr gView, const PointIdList& ids,
 } // unnamed namespace
 
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const HagNnFilter_info
 {
     "filters.hag_nn",
     "Computes height above ground using nearest-neighbor ground-classified "
@@ -81,11 +81,11 @@ static StaticPluginInfo const s_info
     "https://pdal.org/stages/filters.hag_nn.html"
 };
 
-CREATE_STATIC_STAGE(HagNnFilter, s_info)
+CREATE_STATIC_STAGE(HagNnFilter, HagNnFilter_info)
 
 std::string HagNnFilter::getName() const
 {
-    return s_info.name;
+    return HagNnFilter_info.name;
 }
 
 

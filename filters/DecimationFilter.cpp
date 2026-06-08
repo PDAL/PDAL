@@ -40,16 +40,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const DecimationFilter_info
 {
     "filters.decimation",
     "Rank decimation filter. Keep every Nth point",
     "https://pdal.org/stages/filters.decimation.html"
 };
 
-CREATE_STATIC_STAGE(DecimationFilter, s_info)
+CREATE_STATIC_STAGE(DecimationFilter, DecimationFilter_info)
 
-std::string DecimationFilter::getName() const { return s_info.name; }
+std::string DecimationFilter::getName() const { return DecimationFilter_info.name; }
 
 void DecimationFilter::addArgs(ProgramArgs& args)
 {

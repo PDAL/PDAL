@@ -66,7 +66,7 @@ SbetReader::~SbetReader()
     cleanup(); 
 }
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SbetReader_info
 {
     "readers.sbet",
     "SBET Reader",
@@ -74,9 +74,9 @@ static StaticPluginInfo const s_info
     { "sbet" }
 };
 
-CREATE_STATIC_STAGE(SbetReader, s_info)
+CREATE_STATIC_STAGE(SbetReader, SbetReader_info)
 
-std::string SbetReader::getName() const { return s_info.name; }
+std::string SbetReader::getName() const { return SbetReader_info.name; }
 
 void SbetReader::addArgs(ProgramArgs& args)
 {

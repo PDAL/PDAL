@@ -45,14 +45,14 @@ namespace pdal
 //---< PDAL PLUGIN REGISTRATION >-----------------------------------------------
 
 
-static PluginInfo const s_info
+static PluginInfo const RdbReader_info
 {
     "readers.rdb",
     "RIEGL RDB Reader",
     "https://pdal.org/stages/readers.rdb.html"
 };
 
-CREATE_SHARED_STAGE(RdbReader, s_info)
+CREATE_SHARED_STAGE(RdbReader, RdbReader_info)
 
 
 //---< RdbReader::PUBLIC >------------------------------------------------------
@@ -75,7 +75,7 @@ RdbReader::~RdbReader()
 
 std::string RdbReader::getName() const
 {
-    return s_info.name;
+    return RdbReader_info.name;
 }
 
 

@@ -42,18 +42,18 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const LabelDuplicatesFilter_info
 {
     "filters.label_duplicates",
     "Label duplicate points",
     "https://pdal.org/stages/filters.label_duplicates.html"
 };
 
-CREATE_STATIC_STAGE(LabelDuplicatesFilter, s_info)
+CREATE_STATIC_STAGE(LabelDuplicatesFilter, LabelDuplicatesFilter_info)
 
 std::string LabelDuplicatesFilter::getName() const
 {
-    return s_info.name;
+    return LabelDuplicatesFilter_info.name;
 }
 
 

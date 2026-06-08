@@ -45,18 +45,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GreedyProjection_info
 {
     "filters.greedyprojection",
     "Greedy Triangulation filter",
     "https://pdal.org/stages/filters.greedyprojection.html"
 };
 
-CREATE_STATIC_STAGE(GreedyProjection, s_info)
+CREATE_STATIC_STAGE(GreedyProjection, GreedyProjection_info)
 
 std::string GreedyProjection::getName() const
 {
-    return s_info.name;
+    return GreedyProjection_info.name;
 }
 
 

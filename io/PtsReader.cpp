@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const PtsReader_info
 {
     "readers.pts",
     "Pts Reader",
@@ -48,9 +48,9 @@ static StaticPluginInfo const s_info
     { "pts" }
 };
 
-CREATE_STATIC_STAGE(PtsReader, s_info)
+CREATE_STATIC_STAGE(PtsReader, PtsReader_info)
 
-std::string PtsReader::getName() const { return s_info.name; }
+std::string PtsReader::getName() const { return PtsReader_info.name; }
 
 void PtsReader::initialize(PointTableRef table)
 {

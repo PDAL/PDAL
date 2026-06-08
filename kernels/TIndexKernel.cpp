@@ -139,16 +139,16 @@ private:
     }
 };
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TIndexKernel_info
 {
     "kernels.tindex",
     "TIndex Kernel",
     "https://pdal.org/apps/tindex.html"
 };
 
-CREATE_STATIC_KERNEL(TIndexKernel, s_info)
+CREATE_STATIC_KERNEL(TIndexKernel, TIndexKernel_info)
 
-std::string TIndexKernel::getName() const { return s_info.name; }
+std::string TIndexKernel::getName() const { return TIndexKernel_info.name; }
 
 TIndexKernel::TIndexKernel() : SubcommandKernel()
 //ABELL - need to option this.

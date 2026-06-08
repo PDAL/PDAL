@@ -39,20 +39,20 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SeparateScanLineFilter_info
 {
     "filters.separatescanline",
     "Split data by scan line.",
     "https://pdal.org/stages/filters.separatescanline.html"
 };
-CREATE_STATIC_STAGE(SeparateScanLineFilter, s_info)
+CREATE_STATIC_STAGE(SeparateScanLineFilter, SeparateScanLineFilter_info)
 
 SeparateScanLineFilter::SeparateScanLineFilter()
 {}
 
 std::string SeparateScanLineFilter::getName() const
 {
-    return s_info.name;
+    return SeparateScanLineFilter_info.name;
 }
 
 void SeparateScanLineFilter::addArgs(ProgramArgs& args)

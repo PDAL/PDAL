@@ -54,16 +54,16 @@ namespace pdal
 static std::vector<std::string> ramps = {"awesome_green", "black_orange",
     "blue_hue", "blue_red", "heat_map", "pestel_shades", "blue_orange"};
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ColorinterpFilter_info
 {
     "filters.colorinterp",
     "Assigns RGB colors based on a dimension and a ramp",
     "https://pdal.org/stages/filters.colorinterp.html"
 };
 
-CREATE_STATIC_STAGE(ColorinterpFilter, s_info)
+CREATE_STATIC_STAGE(ColorinterpFilter, ColorinterpFilter_info)
 
-std::string ColorinterpFilter::getName() const { return s_info.name; }
+std::string ColorinterpFilter::getName() const { return ColorinterpFilter_info.name; }
 
 // The VSIFILE* that VSIFileFromMemBuffer creates in this
 // macro is never cleaned up. We're opening seven PNGs in the

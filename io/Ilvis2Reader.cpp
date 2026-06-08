@@ -43,16 +43,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const Ilvis2Reader_info
 {
     "readers.ilvis2",
     "ILVIS2 Reader",
     "https://pdal.org/stages/readers.ilvis2.html"
 };
 
-CREATE_STATIC_STAGE(Ilvis2Reader, s_info)
+CREATE_STATIC_STAGE(Ilvis2Reader, Ilvis2Reader_info)
 
-std::string Ilvis2Reader::getName() const { return s_info.name; }
+std::string Ilvis2Reader::getName() const { return Ilvis2Reader_info.name; }
 
 std::istream& operator >> (std::istream& in, Ilvis2Reader::IlvisMapping& mval)
 {

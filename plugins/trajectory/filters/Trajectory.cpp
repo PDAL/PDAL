@@ -13,14 +13,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const Trajectory_info
 {
     "filters.trajectory",
     "SRI Trajectory calculator",
     "http://link/to/documentation"
 };
 
-CREATE_SHARED_STAGE(Trajectory, s_info)
+CREATE_SHARED_STAGE(Trajectory, Trajectory_info)
 
 Trajectory::Trajectory() : m_args(new trajectory::Args)
 {}
@@ -29,7 +29,7 @@ Trajectory::~Trajectory()
 {}
 
 std::string Trajectory::getName() const
-{ return s_info.name; }
+{ return Trajectory_info.name; }
 
 void Trajectory::addArgs(ProgramArgs& args)
 {

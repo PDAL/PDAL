@@ -42,14 +42,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TileKernel_info
 {
     "kernels.tile",
     "Tile Kernel",
     "https://pdal.org/apps/tile.html"
 };
 
-CREATE_STATIC_KERNEL(TileKernel, s_info)
+CREATE_STATIC_KERNEL(TileKernel, TileKernel_info)
 
 TileKernel::TileKernel() : m_table(10000), m_repro(nullptr)
 {}
@@ -57,7 +57,7 @@ TileKernel::TileKernel() : m_table(10000), m_repro(nullptr)
 
 std::string TileKernel::getName() const
 {
-    return s_info.name;
+    return TileKernel_info.name;
 }
 
 

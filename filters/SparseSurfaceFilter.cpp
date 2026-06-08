@@ -41,14 +41,14 @@ namespace pdal
 
 using namespace Dimension;
 
-static PluginInfo const s_info{"filters.sparsesurface", "Sparse Surface Filter",
+static PluginInfo const SparseSurfaceFilter_info{"filters.sparsesurface", "Sparse Surface Filter",
                                "https://pdal.org/stages/filters.sparsesurface.html"};
 
-CREATE_STATIC_STAGE(SparseSurfaceFilter, s_info)
+CREATE_STATIC_STAGE(SparseSurfaceFilter, SparseSurfaceFilter_info)
 
 std::string SparseSurfaceFilter::getName() const
 {
-    return s_info.name;
+    return SparseSurfaceFilter_info.name;
 }
 
 void SparseSurfaceFilter::addArgs(ProgramArgs& args)

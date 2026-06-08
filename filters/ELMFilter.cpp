@@ -45,18 +45,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ELMFilter_info
 {
     "filters.elm",
     "Marks low points as noise.",
     "https://pdal.org/stages/filters.elm.html"
 };
 
-CREATE_STATIC_STAGE(ELMFilter, s_info)
+CREATE_STATIC_STAGE(ELMFilter, ELMFilter_info)
 
 std::string ELMFilter::getName() const
 {
-    return s_info.name;
+    return ELMFilter_info.name;
 }
 
 void ELMFilter::addArgs(ProgramArgs& args)

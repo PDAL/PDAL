@@ -40,16 +40,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const FerryFilter_info
 {
     "filters.ferry",
     "Copy data from one dimension to another.",
     "https://pdal.org/stages/filters.ferry.html"
 };
 
-CREATE_STATIC_STAGE(FerryFilter, s_info)
+CREATE_STATIC_STAGE(FerryFilter, FerryFilter_info)
 
-std::string FerryFilter::getName() const { return s_info.name; }
+std::string FerryFilter::getName() const { return FerryFilter_info.name; }
 
 void FerryFilter::addArgs(ProgramArgs& args)
 {

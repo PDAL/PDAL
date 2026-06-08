@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const GDALWriter_info
 {
     "writers.gdal",
     "Write a point cloud as a GDAL raster.",
@@ -52,11 +52,11 @@ static StaticPluginInfo const s_info
     { "tif", "tiff", "vrt" }
 };
 
-CREATE_STATIC_STAGE(GDALWriter, s_info)
+CREATE_STATIC_STAGE(GDALWriter, GDALWriter_info)
 
 std::string GDALWriter::getName() const
 {
-    return s_info.name;
+    return GDALWriter_info.name;
 }
 
 

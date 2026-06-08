@@ -7,16 +7,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const MyFilter_info
 {
     "filters.name",
     "My awesome filter",
     "http://link/to/documentation"
 };
 
-CREATE_SHARED_STAGE(MyFilter, s_info)
+CREATE_SHARED_STAGE(MyFilter, MyFilter_info)
 
-std::string MyFilter::getName() const { return s_info.name; }
+std::string MyFilter::getName() const { return MyFilter_info.name; }
 
 void MyFilter::addArgs(ProgramArgs& args)
 {

@@ -42,18 +42,18 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const NNDistanceFilter_info
 {
     "filters.nndistance",
     "NN-Distance Filter",
     "https://pdal.org/stages/filters.nndistance.html"
 };
 
-CREATE_STATIC_STAGE(NNDistanceFilter, s_info)
+CREATE_STATIC_STAGE(NNDistanceFilter, NNDistanceFilter_info)
 
 std::string NNDistanceFilter::getName() const
 {
-    return s_info.name;
+    return NNDistanceFilter_info.name;
 }
 
 

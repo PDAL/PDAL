@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SpzReader_info
 {
     "readers.spz",
     "SPZ Reader",
@@ -50,8 +50,8 @@ static StaticPluginInfo const s_info
     { "spz" }
 };
 
-CREATE_SHARED_STAGE(SpzReader, s_info)
-std::string SpzReader::getName() const { return s_info.name; }
+CREATE_SHARED_STAGE(SpzReader, SpzReader_info)
+std::string SpzReader::getName() const { return SpzReader_info.name; }
 
 void SpzReader::addArgs(ProgramArgs& args)
 {}

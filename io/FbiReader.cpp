@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const FbiReader_info
 {
     "readers.fbi",
     "Fbi Reader",
@@ -51,7 +51,7 @@ static StaticPluginInfo const s_info
     { "bin", "fbi" }
 };
 
-CREATE_STATIC_STAGE(FbiReader, s_info)
+CREATE_STATIC_STAGE(FbiReader, FbiReader_info)
 
 void readFbiHeader(fbi::FbiHdr* hdr, std::istream* m_istreamPtr)
 {
@@ -146,7 +146,7 @@ FbiReader::FbiReader()
 {
 }
 
-std::string FbiReader::getName() const { return s_info.name; }
+std::string FbiReader::getName() const { return FbiReader_info.name; }
 
 void FbiReader::initialize()
 {

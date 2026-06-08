@@ -48,14 +48,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info{"filters.fps", "Farthest point sampling filter",
+static PluginInfo const FarthestPointSamplingFilter_info{"filters.fps", "Farthest point sampling filter",
                                "https://pdal.org/stages/filters.fps.html"};
 
-CREATE_STATIC_STAGE(FarthestPointSamplingFilter, s_info)
+CREATE_STATIC_STAGE(FarthestPointSamplingFilter, FarthestPointSamplingFilter_info)
 
 std::string FarthestPointSamplingFilter::getName() const
 {
-    return s_info.name;
+    return FarthestPointSamplingFilter_info.name;
 }
 
 FarthestPointSamplingFilter::FarthestPointSamplingFilter()

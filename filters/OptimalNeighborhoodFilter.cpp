@@ -45,15 +45,15 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info{
+static StaticPluginInfo const OptimalNeighborhood_info{
     "filters.optimalneighborhood", "OptimalNeighborhood Filter",
     "https://pdal.org/stages/filters.optimalneighborhood.html"};
 
-CREATE_STATIC_STAGE(OptimalNeighborhood, s_info)
+CREATE_STATIC_STAGE(OptimalNeighborhood, OptimalNeighborhood_info)
 
 std::string OptimalNeighborhood::getName() const
 {
-    return s_info.name;
+    return OptimalNeighborhood_info.name;
 }
 
 OptimalNeighborhood::OptimalNeighborhood() : Filter() {}

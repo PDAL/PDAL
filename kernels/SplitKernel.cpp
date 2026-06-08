@@ -41,18 +41,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const SplitKernel_info
 {
     "kernels.split",
     "Split Kernel",
     "https://pdal.org/apps/split.html"
 };
 
-CREATE_STATIC_KERNEL(SplitKernel, s_info)
+CREATE_STATIC_KERNEL(SplitKernel, SplitKernel_info)
 
 std::string SplitKernel::getName() const
 {
-    return s_info.name;
+    return SplitKernel_info.name;
 }
 
 

@@ -44,18 +44,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const VoxelCenterNearestNeighborFilter_info
 {
     "filters.voxelcenternearestneighbor",
     "Voxel Center Nearest Neighbor Filter",
     "https://pdal.org/stages/filters.voxelcenternearestneighbor.html"
 };
 
-CREATE_STATIC_STAGE(VoxelCenterNearestNeighborFilter, s_info)
+CREATE_STATIC_STAGE(VoxelCenterNearestNeighborFilter, VoxelCenterNearestNeighborFilter_info)
 
 std::string VoxelCenterNearestNeighborFilter::getName() const
 {
-    return s_info.name;
+    return VoxelCenterNearestNeighborFilter_info.name;
 }
 
 void VoxelCenterNearestNeighborFilter::addArgs(ProgramArgs& args)

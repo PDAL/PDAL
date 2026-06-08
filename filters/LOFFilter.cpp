@@ -44,18 +44,18 @@ namespace pdal
 
 using namespace Dimension;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const LOFFilter_info
 {
     "filters.lof",
     "LOF Filter",
     "https://pdal.org/stages/filters.lof.html"
 };
 
-CREATE_STATIC_STAGE(LOFFilter, s_info)
+CREATE_STATIC_STAGE(LOFFilter, LOFFilter_info)
 
 std::string LOFFilter::getName() const
 {
-    return s_info.name;
+    return LOFFilter_info.name;
 }
 
 void LOFFilter::addArgs(ProgramArgs& args)

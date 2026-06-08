@@ -39,15 +39,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info{
+static PluginInfo const SkewnessBalancingFilter_info{
     "filters.skewnessbalancing", "Bartels & Wei Skewness Balancing",
     "https://pdal.org/stages/filters.skewnessbalancing.html"};
 
-CREATE_STATIC_STAGE(SkewnessBalancingFilter, s_info)
+CREATE_STATIC_STAGE(SkewnessBalancingFilter, SkewnessBalancingFilter_info)
 
 std::string SkewnessBalancingFilter::getName() const
 {
-    return s_info.name;
+    return SkewnessBalancingFilter_info.name;
 }
 
 void SkewnessBalancingFilter::addArgs(ProgramArgs& args)

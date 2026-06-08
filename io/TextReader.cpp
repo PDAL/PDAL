@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const TextReader_info
 {
     "readers.text",
     "Text Reader",
@@ -49,9 +49,9 @@ static StaticPluginInfo const s_info
     { "txt", "csv" }
 };
 
-CREATE_STATIC_STAGE(TextReader, s_info)
+CREATE_STATIC_STAGE(TextReader, TextReader_info)
 
-std::string TextReader::getName() const { return s_info.name; }
+std::string TextReader::getName() const { return TextReader_info.name; }
 
 // NOTE: - Forces reading of the entire file.
 QuickInfo TextReader::inspect()

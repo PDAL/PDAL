@@ -51,14 +51,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const CropFilter_info
 {
     "filters.crop",
     "Filter points inside or outside a bounding box or a polygon",
     "https://pdal.org/stages/filters.crop.html"
 };
 
-CREATE_STATIC_STAGE(CropFilter, s_info)
+CREATE_STATIC_STAGE(CropFilter, CropFilter_info)
 
 struct CropArgs
 {
@@ -78,7 +78,7 @@ CropFilter::ViewGeom::ViewGeom(ViewGeom&& vg) :
     m_poly(std::move(vg.m_poly)), m_gridPnps(std::move(vg.m_gridPnps))
 {}
 
-std::string CropFilter::getName() const { return s_info.name; }
+std::string CropFilter::getName() const { return CropFilter_info.name; }
 
 CropFilter::CropFilter() : m_args(new CropArgs)
 {}

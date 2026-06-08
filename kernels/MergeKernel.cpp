@@ -40,18 +40,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const MergeKernel_info
 {
     "kernels.merge",
     "Merge Kernel",
     "https://pdal.org/apps/merge.html"
 };
 
-CREATE_STATIC_KERNEL(MergeKernel, s_info)
+CREATE_STATIC_KERNEL(MergeKernel, MergeKernel_info)
 
 std::string MergeKernel::getName() const
 {
-    return s_info.name;
+    return MergeKernel_info.name;
 }
 
 

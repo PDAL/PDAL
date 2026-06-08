@@ -55,16 +55,16 @@ namespace pdal
 
 using namespace arrowsupport;
 
-static PluginInfo const s_info
+static PluginInfo const ArrowReader_info
 {
     "readers.arrow",
     "Arrow Reader",
     "https://pdal.org/stages/readers.arrow.html"
 };
 
-CREATE_SHARED_STAGE(ArrowReader, s_info)
+CREATE_SHARED_STAGE(ArrowReader, ArrowReader_info)
 
-std::string ArrowReader::getName() const { return s_info.name; }
+std::string ArrowReader::getName() const { return ArrowReader_info.name; }
 
 
 ArrowReader::ArrowReader()

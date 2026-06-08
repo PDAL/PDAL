@@ -40,18 +40,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const IQRFilter_info
 {
     "filters.iqr",
     "Interquartile Range Filter",
     "https://pdal.org/stages/filters.iqr.html"
 };
 
-CREATE_STATIC_STAGE(IQRFilter, s_info)
+CREATE_STATIC_STAGE(IQRFilter, IQRFilter_info)
 
 std::string IQRFilter::getName() const
 {
-    return s_info.name;
+    return IQRFilter_info.name;
 }
 
 void IQRFilter::addArgs(ProgramArgs& args)

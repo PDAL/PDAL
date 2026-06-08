@@ -37,16 +37,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info{
+static PluginInfo const GpsTimeConvert_info{
     "filters.gpstimeconvert",
     "Convert between GPS Time, GPS Standard Time, and GPS Week Seconds",
     "https://pdal.org/stages/filters.gpstimeconvert.html"};
 
-CREATE_STATIC_STAGE(GpsTimeConvert, s_info)
+CREATE_STATIC_STAGE(GpsTimeConvert, GpsTimeConvert_info)
 
 std::string GpsTimeConvert::getName() const
 {
-    return s_info.name;
+    return GpsTimeConvert_info.name;
 }
 
 void GpsTimeConvert::addArgs(ProgramArgs& args)

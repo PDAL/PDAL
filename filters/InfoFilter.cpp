@@ -42,16 +42,16 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const InfoFilter_info
 {
     "filters.info",
     "Gather basic info about points.",
     "https://pdal.org/stages/filters.info.html"
 };
 
-CREATE_STATIC_STAGE(InfoFilter, s_info)
+CREATE_STATIC_STAGE(InfoFilter, InfoFilter_info)
 
-std::string InfoFilter::getName() const { return s_info.name; }
+std::string InfoFilter::getName() const { return InfoFilter_info.name; }
 
 void InfoFilter::addArgs(ProgramArgs& args)
 {

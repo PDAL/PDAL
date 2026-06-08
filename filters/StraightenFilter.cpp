@@ -41,10 +41,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info{"filters.straighten", "Straighten filter",
+static PluginInfo const StraightenFilter_info{"filters.straighten", "Straighten filter",
                                "http://link/to/documentation"};
 
-CREATE_STATIC_STAGE(StraightenFilter, s_info)
+CREATE_STATIC_STAGE(StraightenFilter, StraightenFilter_info)
 
 struct StraightenFilter::Args
 {
@@ -61,7 +61,7 @@ StraightenFilter::StraightenFilter()
 
 std::string StraightenFilter::getName() const
 {
-    return s_info.name;
+    return StraightenFilter_info.name;
 }
 
 void StraightenFilter::addArgs(ProgramArgs& args)

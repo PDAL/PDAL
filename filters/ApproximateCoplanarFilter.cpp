@@ -48,18 +48,18 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info
+static StaticPluginInfo const ApproximateCoplanarFilter_info
 {
     "filters.approximatecoplanar",
     "Estimates the planarity of a neighborhood of points using eigenvalues.",
     "https://pdal.org/stages/filters.approximatecoplanar.html"
 };
 
-CREATE_STATIC_STAGE(ApproximateCoplanarFilter, s_info)
+CREATE_STATIC_STAGE(ApproximateCoplanarFilter, ApproximateCoplanarFilter_info)
 
 std::string ApproximateCoplanarFilter::getName() const
 {
-    return s_info.name;
+    return ApproximateCoplanarFilter_info.name;
 }
 
 

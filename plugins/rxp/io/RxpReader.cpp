@@ -46,16 +46,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static PluginInfo const RxpReader_info
 {
     "readers.rxp",
     "RXP Reader",
     "https://pdal.org/stages/readers.rxp.html"
 };
 
-CREATE_SHARED_STAGE(RxpReader, s_info)
+CREATE_SHARED_STAGE(RxpReader, RxpReader_info)
 
-std::string RxpReader::getName() const { return s_info.name; }
+std::string RxpReader::getName() const { return RxpReader_info.name; }
 
 Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
 {

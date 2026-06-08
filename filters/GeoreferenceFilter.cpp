@@ -42,11 +42,11 @@
 
 namespace pdal
 {
-static PluginInfo const s_info{
+static PluginInfo const GeoreferenceFilter_info{
     "filters.georeference", "Georeferencing filter",
     "https://pdal.org/stages/filters.georeference.html"};
 
-CREATE_STATIC_STAGE(GeoreferenceFilter, s_info)
+CREATE_STATIC_STAGE(GeoreferenceFilter, GeoreferenceFilter_info)
 
 using DimId = Dimension::Id;
 
@@ -100,7 +100,7 @@ GeoreferenceFilter::~GeoreferenceFilter() {}
 
 std::string GeoreferenceFilter::getName() const
 {
-    return s_info.name;
+    return GeoreferenceFilter_info.name;
 }
 
 void GeoreferenceFilter::addArgs(ProgramArgs& args)

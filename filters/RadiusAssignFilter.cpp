@@ -27,12 +27,12 @@ struct RadiusAssignFilter::Private
     PointIdList ptsToUpdate;
 };
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const RadiusAssignFilter_info = PluginInfo(
     "filters.radiusassign",
     "Re-assign some point attributes based KNN voting",
     "https://pdal.org/stages/filters.radiusassign.html" );
 
-CREATE_STATIC_STAGE(RadiusAssignFilter, s_info)
+CREATE_STATIC_STAGE(RadiusAssignFilter, RadiusAssignFilter_info)
 
 RadiusAssignFilter::RadiusAssignFilter() : m_p(new Private)
 {}
@@ -191,4 +191,3 @@ void RadiusAssignFilter::filter(PointView& view)
 }
 
 } // namespace pdal
-
