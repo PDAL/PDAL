@@ -138,13 +138,13 @@ BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, const SrsTransform& xform)
 
 CREATE_STATIC_STAGE(EptReader, EptReader_info);
 
-struct PolyXform
+struct EptPolyXform
 {
     Polygon poly;
     SrsTransform xform;
 };
 
-struct BoxXform
+struct EptBoxXform
 {
     BOX3D box;
     SrsTransform xform;
@@ -175,8 +175,8 @@ public:
     ept::AddonList addons;
     mutable std::mutex mutex;
     std::condition_variable contentsCv;
-    std::vector<PolyXform> polys;
-    BoxXform bounds;
+    std::vector<EptPolyXform> polys;
+    EptBoxXform bounds;
     SrsTransform llToBcbfTransform;
     uint64_t depthEnd {0};    // Zero indicates selection of all depths.
     uint64_t hierarchyStep {0};
@@ -284,7 +284,7 @@ void EptReader::initialize()
             xform.set(m_p->info->srs(), poly.getSpatialReference());
         for (Polygon& p : exploded)
         {
-            PolyXform ps { std::move(p), xform };
+            EptPolyXform ps { std::move(p), xform };
             m_p->polys.push_back(ps);
         }
     }
@@ -835,7 +835,7 @@ bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
         if (m_p->polys.empty())
             return true;
 
-        for (PolyXform& ps : m_p->polys)
+        for (EptPolyXform& ps : m_p->polys)
         {
             double x = xo;
             double y = yo;

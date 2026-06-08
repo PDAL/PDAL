@@ -202,13 +202,13 @@ std::string toString(const SrsOrderSpec& srsOrder)
 
 CREATE_STATIC_STAGE(CopcReader, CopcReader_info);
 
-struct PolyXform
+struct CopcPolyXform
 {
     Polygon poly;
     SrsTransform xform;
 };
 
-struct BoxXform
+struct CopcBoxXform
 {
     BOX3D box;
     SrsTransform xform;
@@ -244,8 +244,8 @@ public:
     las::LoaderDriver loader;
     std::condition_variable contentsCv;
     std::condition_variable consumedCv;
-    std::vector<PolyXform> polys;
-    BoxXform clip;
+    std::vector<CopcPolyXform> polys;
+    CopcBoxXform clip;
     int depthEnd;
     las::ExtraDims extraDims;
     BOX3D rootNodeExtent;
@@ -563,7 +563,7 @@ void CopcReader::createSpatialFilters()
             xform.set(getSpatialReference(), poly.getSpatialReference());
         for (Polygon& p : exploded)
         {
-            PolyXform ps { std::move(p), xform };
+            CopcPolyXform ps { std::move(p), xform };
             m_p->polys.push_back(ps);
         }
     }
@@ -852,7 +852,7 @@ bool CopcReader::processPoint(const char *inbuf, PointRef& dst)
         if (m_p->polys.empty())
             return true;
 
-        for (PolyXform& ps : m_p->polys)
+        for (CopcPolyXform& ps : m_p->polys)
         {
             double x = xo;
             double y = yo;
