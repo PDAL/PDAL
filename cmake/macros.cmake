@@ -131,7 +131,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
-    if(MSVC)
+    if(WIN32)
         set(${_name} "libpdal_plugin_${_type}_${_shortname}")
     else()
         set(${_name} "pdal_plugin_${_type}_${_shortname}")
