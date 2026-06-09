@@ -17,7 +17,7 @@ macro(PDAL_CREATE_PLUGIN)
     endif()
     set(PROJECT_NAME ${NAME}_${TYPE})
 
-    if(MSVC)
+    if(WIN32)
         set(TARGET "libpdal_plugin_${TYPE}_${NAME}")
     else()
         set(TARGET "pdal_plugin_${TYPE}_${NAME}")
