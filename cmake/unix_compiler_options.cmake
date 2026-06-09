@@ -1,6 +1,7 @@
 function(pdal_target_compile_settings target)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    pdal_target_precompile_headers(${target})
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
         #
         # VERSION_GREATER_EQUAL doesn't come until cmake 3.7

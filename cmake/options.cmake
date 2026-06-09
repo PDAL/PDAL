@@ -129,6 +129,11 @@ option(WITH_GCS
 add_feature_info("Google Cloud Storage" WITH_GCS
     "build with OpenSSL and others for Google storage IO support")
 
+option(PDAL_USE_PRECOMPILED_HEADERS
+    "Use compiler precompiled headers for PDAL C++ targets" OFF)
+add_feature_info("Precompiled headers" PDAL_USE_PRECOMPILED_HEADERS
+    "build PDAL targets with a shared precompiled header")
+
 #
 # Choose dependent options
 #

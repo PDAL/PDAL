@@ -21,6 +21,7 @@ cd $BUILDDIR
 #SANITIZE="-fsanitize=address,alignment,unreachable,vla-bound,vptr"
 #SANITIZE="-fsanitize=address,alignment,undefined"
 SANITIZE=""
+PRECOMPILED_HEADERS="${PDAL_USE_PRECOMPILED_HEADERS:-ON}"
 
 #CC=/usr/bin/cc
 #CXX=/usr/bin/c++
@@ -53,6 +54,7 @@ cmake   -G "Ninja"  \
         -DBUILD_I3S_TESTS=ON \
         -DBUILD_PLUGIN_TILEDB=OFF \
         -DBUILD_PLUGIN_SPZ=ON \
+        -DPDAL_USE_PRECOMPILED_HEADERS="$PRECOMPILED_HEADERS" \
         -DWITH_ZSTD=ON \
         -DWITH_LZMA=ON \
         -DWITH_TESTS=ON \

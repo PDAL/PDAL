@@ -5,6 +5,7 @@
 function(pdal_target_compile_settings target)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    pdal_target_precompile_headers(${target})
     target_compile_definitions(${target} PRIVATE
         -DWIN32_LEAN_AND_MEAN
         -DNOMINMAX
@@ -73,4 +74,3 @@ set(WINSOCK_LIBRARY ws2_32)
 function(pdal_lib_compile_settings target)
     pdal_target_compile_settings(${target})
 endfunction()
-
