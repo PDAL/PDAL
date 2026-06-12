@@ -59,11 +59,26 @@ void GroupByFilter::addArgs(ProgramArgs& args)
 
 void GroupByFilter::prepared(PointTableRef table)
 {
+    StringList badNames;
     PointLayoutPtr layout(table.layout());
-    m_dimId = layout->findDim(m_dimName);
-    if (m_dimId == Dimension::Id::Unknown)
-        throwError("Invalid dimension name '" + m_dimName + "'.");
-    // also need to check that we have a dimension with discrete values
+
+    for (const auto& name : m_dimNames)
+    {
+        auto id = layout->findDim(name);
+        if (id == Dimension::Id::Unknown)
+            badNames.push_back(name);
+        else
+            m_dimIds.push_back(id);
+
+        // TODO also check that dimensions are discrete valued (ints?)
+    }
+    if (!badNames.empty())
+    {
+        std::stringstream showBad;
+        for (const auto& name : badNames)
+            showBad << name << " ";
+        throwError("Invalid dimension name(s): " + showBad.str() + ".");
+    }
 }
 
 PointViewSet GroupByFilter::run(PointViewPtr inView)
