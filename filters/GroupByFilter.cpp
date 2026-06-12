@@ -83,8 +83,6 @@ void GroupByFilter::prepared(PointTableRef table)
 
 PointViewSet GroupByFilter::run(PointViewPtr inView)
 {
-    PointViewSet viewSet;
-
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
         std::vector<int64_t> key(m_dimIds.size()); // could hash int values
@@ -100,11 +98,12 @@ PointViewSet GroupByFilter::run(PointViewPtr inView)
         groupView->appendPoint(*inView.get(), idx);
     }
 
-    // Pull the buffers out of the map and stick them in the standard
-    // output set.
-    for (auto bi = m_viewMap.begin(); bi != m_viewMap.end(); ++bi)
-        viewSet.insert(bi->second);
-    return viewSet;
+    // Transfer grouped pointviews to output set.
+    PointViewSet groupedViewSet;
+    for (const auto& groupKV : m_viewMap)
+        groupedViewSet.insert(groupKV.second);
+
+    return groupedViewSet;
 }
 
 } // namespace pdal
