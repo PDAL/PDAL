@@ -62,7 +62,7 @@ private:
     virtual PointViewSet run(PointViewPtr view);
 
     GroupByFilter& operator=(const GroupByFilter&); // not implemented
-    GroupByFilter(const GroupByFilter&); // not implemented
+    GroupByFilter(const GroupByFilter&);            // not implemented
 };
 
 } // namespace pdal
