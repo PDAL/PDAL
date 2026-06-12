@@ -94,10 +94,10 @@ PointViewSet GroupByFilter::run(PointViewPtr inView)
             key.push_back(val);
         }
 
-        PointViewPtr& outView = m_viewMap[key];
-        if (!outView)
-            outView = inView->makeNew();
-        outView->appendPoint(*inView.get(), idx);
+        PointViewPtr& groupView = m_viewMap[key];
+        if (!groupView)
+            groupView = inView->makeNew();
+        groupView->appendPoint(*inView.get(), idx);
     }
 
     // Pull the buffers out of the map and stick them in the standard
