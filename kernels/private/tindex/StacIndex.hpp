@@ -27,6 +27,7 @@ struct StacFileInfo : FileInfo
     void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
         MetadataNode& infoMeta, std::string pcType)
     {
+        addDatetime(m_properties, readerMeta, infoMeta);
         stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
     }
 
@@ -88,6 +89,7 @@ public:
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
     void fillFileInfo(FileInfoPtr& fileInfo) override;
+    bool fastBoundary(PipelineManager& manager, FileInfo& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) override;
 

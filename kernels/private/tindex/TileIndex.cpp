@@ -30,6 +30,20 @@ void TileIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     runBoundary(reader, *fileInfo, manager);
 }
 
+bool TileIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo)
+{
+    Stage* reader = manager.stages().front();
+    QuickInfo qi = reader->preview();
+    if (!qi.valid())
+        return false;
+
+    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
+    if (!qi.m_srs.empty())
+        fileInfo.m_srs = qi.m_srs.getWKT();
+    fileInfo.m_gridHeight = 0.0;
+    return true;
+}
+
 void TileIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     Feature& feature)
 {

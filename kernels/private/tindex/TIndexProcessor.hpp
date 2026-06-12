@@ -92,8 +92,9 @@ private:
     virtual void fillFileInfo(FileInfoPtr& fileInfo) {}
     virtual void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) {}
+    virtual bool fastBoundary(PipelineManager& manager, FileInfo& fileInfo) 
+        { return false; }
 
-    bool fastBoundary(Stage& reader, FileInfo& fileInfo);
     bool createFeature(const FileInfoPtr& fileInfo);
     bool isFileIndexed(const FileInfoPtr& fileInfo);
     Polygon prepareGeometry(const FileInfo& fileInfo);

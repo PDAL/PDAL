@@ -78,7 +78,7 @@ inline std::string getDateStr(std::string year, std::string doy)
 
 
 inline void stacPointcloud(MetadataNode& root, MetadataNode& statsMeta,
-    MetadataNode& readerMeta, MetadataNode& props, std::string pcType)
+    MetadataNode& infoMeta, MetadataNode& props, std::string pcType)
 {
     std::string filename = getChild(root, "filename").value();
     std::string fileExt = FileUtils::extension(filename);
@@ -89,8 +89,8 @@ inline void stacPointcloud(MetadataNode& root, MetadataNode& statsMeta,
     //Gather stac information for poinctloud extension
     auto pc_stats = statsMeta.findChildren([](MetadataNode& n)
         { return n.name()=="statistic"; });
-    auto&& pc_count = getChild(readerMeta, "num_points");
-    auto pc_schemas = getChild(readerMeta, "schema").findChildren(
+    auto&& pc_count = getChild(infoMeta, "num_points");
+    auto pc_schemas = getChild(infoMeta, "schema").findChildren(
         [](MetadataNode& n)
         { return n.name()=="dimensions"; });
 
@@ -147,6 +147,23 @@ inline void stacProjection(MetadataNode& root, MetadataNode& statsMeta,
     }
 }
 
+inline void addDatetime(MetadataNode& properties, MetadataNode& readerMeta,
+    MetadataNode& infoMeta)
+{
+    //TODO make sure these are available
+    //For now, if there isn't date similar to laz/las/copc then use now.
+    try
+    {
+        std::string doy = getChild(readerMeta, "creation_doy").value();
+        std::string year = getChild(readerMeta, "creation_year").value();
+        properties.add("datetime", getDateStr(year, doy));
+    } catch (std::exception &)
+    {
+        auto&& datetime = getChild(infoMeta, "now");
+        properties.add("datetime", datetime);
+    }
+}
+
 inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& infoMeta, std::string pcType)
 {
@@ -160,18 +177,7 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
         MetadataNode id = stac.add("id", stem);
         MetadataNode properties = stac.add("properties");
 
-        //TODO make sure these are available
-        //For now, if there isn't date similar to laz/las/copc then use now.
-        try
-        {
-            std::string doy = getChild(readerMeta, "creation_doy").value();
-            std::string year = getChild(readerMeta, "creation_year").value();
-            properties.add("datetime", getDateStr(year, doy));
-        } catch (std::exception &)
-        {
-            auto&& datetime = getChild(infoMeta, "now");
-            properties.add("datetime", datetime);
-        }
+        addDatetime(properties, readerMeta, infoMeta);
 
         stac.add("type", "Feature");
         stac.add("stac_version", "1.0.0");

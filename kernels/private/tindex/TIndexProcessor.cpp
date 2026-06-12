@@ -238,29 +238,16 @@ bool TIndexProcessor::runBoundary(Stage& stage, FileInfo& fileInfo,
         catch(pdal_error& e)
         {
             fast = true;
+            // Destroy the hexbin filter -- the manager gets executed again for STAC
+            manager.destroyStage(&hexer);
             m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " <<
                 fileInfo.m_filename << " with error: '" << e.what() << std::endl;
         }
     }
 
     if (fast)
-    {
-        Stage* reader = manager.stages().front();
-        return fastBoundary(*reader, fileInfo);
-    }
-    return true;
-}
+        return fastBoundary(manager, fileInfo);
 
-bool TIndexProcessor::fastBoundary(Stage& reader, FileInfo& fileInfo)
-{
-    QuickInfo qi = reader.preview();
-    if (!qi.valid())
-        return false;
-
-    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
-    if (!qi.m_srs.empty())
-        fileInfo.m_srs = qi.m_srs.getWKT();
-    fileInfo.m_gridHeight = 0.0;
     return true;
 }
 

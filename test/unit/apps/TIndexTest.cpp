@@ -339,4 +339,6 @@ TEST(TIndex, test9)
     FileUtils::deleteFile(outSpec);
     std::string output;
     Utils::run_shell_command(cmd, output);
+
+    FileUtils::deleteFile(outSpec);
 }

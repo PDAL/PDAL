@@ -57,6 +57,24 @@ void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     }
 }
 
+bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo)
+{
+    // We need to execute the entire manager to get the info & stats metadata.
+    // The hexbin filter isn't run so it's marginally faster.
+    Stage* reader = manager.stages().front();
+    // Would be ideal to avoid the preview call. Maybe can get info from the metadata?
+    QuickInfo qi = reader->preview();
+    if (!qi.valid())
+        return false;
+
+    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
+    if (!qi.m_srs.empty())
+        fileInfo.m_srs = qi.m_srs.getWKT();
+    fileInfo.m_gridHeight = 0.0;
+
+    return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
+}
+
 void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     Feature& feature)
 {
