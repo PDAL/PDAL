@@ -54,8 +54,8 @@ public:
 
 private:
     std::map<uint64_t, PointViewPtr> m_viewMap;
-    std::string m_dimName;
-    Dimension::Id m_dimId;
+    StringList m_dimNames;
+    Dimension::IdList m_dimIds;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);

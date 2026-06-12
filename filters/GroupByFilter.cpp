@@ -53,7 +53,8 @@ std::string GroupByFilter::getName() const
 
 void GroupByFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension containing data to be grouped", m_dimName);
+    args.add("dimension", "Dimension containing data to be grouped",
+             m_dimNames);
 }
 
 void GroupByFilter::prepared(PointTableRef table)
@@ -71,7 +72,7 @@ PointViewSet GroupByFilter::run(PointViewPtr inView)
 
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        int64_t val = inView->getFieldAs<int64_t>(m_dimId, idx);
+        int64_t val = inView->getFieldAs<int64_t>(m_dimIds, idx);
         PointViewPtr& outView = m_viewMap[val];
         if (!outView)
             outView = inView->makeNew();
