@@ -87,8 +87,14 @@ PointViewSet GroupByFilter::run(PointViewPtr inView)
 
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        int64_t val = inView->getFieldAs<int64_t>(m_dimIds, idx);
-        PointViewPtr& outView = m_viewMap[val];
+        std::vector<int64_t> key(m_dimIds.size()); // could hash int values
+        for (const auto& dimId : m_dimIds)
+        {
+            int64_t val = inView->getFieldAs<int64_t>(dimId, idx);
+            key.push_back(val);
+        }
+
+        PointViewPtr& outView = m_viewMap[key];
         if (!outView)
             outView = inView->makeNew();
         outView->appendPoint(*inView.get(), idx);
