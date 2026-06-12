@@ -53,7 +53,7 @@ std::string GroupByFilter::getName() const
 
 void GroupByFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension containing data to be grouped",
+    args.add("dimension", "1 or more dimensions by which to group data",
              m_dimNames);
 }
 
@@ -72,6 +72,7 @@ void GroupByFilter::prepared(PointTableRef table)
 
         // TODO also check that dimensions are discrete valued (ints?)
     }
+
     if (!badNames.empty())
     {
         std::stringstream showBad;
