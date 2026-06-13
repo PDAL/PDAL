@@ -172,15 +172,24 @@ TEST(SortFilterTest, pipelineJSON)
     }
 }
 
-TEST(SortFilterTest, pipelineJSON_multidim_order)
+TEST(SortFilterTest, multidims_in_order_of_significance)
 {
-    // 1.2-with-color.las (in pipeline) has classes 1-2 and returns 1-4
-    PipelineManager mgr;
+    // 1.2-with-color.las has classes 1-2 and returns 1-4
+    LasReader r;
+    Options ro;
+    ro.add("filename", Support::datapath("las/1.2-with-color.las"));
+    r.setOptions(ro);
 
-    mgr.readPipeline(Support::configuredpath("filters/sort-multidim.json"));
-    mgr.execute();
+    SortFilter f;
+    Options fo;
 
-    PointViewSet viewSet = mgr.views();
+    fo.add("dimension", "Classification,NumberOfReturns");
+    f.setOptions(fo);
+    f.setInput(r);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet viewSet = f.execute(t);
 
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
