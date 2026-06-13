@@ -78,7 +78,7 @@ void GroupByFilter::prepared(PointTableRef table)
         std::stringstream showBad;
         for (const auto& name : badNames)
             showBad << name << " ";
-        throwError("Invalid dimension name(s): " + showBad.str() + ".");
+        throwError("Invalid dimension name(s): " + showBad.str());
     }
 }
 
