@@ -41,6 +41,7 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <istream>
 #include <limits>
@@ -254,6 +255,40 @@ namespace Utils
         while (size--)
             i += *buf++;
         return i;
+    }
+
+    /**
+      Accumulates successive hashes of `value` into a single `size_t` buffer.
+
+      Taken from boost, etc.
+      https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0814r0.pdf
+      https://www.boost.org/doc/libs/latest/libs/container_hash/doc/html/hash.html#ref_hash_combine
+
+      \param hash  The accumulated hash. An inital value of 0 is fine.
+      \param value A type that std::hash can operate on.
+    */
+    template <typename H = size_t, typename Hashable>
+    PDAL_EXPORT inline void hashCombine(H& hash, const Hashable& value)
+    {
+        hash ^= std::hash<Hashable>()(value) + 0x9e3779b9 + (hash << 6) +
+                (hash >> 2);
+    }
+
+    /**
+      Create a hash from all `values`.
+
+      See hashCombine() for references.
+
+      \param values One or more values compatible with std::hash.
+      \return The computed hash.
+     */
+    template <typename H = size_t, typename... Hashable>
+    PDAL_EXPORT H hashAll(const Hashable&... values)
+    {
+        H hash = 0;
+        for (const auto& v : values)
+            hashCombine(hash, v);
+        return hash;
     }
 
     /**
