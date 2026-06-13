@@ -34,9 +34,8 @@
 
 #include "GroupByFilter.hpp"
 
-#include <functional>
-
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -84,30 +83,16 @@ void GroupByFilter::prepared(PointTableRef table)
     }
 }
 
-/**
-    Accumulates successive hashes of `value` into a single 64-bit buffer.
-    Taken from boost, etc.
-    https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0814r0.pdf
-
-    \param hash  The accumulated 64-bit hash. An inital value of 0 is fine.
-    \param value A type that std::hash can operate on.
-*/
-template <typename Hashable>
-void hashCombine(uint64_t& hash, const Hashable& value)
-{
-    hash ^=
-        std::hash<Hashable>()(value) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-}
-
 PointViewSet GroupByFilter::run(PointViewPtr inView)
 {
+    // create groups by hashing dimension values into a key
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        uint64_t key = 0;
+        size_t key = 0;
         for (const auto& dimId : m_dimIds)
         {
             int64_t val = inView->getFieldAs<int64_t>(dimId, idx);
-            hashCombine(key, val);
+            Utils::hashCombine(key, val);
         }
 
         PointViewPtr& groupView = m_viewMap[key];

@@ -53,7 +53,7 @@ public:
     std::string getName() const;
 
 private:
-    std::map<uint64_t, PointViewPtr> m_viewMap;
+    std::map<size_t, PointViewPtr> m_viewMap;
     StringList m_dimNames;
     Dimension::IdList m_dimIds;
 
