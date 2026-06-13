@@ -172,6 +172,53 @@ TEST(SortFilterTest, pipelineJSON)
     }
 }
 
+TEST(SortFilterTest, pipelineJSON_multidim_order)
+{
+    // 1.2-with-color.las (in pipeline) has classes 1-2 and returns 1-4
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("filters/sort-multidim.json"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    // when multidimensional sort is done (in the filter) in "forward" order,
+    // listing "Classification,NumberOfReturns" sorts points such that
+    // NumberOfRetuns is more "significant" than Classification.
+    // when sort is done "reverse", Classification is significant.
+    // the expectation for listing multiple dimensions for the "dimension"
+    // parameter is that the user has listed them in order of significance.
+    auto expectedSignificantDim = Dimension::Id::Classification;
+    auto expectedSecondaryDim = Dimension::Id::NumberOfReturns;
+
+    // start with expected final condition, assignment in loop will
+    // falsify IF an undersireably condition is encountered.
+    // requires that significant dim has >1 unique value.
+    bool primaryDimIsOrdered = true;
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        double v1 = view->getFieldAs<double>(expectedSignificantDim, i - 1);
+        double v2 = view->getFieldAs<double>(expectedSignificantDim, i);
+        primaryDimIsOrdered |= v1 <= v2;
+    }
+    EXPECT_TRUE(primaryDimIsOrdered);
+
+    // start with opposite, assignment in loop will falsify when
+    // the undesireable condition is met.
+    // requires that secondary dim has >1 unique value.
+    bool secondaryDimIsOrdered = true;
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        double v1 = view->getFieldAs<double>(expectedSecondaryDim, i - 1);
+        double v2 = view->getFieldAs<double>(expectedSecondaryDim, i);
+        secondaryDimIsOrdered &= v1 <= v2;
+    }
+    EXPECT_FALSE(secondaryDimIsOrdered);
+}
+
 TEST(SortFilterTest, issue1382)
 {
 
