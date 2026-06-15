@@ -39,7 +39,7 @@
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 #ifdef _WIN32
-#include <pdal/util/Stackwalker.hpp>
+#include <pdal/util/Stackwalker.h>
 #endif
 
 namespace pdal
