@@ -29,9 +29,9 @@ yq -y -i '.source.path = "../../"' recipe/recipe.yaml
 yq -y -i '.build.number = 2112' recipe/recipe.yaml
 
 # Update installation messages of plugins to reflect the appropriate channel
-sed "s/-c conda-forge/-c pdal-master/" < recipe/build_core.sh >  recipe/build.sh.new
+sed "s/-c conda-forge/-c pdal-master/" < recipe/build.sh >  recipe/build.sh.new
 mv recipe/build.sh.new  recipe/build.sh
-sed "s/-c conda-forge/-c pdal-master/" < recipe/build_core.bat > recipe/build.bat.new
+sed "s/-c conda-forge/-c pdal-master/" < recipe/build.bat > recipe/build.bat.new
 mv recipe/build.bat.new  recipe/build.bat
 
 
