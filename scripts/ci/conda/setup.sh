@@ -23,8 +23,8 @@ cd libpdal-feedstock
 sed -E 's/version: "([0-9]+)\.([0-9]+)\.([0-9]+)"/version: "\1.\2.99"/' < recipe/recipe.yaml > recipe.yaml
 mv recipe.yaml recipe/recipe.yaml
 
-yq -y -i '.source.url = ""' recipe/recipe.yaml
-yq -y -i '.source.sha256 = ""' recipe/recipe.yaml
+yq -y -i 'del(.source.url)' recipe/recipe.yaml
+yq -y -i 'del(.source.sha256)' recipe/recipe.yaml
 yq -y -i '.source.path = "../../"' recipe/recipe.yaml
 yq -y -i '.build.number = 2112' recipe/recipe.yaml
 

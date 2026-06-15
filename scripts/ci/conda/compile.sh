@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mkdir -p packages
 
 CONDA_PLAT=""
@@ -25,9 +27,9 @@ elif grep -q "macos-15-intel" <<< "$GHA_CI_PLATFORM"; then
     ARCH="64"
 fi
 
-echo "CONDA_SUBDIR=${CONDA_PLAT}-${ARCH}" >> $GITHUB_ENV
+#echo "CONDA_SUBDIR=${CONDA_PLAT}-${ARCH}" >> $GITHUB_ENV
 
-rattler-build build --recipe recipe/recipe_patched.yaml  --output-dir packages -m ".ci_support/${CONDA_PLAT}_${ARCH}_.yaml"
+rattler-build build --recipe recipe/recipe.yaml  --output-dir packages -m ".ci_support/${CONDA_PLAT}_${ARCH}_.yaml"
 conda create -y -n test -c ./packages/${CONDA_PLAT}-${ARCH} python libgdal gdal
 conda deactivate
 
