@@ -27,7 +27,7 @@ jobs:
         platform: ['windows-latest','macos-latest','ubuntu-latest']
 
     env:
-      PDAL_PLATFORM: ${{ matrix.platform }}
+      GHA_CI_PLATFORM: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v6
 
