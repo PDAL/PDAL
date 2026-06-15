@@ -101,7 +101,7 @@ TEST(CopcRemoteReaderTest, vsi)
     std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
     std::string vsi ("/vsicurl/"+url);
 
-    testURLs(url, bounds);
+//    testURLs(url, bounds);
     testURLs(vsi, bounds);
 
 

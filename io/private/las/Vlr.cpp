@@ -367,13 +367,14 @@ void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
     auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
     auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
 
-    ThreadPool pool(2);
+    std::thread t1(vlrWalker);
+    std::thread t2(evlrWalker);
 
-    if (vlrCount)
-        pool.add(vlrWalker);
-    if (evlrCount)
-        pool.add(evlrWalker);
-    pool.await();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::cerr << "Waiting for threads!\n";
+    t1.join();
+    t2.join();
+    std::cerr << "Done Waiting for threads!\n";
 }
 
 void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
