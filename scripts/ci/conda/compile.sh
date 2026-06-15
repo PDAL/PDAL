@@ -1,25 +1,34 @@
 #!/bin/bash
 
-mkdir packages
+mkdir -p packages
 
-export CI_PLAT=""
-if grep -q "windows" <<< "$PDAL_PLATFORM"; then
-    CI_PLAT="win"
+CONDA_PLAT=""
+if grep -q "windows" <<< "$GHA_CI_PLATFORM"; then
+    CONDA_PLAT="win"
     ARCH="64"
 fi
 
-if grep -q "ubuntu" <<< "$PDAL_PLATFORM"; then
-    CI_PLAT="linux"
-    ARCH="64"
+if grep -q "ubuntu" <<< "$GHA_CI_PLATFORM"; then
+    CONDA_PLAT="linux"
+    if grep -q "arm" <<< "$GHA_CI_PLATFORM"; then
+      ARCH="aarch64"
+    else
+      ARCH="64"
+    fi
 fi
 
-if grep -q "macos" <<< "$PDAL_PLATFORM"; then
-    CI_PLAT="osx"
+if grep -q "macos-14" <<< "$GHA_CI_PLATFORM"; then
+    CONDA_PLAT="osx"
     ARCH="arm64"
+elif grep -q "macos-15-intel" <<< "$GHA_CI_PLATFORM"; then
+    CONDA_PLAT="osx"
+    ARCH="64"
 fi
 
-conda-build recipe -c conda-forge --use-local --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m ".ci_support/${CI_PLAT}_${ARCH}_.yaml"
-conda create -y -n test -c ./packages/${CI_PLAT}-${ARCH} python pdal
+echo "CONDA_SUBDIR=${CONDA_PLAT}-${ARCH}" >> $GITHUB_ENV
+
+rattler-build build --recipe recipe/recipe_patched.yaml  --output-dir packages -m ".ci_support/${CONDA_PLAT}_${ARCH}_.yaml"
+conda create -y -n test -c ./packages/${CONDA_PLAT}-${ARCH} python libgdal gdal
 conda deactivate
 
 conda activate test
