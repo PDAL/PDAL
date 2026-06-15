@@ -84,6 +84,8 @@
 
 #include "Stackwalker.h"
 
+#include <iostream>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <tchar.h>
@@ -1196,7 +1198,8 @@ BOOL StackWalker::ShowCallstack(HANDLE                    hThread,
     }
     else
     {
-      SuspendThread(hThread);
+      int suspendCount = SuspendThread(hThread);
+      std::cerr << "Suspend count = " << suspendCount << "!\n";
       memset(&c, 0, sizeof(CONTEXT));
       c.ContextFlags = USED_CONTEXT_FLAGS;
 
@@ -1206,6 +1209,7 @@ BOOL StackWalker::ShowCallstack(HANDLE                    hThread,
       // See also: http://www.howzatt.demon.co.uk/articles/DebuggingInWin64.html
       if (GetThreadContext(hThread, &c) == FALSE)
       {
+        std::cerr << "Thread context failed!\n";
         ResumeThread(hThread);
         return FALSE;
       }
