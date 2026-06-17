@@ -33,9 +33,11 @@ struct Field
         m_name(name), m_fieldType(fieldType), m_subtype(subtype)
     {}
 
+    bool valid() const { return !m_name.empty(); }
+
     std::string m_name;
     OGRFieldType m_fieldType;
-    OGRFieldSubType m_subtype = OFSTNone;
+    OGRFieldSubType m_subtype;
     int m_index = -1;  // Integer value proxy for field.
 };
 

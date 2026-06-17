@@ -6,9 +6,10 @@ namespace pdal
 namespace tindex
 {
 
-StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType)
+StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
+    bool statistics)
     : TIndexProcessor(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
-      m_pcType(pcType)
+      m_pcType(pcType), m_writeStats(statistics)
 {
 #if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,9,0)
     throw TIndexError("STAC GeoParquet support requires GDAL 3.9.0 or later");
@@ -25,7 +26,9 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType)
     m_pcEncodingField = m_dataset->defineField("pc:encoding", OFTString);
     m_pcTypeField = m_dataset->defineField("pc:type", OFTString);
     m_pcSchemasField = m_dataset->defineField("pc:schemas", OFTString, OFSTJSON);
-    m_pcStatsField = m_dataset->defineField("pc:statistics", OFTString, OFSTJSON);
+    // Maybe write an empty field instead, so that it stays in the schema
+    if (m_writeStats)
+        m_pcStatsField = m_dataset->defineField("pc:statistics", OFTString, OFSTJSON);
 
     m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
@@ -45,22 +48,26 @@ void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     manager.stageOptions() = m_stageOptions;
 
     Stage& reader = manager.makeReader(stacFileInfo.m_filename, "");
-    Stage& info = manager.makeFilter("filters.info", reader);
-    Stage& stats = manager.makeFilter("filters.stats", info);
+    // Could add an info filter here if the reader isn't LAS/COPC
+    //Stage& info = manager.makeFilter("filters.info", reader);
+    Stage* stats(nullptr);
+    if (m_writeStats)
+        stats = &(manager.makeFilter("filters.stats", reader));
 
-    if (runBoundary(stats, stacFileInfo, manager))
+    if (runBoundary(stacFileInfo, manager))
     {
         MetadataNode readerMeta = reader.getMetadata();
-        MetadataNode statsMeta = stats.getMetadata();
-        MetadataNode infoMeta = info.getMetadata();
-        stacFileInfo.addMetadata(statsMeta, readerMeta, infoMeta, m_pcType);
+        MetadataNode statsMeta;
+        if (stats)
+            statsMeta = stats->getMetadata();
+        MetadataNode schema = 
+            manager.pointTable().layout()->toMetadata().clone("schema");
+        stacFileInfo.addMetadata(readerMeta, statsMeta, schema);
     }
 }
 
 bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo)
 {
-    // We need to execute the entire manager to get the info & stats metadata.
-    // The hexbin filter isn't run so it's marginally faster.
     Stage* reader = manager.stages().front();
     // Would be ideal to avoid the preview call. Maybe can get info from the metadata?
     QuickInfo qi = reader->preview();
@@ -72,7 +79,11 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo
         fileInfo.m_srs = qi.m_srs.getWKT();
     fileInfo.m_gridHeight = 0.0;
 
-    return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
+    // If there's a stats filter we still need to execute the whole thing.
+    // Maybe should make a simpler check.
+    if (manager.stages().size() > 1)
+        return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
+    return true;
 }
 
 void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
@@ -91,7 +102,8 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     feature.setField(m_datetimeField, stacFileInfo.datetime());
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
     feature.setField(m_pcSchemasField, stacFileInfo.schemas());
-    feature.setField(m_pcStatsField, stacFileInfo.statistics());
+    if (m_writeStats)
+        feature.setField(m_pcStatsField, stacFileInfo.statistics());
 }
 
 } // namespace pdal

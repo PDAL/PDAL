@@ -93,6 +93,7 @@ private:
     std::string m_assignSrsString;
     bool m_usestdin;
     bool m_writeStacGeoparquet;
+    bool m_showStats;
     std::string m_originalSrs;
     size_t m_maxFieldSize;
 };

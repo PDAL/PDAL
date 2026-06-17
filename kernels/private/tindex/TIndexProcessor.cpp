@@ -210,8 +210,7 @@ bool TIndexProcessor::isFileIndexed(const FileInfoPtr& fileInfo)
     return output;
 }
 
-bool TIndexProcessor::runBoundary(Stage& stage, FileInfo& fileInfo,
-    PipelineManager& manager)
+bool TIndexProcessor::runBoundary(FileInfo& fileInfo, PipelineManager& manager)
 {
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
@@ -225,8 +224,12 @@ bool TIndexProcessor::runBoundary(Stage& stage, FileInfo& fileInfo,
             opts.add("where", m_args.boundaryExpr);
             hexer.addOptions(opts);
         }
-        hexer.setInput(stage);
+
+        // Could be a reader or a stats filter
+        Stage *stage = manager.stages().back();
+        hexer.setInput(*stage);
         manager.addStage(&hexer);
+
         try
         {
             manager.execute(ExecMode::PreferStream);

@@ -96,6 +96,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "GeoParquet file", m_writeStacGeoparquet);
         args.add("pc_type", "Pointcloud type for STAC generation (lidar, "
             "eopc, radar, sonar, other).", m_pcType, "lidar");
+        args.add("statistics", "Show stats on all points for STAC generation "
+            "(reads entire dataset)", m_showStats);
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
@@ -314,7 +316,7 @@ void TIndexKernel::createFile()
     }
 
     if (m_writeStacGeoparquet)
-        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType));
+        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType, m_showStats));
     else
         m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
             m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));

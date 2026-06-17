@@ -13,42 +13,52 @@ static const std::string STAC_VERSION = "1.1.0";
 
 struct StacFileInfo : FileInfo
 {
-    StacFileInfo(const std::string& filename) : FileInfo(filename)
+    StacFileInfo(const std::string& filename) : FileInfo(filename), m_count(0)
     {
-        // stacProjection & stacPointCloud need these set in the root metadata
-        // for it to work. Should refactor to be less metadata dependent
-        m_root.add("filename", filename);
+        m_encoding = FileUtils::extension(filename);
         MetadataNode self = m_root.addList("links");
         self.add("rel", "derived_from");
         self.add("href", filename);
-        m_properties = m_root.add("properties");
     }
 
-    void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
-        MetadataNode& infoMeta, std::string pcType)
+    void addMetadata(MetadataNode& readerMeta, MetadataNode& statsMeta, MetadataNode& schema)
     {
-        addDatetime(m_properties, readerMeta, infoMeta);
-        stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
+        auto schemas = schema.findChildren([](MetadataNode& n)
+            { return n.name()=="dimensions"; });
+        for (auto& s : schemas)
+            m_root.addList(s.clone("pc:schemas"));
+
+        // stageMetadata will always have reader metadata, but may not have stats.
+        if (!statsMeta.empty())
+        {
+            auto props = statsMeta.findChildren([](MetadataNode& n)
+                { return n.name()=="statistic"; });
+            for (auto& p : props)
+                m_root.addList(p.clone("pc:statistics"));
+        }
+
+        // get LAS/COPC/EPT point count
+
+        // EPT
+        MetadataNode points = readerMeta.findChild("points");
+        // LAS/COPC
+        MetadataNode count = readerMeta.findChild("count");
+        if (!points.empty())
+            m_count = points.value<point_count_t>();
+        else if (!count.empty())
+            m_count = count.value<point_count_t>();
+    
+        addDatetime(m_root, readerMeta);
     }
 
     std::string schemas()
     {
-        return jsonElement(m_properties.children("pc:schemas"));
+        return jsonElement(m_root.children("pc:schemas"));
     }
     
     std::string statistics()
     {
-        return jsonElement(m_properties.children("pc:statistics"));
-    }
-
-    int count()
-    {
-        return getChild(m_properties, "pc:count").value<int>();
-    }
-
-    std::string encoding()
-    {
-        return getChild(m_properties, "pc:encoding").value();
+        return jsonElement(m_root.children("pc:statistics"));
     }
 
     std::string links()
@@ -58,10 +68,17 @@ struct StacFileInfo : FileInfo
 
     std::string datetime()
     {
-        return getChild(m_properties, "datetime").value();
+        return getChild(m_root, "datetime").value();
     }
 
-    StringList extensions() const { return m_extensions; }
+    int count()
+        { return m_count; }
+
+    std::string encoding()
+        { return m_encoding; }
+
+    StringList extensions() const
+        { return m_extensions; }
 
 private:
     std::string jsonElement(MetadataNodeList nodeList)
@@ -77,14 +94,17 @@ private:
     }
 
     MetadataNode m_root;
-    MetadataNode m_properties;
+
     StringList m_extensions;
+    std::string m_encoding;
+    point_count_t m_count;
 };
 
 class StacIndexBuilder : public TIndexProcessor
 {
 public:
-    StacIndexBuilder(const Args& args, const std::string& pcType);
+    StacIndexBuilder(const Args& args, const std::string& pcType,
+        bool statistics);
 
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
@@ -95,6 +115,7 @@ private:
 
     StringList m_extensions;
     std::string m_pcType;
+    bool m_writeStats;
     Field *m_srsField;
     Field *m_datetimeField;
     Field *m_linksField;

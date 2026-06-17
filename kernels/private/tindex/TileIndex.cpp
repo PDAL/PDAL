@@ -27,7 +27,7 @@ void TileIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     manager.stageOptions() = m_stageOptions;
 
     Stage& reader = manager.makeReader(fileInfo->m_filename, "");
-    runBoundary(reader, *fileInfo, manager);
+    runBoundary(*fileInfo, manager);
 }
 
 bool TileIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo)

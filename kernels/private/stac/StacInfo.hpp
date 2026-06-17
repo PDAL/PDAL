@@ -147,8 +147,7 @@ inline void stacProjection(MetadataNode& root, MetadataNode& statsMeta,
     }
 }
 
-inline void addDatetime(MetadataNode& properties, MetadataNode& readerMeta,
-    MetadataNode& infoMeta)
+inline void addDatetime(MetadataNode& properties, MetadataNode& readerMeta)
 {
     //TODO make sure these are available
     //For now, if there isn't date similar to laz/las/copc then use now.
@@ -159,8 +158,11 @@ inline void addDatetime(MetadataNode& properties, MetadataNode& readerMeta,
         properties.add("datetime", getDateStr(year, doy));
     } catch (std::exception &)
     {
-        auto&& datetime = getChild(infoMeta, "now");
-        properties.add("datetime", datetime);
+        std::time_t now = 
+            std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::stringstream t;
+        t << std::put_time( std::localtime( &now ), "%FT%T%z" );
+        properties.add("datetime", t.str());
     }
 }
 
@@ -177,7 +179,7 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
         MetadataNode id = stac.add("id", stem);
         MetadataNode properties = stac.add("properties");
 
-        addDatetime(properties, readerMeta, infoMeta);
+        addDatetime(properties, readerMeta);
 
         stac.add("type", "Feature");
         stac.add("stac_version", "1.0.0");

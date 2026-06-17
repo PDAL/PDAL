@@ -78,8 +78,7 @@ public:
     std::vector<FileInfo> readIndex();
 
 protected:
-    bool runBoundary(Stage& stage, FileInfo& fileInfo,
-        PipelineManager& manager);
+    bool runBoundary(FileInfo& fileInfo, PipelineManager& manager);
 
     std::vector<FileInfoPtr> m_infos;
     std::unique_ptr<Dataset> m_dataset;
