@@ -23,6 +23,13 @@ files directly from {{ RIEGL }} sensors and from several project-specific
 government platforms.
 ```
 
+```{note}
+The Leica CSD reader ({ref}`readers.csd`) is a proprietary driver and may not be
+available in all PDAL distributions (including standard Conda builds). If you
+cannot read the `.csd` file, you should use the provided `.laz` equivalent for
+the subsequent exercises.
+```
+
 ## Exercise
 
 The file `S1C1_csd_004.csd` contains airborne data from an {{ Optech }} sensor.

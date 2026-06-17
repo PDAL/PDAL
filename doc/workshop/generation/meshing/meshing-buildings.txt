@@ -1,0 +1,5 @@
+pdal translate \
+   ./exercises/analysis/density/uncompahgre.laz \
+   -o ./exercises/analysis/meshing/building-mesh.ply \
+   poisson \
+   --filters.poisson.depth=8
