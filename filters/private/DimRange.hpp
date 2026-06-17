@@ -37,6 +37,7 @@
 #include <string>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -71,8 +72,7 @@ struct DimRange
 
     void parse(const std::string& s);
     bool valuePasses(double d) const;
-    static bool pointPasses(const std::vector<DimRange>& ranges,
-        PointRef& point);
+    Utils::StatusWithReason prepare(const PointLayoutPtr layout);
 
     std::string m_name;
     Dimension::Id m_id;
@@ -86,76 +86,53 @@ protected:
     std::string::size_type subParse(const std::string& r);
 };
 
-bool operator < (const DimRange& r1, const DimRange& r2);
 std::istream& operator>>(std::istream& in, DimRange& r);
 std::ostream& operator<<(std::ostream& out, const DimRange& r);
 
-template <>
-class VArg<DimRange> : public BaseVArg
+class DimRangeList
 {
 public:
-    VArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, std::vector<DimRange>& variable,
-        std::vector<DimRange> def) :
-        BaseVArg(longname, shortname, description), m_var(variable),
-        m_defaultVal(def)
-    {
-        m_var = def;
-        m_defaultProvided = true;
-    }
-
-    VArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, std::vector<DimRange>& variable) :
-        BaseVArg(longname, shortname, description), m_var(variable)
-    {}
-
-    virtual void setValue(const std::string& s)
-    {
-        std::vector<std::string> slist = Utils::split2(s, ',');
-        for (auto& ts : slist)
-            Utils::trim(ts);
-
-        if (slist.empty())
-            throw arg_val_error("Missing value for argument '" + m_longname +
-                "'.");
-        m_rawVal = s;
-        if (!m_set)
-            m_var.clear();
-        for (auto& ts : slist)
-        {
-            DimRange dim;
-            dim.parse(ts);
-            m_var.push_back(dim);
-        }
-        m_set = true;
-    }
-
-    virtual void reset()
-    {
-        m_var = m_defaultVal;
-        m_set = false;
-        m_hidden = false;
-    }
-
-    virtual std::string defaultVal() const
-    {
-        std::string s;
-
-        for (size_t i = 0; i < m_defaultVal.size(); ++i)
-        {
-            std::ostringstream oss;
-
-            if (i > 0)
-                s += ", ";
-            oss << m_defaultVal[i];
-            s += oss.str();
-        }
-        return s;
-    }
+    void add(const DimRange& range);
+    bool pointPasses(PointRef& point);
+    Utils::StatusWithReason prepare(const PointLayoutPtr layout);
+    const std::vector<DimRange>& ranges() const;
+    bool empty();
 
 private:
-    std::vector<DimRange>& m_var;
-    std::vector<DimRange> m_defaultVal;
+    std::vector<DimRange> m_ranges;
+
+    friend std::ostream& operator<<(std::ostream& out, const DimRangeList& r);
 };
+
+
+namespace Utils
+{
+    template<>
+    inline StatusWithReason fromString(const std::string& s, DimRangeList& ranges)
+    {
+        try
+        {
+            std::vector<std::string> slist = Utils::split2(s, ',');
+            for (auto& ts : slist)
+                Utils::trim(ts);
+
+            if (slist.empty())
+                return StatusWithReason(-1, "Missing value for DimRange.");
+
+            for (auto& ts : slist)
+            {
+                DimRange dim;
+                dim.parse(ts);
+                ranges.add(dim);
+            }
+        }
+        catch (DimRange::error& error)
+        {
+            std::string msg = "Error parsing '" + s + "': " + error.what();
+            return StatusWithReason(-1, msg);
+        }
+        return true;
+    }
+}
 
 } // namespace pdal

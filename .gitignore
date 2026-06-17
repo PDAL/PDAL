@@ -103,9 +103,9 @@ xcode/
 /*local*.sh
 Makefile
 doc/build
-bin/
-lib/
-include/
+/bin/
+/lib/
+/include/
 test/unit/CMakeScripts/
 test/unit/TestConfig.hpp
 *.pyc

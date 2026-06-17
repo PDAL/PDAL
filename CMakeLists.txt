@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 3.13)
 project(PDAL VERSION 2.10.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
+option(BUILD_SHARED_LIBS "Build pdal as a shared library" ON)
+
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
@@ -246,6 +248,7 @@ target_include_directories(${PDAL_LIB_NAME}
         ${UTFCPP_INCLUDE_DIR}
 )
 
+
 target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
@@ -260,7 +263,6 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LEPCC_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
-        ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
@@ -418,6 +420,19 @@ export(
         ${PDAL_LIB_NAME}
     FILE
         "${PDAL_BINARY_DIR}/PDALTargets.cmake")
+
+if (${PDAL_LIB_TYPE} STREQUAL "STATIC")
+  export(
+      TARGETS
+          ${JSON_SCHEMA_LIB_NAME}
+          ${PDAL_ARBITER_LIB_NAME}
+          ${PDAL_H3_LIB_NAME}
+          ${PDAL_KAZHDAN_LIB_NAME}
+          ${PDAL_LAZPERF_LIB_NAME}
+          ${PDAL_LEPCC_LIB_NAME}
+      FILE
+          "${PDAL_BINARY_DIR}/PDALTargets.cmake")
+endif ()
 
 install(
     EXPORT

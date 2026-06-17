@@ -80,10 +80,10 @@ TEST_F(FbiReaderTest, Header)
     m_reader.prepare(table);
     fbi::FbiHdr header = m_reader.getHeader();
 
-    EXPECT_EQ(1808, header.HdrSize);
-    EXPECT_EQ(1, header.Version);
-    EXPECT_EQ(1065, header.FastCnt);
-    EXPECT_EQ(1808, header.PosXyz);
+    EXPECT_EQ(1808u, header.HdrSize);
+    EXPECT_EQ(1u, header.Version);
+    EXPECT_EQ(1065u, header.FastCnt);
+    EXPECT_EQ(1808u, header.PosXyz);
 
     //could add more test values
 }
@@ -94,10 +94,10 @@ TEST_F(FbiReaderTest, ReadingPoints)
     m_reader.prepare(table);
     PointViewSet viewSet = m_reader.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
-    
+
     //number of points
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065);
+    EXPECT_EQ(view->size(), 1065u);
 
     //some tests on the first point
     EXPECT_NEAR(635618.98, view->getFieldAs<double>(Dimension::Id::X, 0),1e-4);

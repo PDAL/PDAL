@@ -233,7 +233,7 @@ TEST(EptReaderTest, unreadableTileFailure)
         EXPECT_THROW(mgr.execute(), pdal_error);
     });
 
-    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5))
         != std::future_status::timeout);
     // This will abort the whole EPT test on failure. Need to think of a better
     // way to do this.
@@ -284,7 +284,7 @@ TEST(EptReaderTest, unreadableTileFailureStreaming)
         EXPECT_THROW(mgr.executeStream(table), pdal_error);
     });
 
-    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5))
         != std::future_status::timeout);
     // This will abort the whole EPT test on failure. Need to think of a better
     // way to do this.
@@ -312,7 +312,7 @@ TEST(EptReaderTest, unreadableDataIgnored)
 
     // This is missing its root point data node (which is its only node), so we
     // should simply get no points here.
-    EXPECT_EQ(np, 0);
+    EXPECT_EQ(np, 0u);
 }
 
 TEST(EptReaderTest, unreadableDataIgnoredStreaming)
@@ -1089,7 +1089,7 @@ TEST(EptReaderTest, bcbfToLonLat)
         }
     }
 
-    EXPECT_EQ(np, 5);
+    EXPECT_EQ(np, 5u);
 }
 
 TEST(EptReaderTest, badTilePointCountLaszip)

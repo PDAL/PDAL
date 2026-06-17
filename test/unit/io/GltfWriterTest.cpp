@@ -147,7 +147,7 @@ TEST(GltfWriter, Write)
 {
     std::string path = Support::temppath("out.glb");
     testWrite(false, false, path);
-    ASSERT_EQ(FileUtils::fileSize(path), 5100);
+    ASSERT_EQ(FileUtils::fileSize(path), 5100u);
 }
 
 
@@ -155,7 +155,7 @@ TEST(GltfWriter, WriteWithNormals)
 {
     std::string path = Support::temppath("out_normals.glb");
     testWrite(true, false, path);
-    ASSERT_EQ(FileUtils::fileSize(path), 5148);
+    ASSERT_EQ(FileUtils::fileSize(path), 5148u);
 }
 
 
@@ -163,7 +163,7 @@ TEST(GltfWriter, WriteWithColors)
 {
     std::string path = Support::temppath("out_colors.glb");
     testWrite(false, true, path);
-    ASSERT_EQ(FileUtils::fileSize(path), 5148);
+    ASSERT_EQ(FileUtils::fileSize(path), 5148u);
 }
 
 
@@ -171,7 +171,7 @@ TEST(GltfWriter, WriteWithNormalsAndColors)
 {
     std::string path = Support::temppath("out_normals_colors.glb");
     testWrite(true, true, path);
-    ASSERT_EQ(FileUtils::fileSize(path), 5196);
+    ASSERT_EQ(FileUtils::fileSize(path), 5196u);
 }
 
 } // namespace pdal

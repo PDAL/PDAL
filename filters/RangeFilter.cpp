@@ -48,6 +48,11 @@
 namespace pdal
 {
 
+struct RangeFilter::Private
+{
+    DimRangeList ranges;
+};
+
 static StaticPluginInfo const s_info
 {
     "filters.range",
@@ -63,7 +68,7 @@ std::string RangeFilter::getName() const
 }
 
 
-RangeFilter::RangeFilter()
+RangeFilter::RangeFilter() : m_p(new Private)
 {}
 
 
@@ -73,22 +78,15 @@ RangeFilter::~RangeFilter()
 
 void RangeFilter::addArgs(ProgramArgs& args)
 {
-    args.add("limits", "Range limits", m_ranges).setPositional();
+    args.add("limits", "Range limits", m_p->ranges).setPositional();
 }
 
 
 void RangeFilter::prepared(PointTableRef table)
 {
-    const PointLayoutPtr layout(table.layout());
-
-    for (auto& r : m_ranges)
-    {
-        r.m_id = layout->findDim(r.m_name);
-        if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'limits' option: '" +
-                r.m_name + "'.");
-    }
-    std::sort(m_ranges.begin(), m_ranges.end());
+    Utils::StatusWithReason ret = m_p->ranges.prepare(table.layout());
+    if (!ret)
+        throwError("Invalid 'limits' option: " +  ret.what());
 }
 
 
@@ -98,7 +96,7 @@ void RangeFilter::prepared(PointTableRef table)
 // common case.
 bool RangeFilter::processOne(PointRef& point)
 {
-    return DimRange::pointPasses(m_ranges, point);
+    return m_p->ranges.pointPasses(point);
 }
 
 
