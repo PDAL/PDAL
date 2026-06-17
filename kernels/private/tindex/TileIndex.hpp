@@ -18,7 +18,7 @@ public:
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
     void fillFileInfo(FileInfoPtr& fileInfo) override;
-    bool fastBoundary(PipelineManager& manager, FileInfo& fileInfo) override;
+    bool fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) override;
 

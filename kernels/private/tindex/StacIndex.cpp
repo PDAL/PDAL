@@ -41,43 +41,62 @@ FileInfoPtr StacIndexBuilder::makeFileInfo(const std::string& filename)
 
 void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
 {
-    StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
-
     PipelineManager manager;
     manager.commonOptions() = m_commonOptions;
     manager.stageOptions() = m_stageOptions;
 
-    Stage& reader = manager.makeReader(stacFileInfo.m_filename, "");
+    Stage& reader = manager.makeReader(fileInfo->m_filename, "");
     // Could add an info filter here if the reader isn't LAS/COPC
     //Stage& info = manager.makeFilter("filters.info", reader);
     Stage* stats(nullptr);
     if (m_writeStats)
         stats = &(manager.makeFilter("filters.stats", reader));
 
-    if (runBoundary(stacFileInfo, manager))
+    if (runBoundary(fileInfo, manager))
     {
+        StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
+
         MetadataNode readerMeta = reader.getMetadata();
         MetadataNode statsMeta;
         if (stats)
             statsMeta = stats->getMetadata();
         MetadataNode schema = 
             manager.pointTable().layout()->toMetadata().clone("schema");
-        stacFileInfo.addMetadata(readerMeta, statsMeta, schema);
+        // Schema may not exist if fastBoundary was used
+        if (schema)
+            stacFileInfo.addSchema(schema);
+        stacFileInfo.addMetadata(readerMeta, statsMeta);
     }
 }
 
-bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo)
+bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo)
 {
+    StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
+
     Stage* reader = manager.stages().front();
-    // Would be ideal to avoid the preview call. Maybe can get info from the metadata?
     QuickInfo qi = reader->preview();
     if (!qi.valid())
         return false;
 
-    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
+    stacFileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
     if (!qi.m_srs.empty())
-        fileInfo.m_srs = qi.m_srs.getWKT();
-    fileInfo.m_gridHeight = 0.0;
+        stacFileInfo.m_srs = qi.m_srs.getWKT();
+    stacFileInfo.m_gridHeight = 0.0;
+
+    // We have to make the dimensions into a schema. May not be entirely accurate
+    // Structure copied from PointLayout::toMetadata()
+    MetadataNode root("schema");
+    for (std::string& dimName : qi.m_dimNames)
+    {
+        MetadataNode dim("dimensions");
+        dim.add("name", dimName);
+        Dimension::Id id = Dimension::id(dimName);
+        Dimension::Type t = Dimension::defaultType(id);
+        dim.add("type", Dimension::toName(Dimension::base(t)));
+        dim.add("size", Dimension::size(t));
+        root.addList(dim);
+    }
+    stacFileInfo.addSchema(root);
 
     // If there's a stats filter we still need to execute the whole thing.
     // Maybe should make a simpler check.

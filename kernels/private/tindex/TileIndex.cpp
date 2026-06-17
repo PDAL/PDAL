@@ -27,20 +27,20 @@ void TileIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     manager.stageOptions() = m_stageOptions;
 
     Stage& reader = manager.makeReader(fileInfo->m_filename, "");
-    runBoundary(*fileInfo, manager);
+    runBoundary(fileInfo, manager);
 }
 
-bool TileIndexBuilder::fastBoundary(PipelineManager& manager, FileInfo& fileInfo)
+bool TileIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo)
 {
     Stage* reader = manager.stages().front();
     QuickInfo qi = reader->preview();
     if (!qi.valid())
         return false;
 
-    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
+    fileInfo->m_boundary = qi.m_bounds.to2d().toWKT();
     if (!qi.m_srs.empty())
-        fileInfo.m_srs = qi.m_srs.getWKT();
-    fileInfo.m_gridHeight = 0.0;
+        fileInfo->m_srs = qi.m_srs.getWKT();
+    fileInfo->m_gridHeight = 0.0;
     return true;
 }
 

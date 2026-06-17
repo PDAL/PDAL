@@ -21,13 +21,16 @@ struct StacFileInfo : FileInfo
         self.add("href", filename);
     }
 
-    void addMetadata(MetadataNode& readerMeta, MetadataNode& statsMeta, MetadataNode& schema)
+    void addSchema(MetadataNode& schema)
     {
         auto schemas = schema.findChildren([](MetadataNode& n)
             { return n.name()=="dimensions"; });
         for (auto& s : schemas)
             m_root.addList(s.clone("pc:schemas"));
+    }
 
+    void addMetadata(MetadataNode& readerMeta, MetadataNode& statsMeta)
+    {
         // stageMetadata will always have reader metadata, but may not have stats.
         if (!statsMeta.empty())
         {
@@ -109,7 +112,7 @@ public:
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
     void fillFileInfo(FileInfoPtr& fileInfo) override;
-    bool fastBoundary(PipelineManager& manager, FileInfo& fileInfo) override;
+    bool fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) override;
 

@@ -78,7 +78,7 @@ public:
     std::vector<FileInfo> readIndex();
 
 protected:
-    bool runBoundary(FileInfo& fileInfo, PipelineManager& manager);
+    bool runBoundary(FileInfoPtr& fileInfo, PipelineManager& manager);
 
     std::vector<FileInfoPtr> m_infos;
     std::unique_ptr<Dataset> m_dataset;
@@ -91,7 +91,7 @@ private:
     virtual void fillFileInfo(FileInfoPtr& fileInfo) {}
     virtual void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) {}
-    virtual bool fastBoundary(PipelineManager& manager, FileInfo& fileInfo) 
+    virtual bool fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo) 
         { return false; }
 
     bool createFeature(const FileInfoPtr& fileInfo);
