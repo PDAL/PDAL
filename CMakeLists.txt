@@ -310,7 +310,13 @@ target_include_directories(${PDAL_LIB_NAME}
 target_compile_definitions(${PDAL_LIB_NAME}
     PRIVATE
     ARBITER_CURL
+endif ()
     H3_PREFIX=PDALH3)
+if (BUILD_SHARED_LIBS)
+    target_compile_definitions(${PDAL_LIB_NAME}
+        PRIVATE
+        ARBITER_DLL_EXPORT)
+endif()
 
 if (PDAL_HAVE_ZLIB)
     target_compile_definitions(${PDAL_LIB_NAME}
