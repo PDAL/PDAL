@@ -85,7 +85,7 @@ void exec1(const std::string& where, size_t expKeep, size_t expViews,
     size_t total = 0;
     for (auto vp : s)
         total += vp->size();
-    EXPECT_EQ(total, 100);
+    EXPECT_EQ(total, 100u);
     EXPECT_EQ(g_count, expKeep);
 }
 
@@ -134,7 +134,7 @@ void exec2(const std::string& where, size_t expKeep, size_t expViews,
     size_t total = 0;
     for (auto vp : s)
         total += vp->size();
-    EXPECT_EQ(total, 101);
+    EXPECT_EQ(total, 101u);
     EXPECT_EQ(g_count, expKeep);
 }
 
@@ -179,7 +179,7 @@ void exec3(const std::string& where, size_t expKeep, size_t expViews,
     size_t total = 0;
     for (auto vp : s)
         total += vp->size();
-    EXPECT_EQ(total, 100);
+    EXPECT_EQ(total, 100u);
     EXPECT_EQ(g_count, expKeep);
 }
 
@@ -224,7 +224,7 @@ void exec4(const std::string& where, size_t expKeep, size_t expViews,
     size_t total = 0;
     for (auto vp : s)
         total += vp->size();
-    EXPECT_EQ(total, 100);
+    EXPECT_EQ(total, 100u);
     EXPECT_EQ(g_count, expKeep);
 }
 
@@ -234,7 +234,7 @@ void exec5(const std::string& where, size_t expKeep)
 
     Stage *r = factory.createStage("readers.faux");
     Options ro;
-    ro.add("count", 100);
+    ro.add("count", 100u);
     ro.add("bounds", BOX3D(0, 0, 100, 99, 9.9, 199));
     ro.add("mode", "ramp");
     r->setOptions(ro);
@@ -315,7 +315,7 @@ void exec6(const std::string& where, size_t expKeep, size_t expViews,
     size_t total = 0;
     for (auto vp : s)
         total += vp->size();
-    EXPECT_EQ(total, 100);
+    EXPECT_EQ(total, 100u);
     EXPECT_EQ(g_count, expKeep);
 }
 

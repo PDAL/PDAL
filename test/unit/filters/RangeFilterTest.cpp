@@ -105,8 +105,7 @@ TEST(RangeFilterTest, multipleDimensions)
     reader.setOptions(ops);
 
     Options rangeOps;
-    rangeOps.add("limits", "Y[4.00e0:+6]");
-    rangeOps.add("limits", "Z[4:6]");
+    rangeOps.add("limits", "Y[4.00e0:+6], Z[4:6]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);

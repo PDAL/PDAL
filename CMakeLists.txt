@@ -7,6 +7,8 @@ cmake_minimum_required(VERSION 3.13)
 project(PDAL VERSION 2.10.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
+option(BUILD_SHARED_LIBS "Build pdal as a shared library" ON)
+
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
@@ -256,7 +258,6 @@ target_link_libraries(${PDAL_LIB_NAME}
         PROJ::proj
         ${GEOTIFF_LIBRARY}
         ${PDAL_REEXPORT}
-        ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
         ${OPENSSL_LIBRARIES}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
@@ -434,8 +435,6 @@ install(
     DESTINATION
         "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
-
-
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 

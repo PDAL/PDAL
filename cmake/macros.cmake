@@ -49,13 +49,13 @@
 #  attempting to build anything else in the library.
 #
 macro(PDAL_ADD_LIBRARY _name)
-    add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+    add_library(${_name} ${ARGN})
     add_dependencies(${_name} generate_dimension_hpp)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
     pdal_lib_compile_settings(${_name})
-    if (NOT ${_library_type} STREQUAL "STATIC")
+    if (BUILD_SHARED_LIBS)
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
     endif()
 
@@ -104,7 +104,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
 
-    add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
+    add_library(${${_name}} ${PDAL_ADD_PLUGIN_FILES})
     pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
@@ -156,6 +156,10 @@ endmacro(PDAL_ADD_PLUGIN)
 #    INCLUDES header file directories
 #
 
+if(NOT TARGET GTest::gtest)
+    include (${PDAL_CMAKE_DIR}/gtest.cmake)
+endif()
+
 macro(PDAL_ADD_TEST _name)
 
     if (NOT WITH_TESTS)
@@ -179,6 +183,10 @@ macro(PDAL_ADD_TEST _name)
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
+    if(NOT USE_EXTERNAL_GTEST AND NOT MSVC)
+        target_compile_options(${_name} BEFORE PRIVATE
+            "-iquote${ROOT_DIR}/vendor/gtest/include")
+    endif()
     if (PDAL_ADD_TEST_SYSTEM_INCLUDES)
         target_include_directories(${_name} SYSTEM PRIVATE
             ${PDAL_ADD_TEST_SYSTEM_INCLUDES})

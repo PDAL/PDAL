@@ -67,7 +67,7 @@ TEST(StacReaderTest, local_data_test)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(view->size(), 110000);
+    EXPECT_EQ(view->size(), 110000u);
 }
 
 
@@ -93,7 +93,7 @@ TEST(StacReaderTest, local_catalog_test)
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MI_Charlevoix_Islands_TL_2018") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "IA_SouthCentral_1_2020") != idList.end());
 
-    EXPECT_EQ(qi.m_pointCount, 44851411750);
+    EXPECT_EQ(qi.m_pointCount, 44851411750u);
 
 }
 
@@ -117,7 +117,7 @@ TEST(StacReaderTest, collection_filter_test)
         PointViewSet viewSet = reader.execute(table);
         PointViewPtr view = *viewSet.begin();
 
-        EXPECT_EQ(view->size(), 110000);
+        EXPECT_EQ(view->size(), 110000u);
     }
     {
         Options options;
@@ -153,7 +153,7 @@ TEST(StacReaderTest, collection_filter_test)
         PointViewSet viewSet = reader.execute(table);
         PointViewPtr view = *viewSet.begin();
 
-        EXPECT_EQ(view->size(), 110000);
+        EXPECT_EQ(view->size(), 110000u);
     }
 
     {
@@ -189,7 +189,7 @@ TEST(StacReaderTest, collection_test)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(view->size(), 110000);
+    EXPECT_EQ(view->size(), 110000u);
 
 }
 
@@ -228,7 +228,7 @@ TEST(StacReaderTest, item_collection_test)
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B13_2018") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B14_2018") != idList.end());
 
-    EXPECT_EQ(qi.m_pointCount, 9580132559);
+    EXPECT_EQ(qi.m_pointCount, 9580132559u);
 }
 
 TEST(StacReaderTest, remote_item_test)
@@ -244,7 +244,7 @@ TEST(StacReaderTest, remote_item_test)
 
     QuickInfo qi = reader.preview();
 
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 4860658u);
 }
 
 
@@ -261,7 +261,7 @@ TEST(StacReaderTest, catalog_test)
 
     QuickInfo qi = reader.preview();
 
-    EXPECT_EQ(qi.m_pointCount, 36174643520);
+    EXPECT_EQ(qi.m_pointCount, 36174643520u);
 }
 
 TEST(StacReaderTest, nested_catalog_test)
@@ -296,7 +296,7 @@ TEST(StacReaderTest, nested_catalog_test)
     EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "IA_SouthCentral_1_2020") != itemList.end());
     EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "MI_Charlevoix_Islands_TL_2018") != itemList.end());
 
-    EXPECT_EQ(qi.m_pointCount, 44872718422);
+    EXPECT_EQ(qi.m_pointCount, 44872718422u);
 }
 
 TEST(StacReaderTest, multiple_readers_test)
@@ -330,7 +330,7 @@ TEST(StacReaderTest, multiple_readers_test)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(view->size(), 61307);
+    EXPECT_EQ(view->size(), 61307u);
 }
 
 TEST(StacReaderTest, id_prune_test)
@@ -356,7 +356,7 @@ TEST(StacReaderTest, id_prune_test)
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_Anchorage_2015_LAS_2017") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_FairbanksNSB_QL1_2017_LAS_2018") != idList.end());
-    EXPECT_EQ(qi.m_pointCount, 36134211758);
+    EXPECT_EQ(qi.m_pointCount, 36134211758u);
 }
 
 TEST(StacReaderTest, date_validate_test)
@@ -392,7 +392,7 @@ TEST(StacReaderTest, date_prune_accept_test)
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 4860658u);
 
 }
 
@@ -415,7 +415,7 @@ TEST(StacReaderTest, date_start_end_time_accept_test)
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 4860658u);
 }
 
 TEST(StacReaderTest, date_prune_reject_test)
@@ -453,7 +453,7 @@ TEST(StacReaderTest, bounds_prune_accept_test)
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 4860658u);
 
 }
 
@@ -479,7 +479,7 @@ TEST(StacReaderTest, ogr_bounds_accept_test)
     json["type"] = "ogr";
     json["drivers"] = {"GeoJSON"};
     json["datasource"] = Support::datapath("stac/ogr_boundary.json");
-    // feature 1 is same as bounds in bounds_prune_accept_test 
+    // feature 1 is same as bounds in bounds_prune_accept_test
     json["sql"] = "select \"_ogr_geometry_\" from ogr_boundary WHERE id = 1";
     OGRSpec ogr(json);
 
@@ -498,7 +498,7 @@ TEST(StacReaderTest, ogr_bounds_accept_test)
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 4860658u);
 }
 
 TEST(StacReaderTest, ogr_bounds_reject_test)
@@ -507,7 +507,7 @@ TEST(StacReaderTest, ogr_bounds_reject_test)
     json["type"] = "ogr";
     json["drivers"] = {"GeoJSON"};
     json["datasource"] = Support::datapath("stac/ogr_boundary.json");
-    // feature 2 is same as bounds in bounds_prune_reject_test 
+    // feature 2 is same as bounds in bounds_prune_reject_test
     json["sql"] = "select \"_ogr_geometry_\" from ogr_boundary WHERE id = 2";
     OGRSpec ogr(json);
 
@@ -561,7 +561,7 @@ TEST(StacReaderTest, wrench_test)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(view->size(), 111065);
+    EXPECT_EQ(view->size(), 111065u);
 }
 
 #ifndef _WIN32
@@ -581,6 +581,6 @@ TEST(StacReaderTest, schema_validate_test)
 
     QuickInfo qi = reader.preview();
     EXPECT_TRUE(qi.valid());
-    EXPECT_EQ(qi.m_pointCount, 44851411750);
+    EXPECT_EQ(qi.m_pointCount, 44851411750u);
 }
 #endif

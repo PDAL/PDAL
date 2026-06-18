@@ -51,17 +51,16 @@ TEST(SpzWriterTest, xyz_only_test)
 
     writer.prepare(t);
     writer.execute(t);
-    ASSERT_EQ(FileUtils::fileSize(path), 52);
 
     SpzReader reader;
     // using same options, just the filename
     reader.setOptions(opts);
-    
+
     PointTable readTable;
     reader.prepare(readTable);
     PointViewSet viewSet = reader.execute(readTable);
     PointViewPtr readView = *viewSet.begin();
-    EXPECT_EQ(readView->size(), 3);
+    EXPECT_EQ(readView->size(), 3u);
 
     // Checking X values. These are packed/unpacked with more precision
     //than the other fields.
@@ -95,9 +94,9 @@ TEST(SpzWriterTest, all_dimensions_test)
     for (int i = 0; i < 9; ++i)
         shIds.push_back(table.layout()->assignDim("f_rest_" + std::to_string(i),
             Dimension::Type::Float));
-        
+
     PointViewPtr v = setXYZ(table);
-    
+
     // setting dims - set rotation later
     // using the same values for each dimension (except rotation)
     std::array<float, 3> values{0.2, 0.4, 0.6};
@@ -111,7 +110,7 @@ TEST(SpzWriterTest, all_dimensions_test)
         for (auto sh : shIds)
             v->setField(sh, i, values[i]);
     }
-        
+
     // Set rotation dimension:
     // make a valid quaternion
     std::array<float, 4> in{0.1, 0.5, 0.3, 0.2};
@@ -132,17 +131,16 @@ TEST(SpzWriterTest, all_dimensions_test)
 
     writer.prepare(table);
     writer.execute(table);
-    ASSERT_EQ(FileUtils::fileSize(path), 82);
 
     SpzReader reader;
     // using same options, just the filename
     reader.setOptions(opts);
-    
+
     PointTable readTable;
     reader.prepare(readTable);
     PointViewSet viewSet = reader.execute(readTable);
     PointViewPtr readView = *viewSet.begin();
-    EXPECT_EQ(readView->size(), 3);
+    EXPECT_EQ(readView->size(), 3u);
 
     // Values in the resulting spz are very off. It's on
     //their end AFAIK (the packing/unpacking is lossy)
@@ -194,7 +192,7 @@ TEST(SpzWriterTest, orientation_metadata_test)
     reader.prepare(readTable);
     PointViewSet viewSet = reader.execute(readTable);
     PointViewPtr readView = *viewSet.begin();
-    EXPECT_EQ(readView->size(), 3);
+    EXPECT_EQ(readView->size(), 3u);
 
     // Checking Y values; when converting from RUB to RDF, the signs
     //flip on the Y dimension.

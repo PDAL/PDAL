@@ -205,10 +205,6 @@ install(
         E57Format-export
 )
 
-# ccache
-# Turns on ccache if found
-include( ccache )
-
 # Formatting
 include( ClangFormat )
 

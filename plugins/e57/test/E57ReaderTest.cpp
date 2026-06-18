@@ -42,7 +42,7 @@
 
 using namespace pdal;
 
-TEST(E57Reader, testCtr)
+TEST(E57ReaderTest, testCtr)
 {
     Options ops;
     ops.add("filename",Support::datapath("e57/A4.e57"));
@@ -54,7 +54,7 @@ TEST(E57Reader, testCtr)
 }
 
 
-TEST(E57Reader, testPreview)
+TEST(E57ReaderTest, testPreview)
 {
     Options ops;
     ops.add("filename", Support::datapath("e57/A_B.e57"));
@@ -69,7 +69,7 @@ TEST(E57Reader, testPreview)
     ASSERT_TRUE(qi.m_bounds.valid());
 }
 
-TEST(E57Reader, testHeader)
+TEST(E57ReaderTest, testHeader)
 {
     Options ops;
     ops.add("filename", Support::datapath("e57/A_B.e57"));
@@ -89,7 +89,7 @@ TEST(E57Reader, testHeader)
     }
 }
 
-TEST(E57Reader, testRead)
+TEST(E57ReaderTest, testRead)
 {
     Options ops;
     ops.add("filename",Support::datapath("e57/A4.e57"));
@@ -128,7 +128,7 @@ PointViewSet readertest_readE57(std::string filename,PointTableRef table)
     return reader.execute(table);
 }
 
-TEST(E57Reader, testMultipleClouds)
+TEST(E57ReaderTest, testMultipleClouds)
 {
     PointTable table;
     PointViewSet viewSet = readertest_readE57(Support::datapath("e57/A_B.e57"),table);
@@ -166,7 +166,7 @@ TEST(E57Reader, testMultipleClouds)
     }
 }
 
-TEST(E57Reader, testTransformMerge)
+TEST(E57ReaderTest, testTransformMerge)
 {
     PointTable table;
     PointViewSet viewSet = readertest_readE57(Support::datapath("e57/A_moved_B.e57"),table);
@@ -209,7 +209,7 @@ TEST(E57Reader, testTransformMerge)
 }
 
 
-TEST(E57Reader, testDimensionRescaling)
+TEST(E57ReaderTest, testDimensionRescaling)
 {
     std::string outfile(Support::datapath("las/test.las"));
     {
@@ -250,7 +250,7 @@ TEST(E57Reader, testDimensionRescaling)
     remove(outfile.c_str());
 }
 
-TEST(E57Reader, testScansWithDifferentDimensions)
+TEST(E57ReaderTest, testScansWithDifferentDimensions)
 {
     std::string outfile(Support::datapath("las/test.las"));
     {

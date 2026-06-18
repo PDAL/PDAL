@@ -29,6 +29,12 @@ target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
         ${PROJECT_BINARY_DIR}/test/unit
         ${PDAL_INCLUDE_DIR}
 )
+if(NOT USE_EXTERNAL_GTEST)
+    target_compile_options(${PDAL_TEST_SUPPORT_OBJS} BEFORE
+        PRIVATE
+            "-iquote${ROOT_DIR}/vendor/gtest/include"
+    )
+endif()
 PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
@@ -202,6 +208,7 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES TIMEOUT 300)
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp

@@ -3,5 +3,4 @@ set(KAZHDAN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/Factor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MarchingCubes.cpp
-    PARENT_SCOPE
-)
+    PARENT_SCOPE)
