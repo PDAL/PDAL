@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <chrono>
+
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 

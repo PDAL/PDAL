@@ -83,7 +83,13 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
         stacFileInfo.m_srs = qi.m_srs.getWKT();
     stacFileInfo.m_gridHeight = 0.0;
 
-    // We have to make the dimensions into a schema. May not be entirely accurate
+    // If there's a stats filter we still need to execute the whole thing.
+    // Maybe should make a simpler check.
+    if (manager.stages().size() > 1)
+        return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
+
+    // If the manager isn't executed, we have to make the dimension names into 
+    // a schema. May not be accurate for custom dimensions.
     // Structure copied from PointLayout::toMetadata()
     MetadataNode root("schema");
     for (std::string& dimName : qi.m_dimNames)
@@ -98,10 +104,6 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
     }
     stacFileInfo.addSchema(root);
 
-    // If there's a stats filter we still need to execute the whole thing.
-    // Maybe should make a simpler check.
-    if (manager.stages().size() > 1)
-        return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
     return true;
 }
 
