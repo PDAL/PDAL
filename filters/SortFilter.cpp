@@ -79,17 +79,15 @@ void SortFilter::prepared(PointTableRef table)
 
 void SortFilter::filter(PointView& view)
 {
-    // using reverse iterator so user-listed dimensions are treated
-    // as most-to-least significant when sorting.
-    for (auto itID = m_dims.rbegin(); itID != m_dims.rend(); ++itID)
+    for (Dimension::IdList::size_type i=0; i < m_dims.size(); ++i)
     {
         PointView::Compare cmp;
-        cmp = [&view, dim=*itID](PointId id1, PointId id2)
+        cmp = [&view, dim=m_dims[i]](PointId id1, PointId id2)
         {
             return view.compare(dim, id1, id2);
         };
         if (m_order == SortOrder::DESC)
-            cmp = [&view, dim=*itID](PointId id1, PointId id2)
+            cmp = [&view, dim=m_dims[i]](PointId id1, PointId id2)
             {
                 return view.compare(dim, id2, id1);
             };
@@ -98,7 +96,7 @@ void SortFilter::filter(PointView& view)
         {
             // If we have multiple dimensions, sort the first one
             // and then stable_sort the rest
-            if (itID == m_dims.rbegin()) // first of rev iterator
+            if (i == 0)
                 view.sort(cmp);
             else
                 view.stableSort(cmp);
