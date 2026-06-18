@@ -311,7 +311,7 @@ target_compile_definitions(${PDAL_LIB_NAME}
     ARBITER_CURL
     H3_PREFIX=PDALH3)
 
-if(WIN32 AND BUILD_SHARED)
+if(WIN32 AND BUILD_SHARED_LIBS)
     target_compile_definitions(${PDAL_LIB_NAME}
         PUBLIC
             PDAL_DLL_EXPORT
