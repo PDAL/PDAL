@@ -298,7 +298,6 @@ if (OPENSSL_FOUND)
         ${OPENSSL_LIBRARIES})
 endif()
 
-
 #
 # Allow downstream cmake projects to find PDAL header files without
 # being explicit.
@@ -310,12 +309,14 @@ target_include_directories(${PDAL_LIB_NAME}
 target_compile_definitions(${PDAL_LIB_NAME}
     PRIVATE
     ARBITER_CURL
-endif ()
     H3_PREFIX=PDALH3)
-if (BUILD_SHARED_LIBS)
+
+if(WIN32 AND BUILD_SHARED)
     target_compile_definitions(${PDAL_LIB_NAME}
-        PRIVATE
-        ARBITER_DLL_EXPORT)
+        PUBLIC
+            PDAL_DLL_EXPORT
+            ARBITER_DLL_EXPORT
+    )
 endif()
 
 if (PDAL_HAVE_ZLIB)
@@ -323,13 +324,6 @@ if (PDAL_HAVE_ZLIB)
     PRIVATE
     ARBITER_ZLIB)
 endif()
-
-if(WIN32)
-    target_compile_definitions(${PDAL_LIB_NAME}
-        PUBLIC
-            PDAL_DLL_EXPORT=1
-    )
-endif(WIN32)
 
 set(PDALCPP_LIB_OUTPUT_NAME "pdalcpp" CACHE STRING "Name of the PDALCPP library")
 
