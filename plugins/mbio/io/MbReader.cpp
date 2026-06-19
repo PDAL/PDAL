@@ -96,8 +96,8 @@ void MbReader::ready(PointTableRef table)
     int pings = 0;  // Perhaps an argument for this?
     int lonflip = 0; // Longitude -180 -> 180
     double bounds[4] { -180, 180, -90, 90 };
-    int btime_i[7] { 0, 0, 0, 0, 0, 0, 0 };
-    int etime_i[7] { (std::numeric_limits<int>::max)(), 0, 0, 0, 0, 0 };
+    int btime_i[7] { 1962, 2, 21, 10, 30, 0, 0 };
+    int etime_i[7] { 2062, 2, 21, 10, 30, 0, 0 };
     char *mbio_ptr;
     double btime_d;
     double etime_d;
@@ -168,14 +168,14 @@ bool MbReader::loadData()
         // years and one month.
         double gpsTime = pingTimeT;
 
-        if (status == 0)
+        if (error > 0)
         {
-            if (error > 0 && error != MB_ERROR_EOF)
+            if (error != MB_ERROR_EOF)
                 throwError("Error reading data: " + MbError::text(error));
             return false;
         }
 
-        if (kind == 1)
+        if (status == MB_SUCCESS && kind == 1)
         {
             bool ok(false);
             if (m_dataType == DataType::Multibeam)
