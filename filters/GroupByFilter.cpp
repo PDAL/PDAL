@@ -88,6 +88,10 @@ void GroupByFilter::prepared(PointTableRef table)
 
 PointViewSet GroupByFilter::run(PointViewPtr inView)
 {
+    // note that the order of output viewsets is determined by the sorted order
+    // of their m_id. this comes from a global counter. thus the first view
+    // created from the first-encountered group has the lowest m_id.
+
     // create groups by hashing dimension values into a key
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
