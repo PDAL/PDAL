@@ -26,8 +26,21 @@ only points of a single `Classification`.
 ]
 ```
 
-```{note}
-By default the groups are ordered according to the order of first occurance within the input. To change this, use `filters.sort` first to order the points according to `dimension`.
+By default the groups are ordered according to the order of first occurrence within the input. To control the order of output groups, use {ref}`filters.sort` first to order the points according to `dimension`. For example, the pipeline below will create a file for each PointSourceId-Classification combination in `input.las`. The first output will contain the minimum source and class, and the final output will contain the maximum source and class.
+
+```json
+[
+    "input.las",
+    {
+        "type": "filters.sort",
+        "dimension": "PointSourceId,Classification"
+    },
+    {
+        "type": "filters.groupby",
+        "dimension": "PointSourceId,Classification"
+    },
+    "output_#.las"
+]
 ```
 
 ## Options
