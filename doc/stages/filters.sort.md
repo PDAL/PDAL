@@ -24,8 +24,7 @@ sorting can be done in increasing (ascending) or decreasing (descending) order.
 ```
 
 ```{note}
-See {ref}`filters.label_duplicates` for an example of using {ref}`filters.sort` to
-sort multiple dimensions at once.
+See {ref}`filters.label_duplicates` for an example of using multiple {ref}`filters.sort` sequentially. See {ref}`filters.groupby` for an example using a single {ref}`filters.sort` with multiple dimensions.
 ```
 
 ## Options
