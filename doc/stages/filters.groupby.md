@@ -34,7 +34,7 @@ By default the groups are ordered according to the order of first occurance with
 
 dimension
 
-: The dimension containing data to be grouped.
+: A list of 1 or more dimensions by which to group points.
 
 ```{include} filter_opts.md
 ```
