@@ -32,7 +32,13 @@ sort multiple dimensions at once.
 
 dimensions
 
-: A list of dimensions by which to sort points. When multiple dimensions are specified points are sorted [lexicographically](https://en.wikipedia.org/wiki/Lexicographic_order), where the first dimension listed is most significant and the last listed is least significant. This follows how multi-column sort works in most spreadsheet and data analysis programs.  \[Required\]
+: A list of 1 or more dimensions by which to sort points.
+
+    When multiple dimensions are specified points are sorted [lexicographically](https://en.wikipedia.org/wiki/Lexicographic_order), where the first dimension listed is most significant and the last listed is least significant. This follows how multi-column sort works in most spreadsheet and data analysis programs.  \[Required\]
+
+    ```{note}
+    In PDAL 2.11 the significance of the dimension list changed from least-to-most to most-to-least.
+    ```
 
 order
 
