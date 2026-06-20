@@ -3,7 +3,7 @@
 # filters.groupby
 
 The **Groupby Filter** takes a single `PointView` as its input and
-creates a `PointView` for each category in the named [dimension] as
+creates a `PointView` for each category in the named {ref}`dimensions` as
 its output.
 
 ```{eval-rst}
