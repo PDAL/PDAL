@@ -212,8 +212,8 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     bool mostSignificantDimIsOrdered = true;
     for (PointId i = 1; i < view->size(); ++i)
     {
-        double v1 = view->getFieldAs<double>(mostSignificantDim, i - 1);
-        double v2 = view->getFieldAs<double>(mostSignificantDim, i);
+        int64_t v1 = view->getFieldAs<int64_t>(mostSignificantDim, i - 1);
+        int64_t v2 = view->getFieldAs<int64_t>(mostSignificantDim, i);
         mostSignificantDimIsOrdered &= v1 <= v2;
     }
     EXPECT_TRUE(mostSignificantDimIsOrdered);
@@ -223,8 +223,8 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     bool leastSignificantDimIsOrdered = true;
     for (PointId i = 1; i < view->size(); ++i)
     {
-        double v1 = view->getFieldAs<double>(leastSignificantDim, i - 1);
-        double v2 = view->getFieldAs<double>(leastSignificantDim, i);
+        int64_t v1 = view->getFieldAs<int64_t>(leastSignificantDim, i - 1);
+        int64_t v2 = view->getFieldAs<int64_t>(leastSignificantDim, i);
         leastSignificantDimIsOrdered &= v1 <= v2;
     }
     EXPECT_FALSE(leastSignificantDimIsOrdered);
@@ -235,12 +235,12 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     for (PointId i = 1; i < view->size(); ++i)
     {
         std::pair p1{
-            view->getFieldAs<double>(mostSignificantDim, i - 1),
-            view->getFieldAs<double>(leastSignificantDim, i - 1),
+            view->getFieldAs<int64_t>(mostSignificantDim, i - 1),
+            view->getFieldAs<int64_t>(leastSignificantDim, i - 1),
         };
         std::pair p2{
-            view->getFieldAs<double>(mostSignificantDim, i),
-            view->getFieldAs<double>(leastSignificantDim, i),
+            view->getFieldAs<int64_t>(mostSignificantDim, i),
+            view->getFieldAs<int64_t>(leastSignificantDim, i),
         };
         totalOrdering &= p1 <= p2;
     }
