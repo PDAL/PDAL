@@ -211,7 +211,7 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     {
         double v1 = view->getFieldAs<double>(expectedSignificantDim, i - 1);
         double v2 = view->getFieldAs<double>(expectedSignificantDim, i);
-        primaryDimIsOrdered |= v1 <= v2;
+        primaryDimIsOrdered &= v1 <= v2;
     }
     EXPECT_TRUE(primaryDimIsOrdered);
 
