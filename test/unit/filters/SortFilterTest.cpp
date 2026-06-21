@@ -227,18 +227,22 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     }
     EXPECT_FALSE(leastSignificantDimIsOrdered);
 
-
-    // start with opposite, assignment in loop will falsify when
-    // the undesireable condition is met.
-    // requires that secondary dim has >1 unique value.
-    bool secondaryDimIsOrdered = true;
+    // expect that points are totally ordered by the tuples formed of the
+    // most and least dimension.
+    bool totalOrdering = true;
     for (PointId i = 1; i < view->size(); ++i)
     {
-        double v1 = view->getFieldAs<double>(expectedSecondaryDim, i - 1);
-        double v2 = view->getFieldAs<double>(expectedSecondaryDim, i);
-        secondaryDimIsOrdered &= v1 <= v2;
+        std::pair p1{
+            view->getFieldAs<double>(mostSignificantDim, i - 1),
+            view->getFieldAs<double>(leastSignificantDim, i - 1),
+        };
+        std::pair p2{
+            view->getFieldAs<double>(mostSignificantDim, i),
+            view->getFieldAs<double>(leastSignificantDim, i),
+        };
+        totalOrdering &= p1 <= p2;
     }
-    EXPECT_FALSE(secondaryDimIsOrdered);
+    EXPECT_TRUE(totalOrdering);
 }
 
 TEST(SortFilterTest, issue1382)
