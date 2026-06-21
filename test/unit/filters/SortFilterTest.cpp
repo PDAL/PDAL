@@ -200,20 +200,33 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     // when sort is done "reverse", Classification is significant.
     // the expectation for listing multiple dimensions for the "dimension"
     // parameter is that the user has listed them in order of significance.
-    auto expectedSignificantDim = Dimension::Id::Classification;
-    auto expectedSecondaryDim = Dimension::Id::NumberOfReturns;
+    auto mostSignificantDim = Dimension::Id::Classification;
+    auto leastSignificantDim = Dimension::Id::NumberOfReturns;
 
-    // start with expected final condition, assignment in loop will
-    // falsify IF an undersireably condition is encountered.
-    // requires that significant dim has >1 unique value.
-    bool primaryDimIsOrdered = true;
+    // expect that the primary most significant dimension is completely sorted.
+    // assignment in loop will falsify IF an undersireably condition is
+    // encountered.
+    bool mostSignificantDimIsOrdered = true;
     for (PointId i = 1; i < view->size(); ++i)
     {
-        double v1 = view->getFieldAs<double>(expectedSignificantDim, i - 1);
-        double v2 = view->getFieldAs<double>(expectedSignificantDim, i);
-        primaryDimIsOrdered &= v1 <= v2;
+        double v1 = view->getFieldAs<double>(mostSignificantDim, i - 1);
+        double v2 = view->getFieldAs<double>(mostSignificantDim, i);
+        mostSignificantDimIsOrdered &= v1 <= v2;
     }
-    EXPECT_TRUE(primaryDimIsOrdered);
+    EXPECT_TRUE(mostSignificantDimIsOrdered);
+
+    // expect that the least-significant dimension is not completely
+    // sorted when there are more than 1 unique values in the dimension.
+    // assignment in loop will falsify when the undesireable condition is met.
+    bool leastSignificantDimIsOrdered = true;
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        double v1 = view->getFieldAs<double>(leastSignificantDim, i - 1);
+        double v2 = view->getFieldAs<double>(leastSignificantDim, i);
+        leastSignificantDimIsOrdered &= v1 <= v2;
+    }
+    EXPECT_FALSE(leastSignificantDimIsOrdered);
+
 
     // start with opposite, assignment in loop will falsify when
     // the undesireable condition is met.
