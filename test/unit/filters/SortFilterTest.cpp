@@ -183,6 +183,9 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     // 1.2-with-color.las has classes 1-2 and returns 1-4 and satisfies this
     // requirement.
 
+    auto mostSignificantDim = Dimension::Id::Classification;
+    auto leastSignificantDim = Dimension::Id::NumberOfReturns;
+    
     LasReader r;
     Options ro;
     ro.add("filename", Support::datapath("las/1.2-with-color.las"));
@@ -191,7 +194,8 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     SortFilter f;
     Options fo;
 
-    fo.add("dimension", "Classification,NumberOfReturns");
+    fo.add("dimension", Dimension::name(mostSignificantDim) + "," +
+                        Dimension::name(leastSignificantDim));
     f.setOptions(fo);
     f.setInput(r);
 
@@ -199,11 +203,9 @@ TEST(SortFilterTest, multidims_in_order_of_significance)
     f.prepare(t);
     PointViewSet viewSet = f.execute(t);
 
+    // expect a single pointset
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-
-    auto mostSignificantDim = Dimension::Id::Classification;
-    auto leastSignificantDim = Dimension::Id::NumberOfReturns;
 
     // expect that the primary most significant dimension is completely sorted.
     // assignment in loop will falsify IF an undersireably condition is encountered.
