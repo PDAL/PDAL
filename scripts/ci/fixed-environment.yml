@@ -2,7 +2,7 @@ name: pdal-build
 channels:
   - conda-forge
 dependencies:
-  - libgdal=3.12
+  - libgdal=3.13
   - libpq
   - geotiff
   - gtest
