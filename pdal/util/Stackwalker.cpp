@@ -1448,10 +1448,12 @@ BOOL StackWalker::ShowCallstack(HANDLE                    hThread,
           csEntry.lineNumber = Line.LineNumber;
           MyStrCpy(csEntry.lineFileName, STACKWALK_MAX_NAMELEN, Line.FileName);
         }
+        /**
         else
         {
           this->OnDbgHelpErr("SymGetLineFromAddr64", GetLastError(), csEntry.offset);
         }
+        **/
       } // yes, we have SymGetLineFromAddr64()
     } // we seem to have a valid PC
 
@@ -1591,7 +1593,7 @@ void StackWalker::OnLoadModule(LPCSTR    img,
         img, mod, (LPVOID)baseAddr, size, result, symType, pdbName, v1, v2, v3, v4);
   }
   buffer[STACKWALK_MAX_NAMELEN - 1] = 0; // be sure it is NULL terminated
-  OnOutput(buffer);
+//  OnOutput(buffer);
 }
 
 void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry)
@@ -1610,13 +1612,7 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry& ent
     if (entry.undFullName[0] != 0)
       MyStrCpy(entry.name, STACKWALK_MAX_NAMELEN, entry.undFullName);
     if (entry.lineFileName[0] == 0)
-    {
-      MyStrCpy(entry.lineFileName, STACKWALK_MAX_NAMELEN, "(filename not available)");
-      if (entry.moduleName[0] == 0)
-        MyStrCpy(entry.moduleName, STACKWALK_MAX_NAMELEN, "(module-name not available)");
-      _snprintf_s(buffer, maxLen, "%p (%s): %s: %s\n", (LPVOID)entry.offset, entry.moduleName,
-                  entry.lineFileName, entry.name);
-    }
+      _snprintf_s(buffer, maxLen, "(Unknown): %s\n", entry.name);
     else
       _snprintf_s(buffer, maxLen, "%s (%d): %s\n", entry.lineFileName, entry.lineNumber,
                   entry.name);
