@@ -1200,6 +1200,8 @@ BOOL StackWalker::ShowCallstack(HANDLE                    hThread,
     {
       int suspendCount = SuspendThread(hThread);
       std::cerr << "Suspend count = " << suspendCount << "!\n";
+      if (suspendCount < 0)
+          std::cerr << "Error on suspend = " << GetLastError() << "!\n";
       memset(&c, 0, sizeof(CONTEXT));
       c.ContextFlags = USED_CONTEXT_FLAGS;
 
