@@ -361,6 +361,8 @@ VlrCatalog::VlrCatalog(VlrCatalog::ReadFunc f) : m_fetch(f)
 VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
     uint64_t evlrOffset, uint32_t evlrCount, VlrCatalog::ReadFunc f) : m_fetch(f)
 {
+    std::cerr << "VLR offset/count = " << vlrOffset << "/" << vlrCount << "!\n";
+    std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     load(vlrOffset, vlrCount, evlrOffset, evlrCount);
 }
 
