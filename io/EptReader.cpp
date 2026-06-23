@@ -298,6 +298,9 @@ void EptReader::initialize()
         throwError(e.what());
     }
 
+    // Adding total point count to the metadata
+    m_metadata.add("points", m_p->info->pointCount());
+
     // Figure out our max depth.
     const double queryResolution(m_args->m_resolution);
     //reseting depthEnd if initialize() has been called before
