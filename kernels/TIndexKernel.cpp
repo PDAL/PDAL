@@ -176,8 +176,16 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
                 "--path_prefix options.");
         if (m_writeStacGeoparquet)
         {
-            //!! Not sure if we should add to the list or overwrite. Some user values
-            //could potentially make the file invalid (i think only SORT_BY_BBOX=YES).
+            if (args.set("ogrdriver") && m_driverName != "Parquet")
+                throw pdal_error("Can't specify OGR driver when outputting "
+                    "to STAC GeoParquet.");
+            if (args.set("t_srs") && m_tgtSrsString != "EPSG:4326")
+                throw pdal_error("Can't specify target SRS when outputting "
+                    "to STAC GeoParquet; must be EPSG:4326.");
+            if (args.set("tindex_name"))
+                throw pdal_error("Can't specify tile index column name when "
+                    "outputting to STAC GeoParquet.");
+
             m_args->lcOptions.push_back("WRITE_COVERING_BBOX=YES");
         }
         if (args.set("a_srs"))

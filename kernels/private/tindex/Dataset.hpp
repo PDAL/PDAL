@@ -54,6 +54,7 @@ public:
     void setField(Field *field, const StringList& values);
     void setField(Field *field, const int value);
     void setField(Field *field, const tm& tyme);
+    void setField(Field *field, const std::vector<double>& values);
     std::string getField(Field *field);
     bool setGeometry(const Polygon& polygon);
 

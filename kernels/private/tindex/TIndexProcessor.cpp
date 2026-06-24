@@ -68,13 +68,16 @@ void TIndexProcessor::create(const StringList& files, PipelineManager& mgr)
                 "' in output file '" << m_args.idxFilename << "'.";
             throw TIndexError(out.str());
         }
+    // Define OGR fields, get indexes
     m_dataset->createFields();
 
+    // Create minimally populated FileInfo/StacFileInfo objects
     for (const std::string& file : files)
         m_infos.push_back(makeFileInfo(file));
 
     ThreadPool pool(m_args.numThreads);
 
+    // Create geometry, fill additional info from stages
     for (auto &info : m_infos)
     {
         pool.add([this, &info]()

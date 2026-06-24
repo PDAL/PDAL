@@ -16,9 +16,6 @@ struct StacFileInfo : FileInfo
     StacFileInfo(const std::string& filename) : FileInfo(filename), m_count(0)
     {
         m_encoding = FileUtils::extension(filename);
-        MetadataNode self = m_root.addList("links");
-        self.add("rel", "derived_from");
-        self.add("href", filename);
     }
 
     void addSchema(MetadataNode& schema)
@@ -38,10 +35,21 @@ struct StacFileInfo : FileInfo
                 { return n.name()=="statistic"; });
             for (auto& p : props)
                 m_root.addList(p.clone("pc:statistics"));
+
+            MetadataNode bbox = 
+                statsMeta.findChild("bbox").findChild("native").findChild("bbox");
+            if (!bbox.empty())
+            {
+                m_projBbox.push_back(getChild(bbox, "minx").value<double>());
+                m_projBbox.push_back(getChild(bbox, "miny").value<double>());
+                m_projBbox.push_back(getChild(bbox, "minz").value<double>());
+                m_projBbox.push_back(getChild(bbox, "maxx").value<double>());
+                m_projBbox.push_back(getChild(bbox, "maxy").value<double>());
+                m_projBbox.push_back(getChild(bbox, "maxz").value<double>());
+            }
         }
 
         // get LAS/COPC/EPT point count
-
         // EPT
         MetadataNode points = readerMeta.findChild("points");
         // LAS/COPC
@@ -50,7 +58,7 @@ struct StacFileInfo : FileInfo
             m_count = points.value<point_count_t>();
         else if (!count.empty())
             m_count = count.value<point_count_t>();
-    
+
         addDatetime(m_root, readerMeta);
     }
 
@@ -58,15 +66,10 @@ struct StacFileInfo : FileInfo
     {
         return jsonElement(m_root.children("pc:schemas"));
     }
-    
+
     std::string statistics()
     {
         return jsonElement(m_root.children("pc:statistics"));
-    }
-
-    std::string links()
-    {
-        return jsonElement(m_root.children("links"));
     }
 
     std::string datetime()
@@ -80,8 +83,8 @@ struct StacFileInfo : FileInfo
     std::string encoding()
         { return m_encoding; }
 
-    StringList extensions() const
-        { return m_extensions; }
+    std::vector<double> bbox()
+        { return m_projBbox; }
 
 private:
     std::string jsonElement(MetadataNodeList nodeList)
@@ -98,9 +101,9 @@ private:
 
     MetadataNode m_root;
 
-    StringList m_extensions;
     std::string m_encoding;
     point_count_t m_count;
+    std::vector<double> m_projBbox;
 };
 
 class StacIndexBuilder : public TIndexProcessor
@@ -117,8 +120,11 @@ private:
         Feature& feature) override;
 
     StringList m_extensions;
+    StringList m_assetTypes;
     std::string m_pcType;
     bool m_writeStats;
+
+    Field *m_assetTypeField;
     Field *m_srsField;
     Field *m_datetimeField;
     Field *m_linksField;
@@ -129,7 +135,10 @@ private:
     Field *m_pcEncodingField;
     Field *m_pcTypeField;
     Field *m_pcSchemasField;
+
+    // Optional fields
     Field *m_pcStatsField;
+    Field *m_projBboxField;
 };
 
 } // namespace tindex

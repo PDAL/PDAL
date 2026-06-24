@@ -14,10 +14,11 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
 #if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,9,0)
     throw TIndexError("STAC GeoParquet support requires GDAL 3.9.0 or later");
 #endif
-
     // Add STAC-specific fields
+    m_assetTypeField = m_dataset->defineField("assets.data.type", OFTStringList);
     m_srsField = m_dataset->defineField("proj:projjson", OFTString, OFSTJSON);
     m_datetimeField = m_dataset->defineField("datetime", OFTDateTime);
+    // Empty field, so that it stays in the schema.
     m_linksField = m_dataset->defineField("links", OFTString, OFSTJSON);
     m_idField = m_dataset->defineField("id", OFTString);
     m_stacExtensionsField = m_dataset->defineField("stac_extensions", OFTStringList);
@@ -26,12 +27,16 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
     m_pcEncodingField = m_dataset->defineField("pc:encoding", OFTString);
     m_pcTypeField = m_dataset->defineField("pc:type", OFTString);
     m_pcSchemasField = m_dataset->defineField("pc:schemas", OFTString, OFSTJSON);
-    // Maybe write an empty field instead, so that it stays in the schema
+    // Optional fields that require filters.stats
     if (m_writeStats)
+    {
         m_pcStatsField = m_dataset->defineField("pc:statistics", OFTString, OFSTJSON);
+        m_projBboxField = m_dataset->defineField("proj:bbox", OFTRealList);
+    }
 
     m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
+    m_assetTypes = { "data" };
 }
 
 FileInfoPtr StacIndexBuilder::makeFileInfo(const std::string& filename)
@@ -46,8 +51,6 @@ void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     manager.stageOptions() = m_stageOptions;
 
     Stage& reader = manager.makeReader(fileInfo->m_filename, "");
-    // Could add an info filter here if the reader isn't LAS/COPC
-    //Stage& info = manager.makeFilter("filters.info", reader);
     Stage* stats(nullptr);
     if (m_writeStats)
         stats = &(manager.makeFilter("filters.stats", reader));
@@ -57,12 +60,14 @@ void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
         StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
         MetadataNode readerMeta = reader.getMetadata();
+        // Only add stats metadata if a stats filter was added
         MetadataNode statsMeta;
         if (stats)
             statsMeta = stats->getMetadata();
+
         MetadataNode schema = 
             manager.pointTable().layout()->toMetadata().clone("schema");
-        // Schema may not exist if fastBoundary was used
+        // Schema may not exist if fastBoundary was run
         if (schema)
             stacFileInfo.addSchema(schema);
         stacFileInfo.addMetadata(readerMeta, statsMeta);
@@ -83,13 +88,13 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
         stacFileInfo.m_srs = qi.m_srs.getWKT();
     stacFileInfo.m_gridHeight = 0.0;
 
-    // If there's a stats filter we still need to execute the whole thing.
-    // Maybe should make a simpler check.
+    // If the optional stats filter was added in fillFileInfo, we still need 
+    // to execute the whole thing in order to get stats metadata.
     if (manager.stages().size() > 1)
         return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
 
-    // If the manager isn't executed, we have to make the dimension names into 
-    // a schema. May not be accurate for custom dimensions.
+    // If the manager isn't executed, dimensions won't be in the layout, so we 
+    // have to make a schema from the dimension names.
     // Structure copied from PointLayout::toMetadata()
     MetadataNode root("schema");
     for (std::string& dimName : qi.m_dimNames)
@@ -112,7 +117,7 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
 {
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
-    feature.setField(m_linksField, stacFileInfo.links());
+    feature.setField(m_assetTypeField, m_assetTypes);
     feature.setField(m_idField, FileUtils::getFilename(stacFileInfo.m_filename));
     feature.setField(m_stacVersionField, STAC_VERSION);
     feature.setField(m_stacExtensionsField, m_extensions);
@@ -121,10 +126,12 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     feature.setField(m_pcEncodingField, stacFileInfo.encoding());
     feature.setField(m_pcTypeField, m_pcType);
     feature.setField(m_datetimeField, stacFileInfo.datetime());
-    // Not sure if schema and statistics need to be native parquet lists or if json is ok
     feature.setField(m_pcSchemasField, stacFileInfo.schemas());
     if (m_writeStats)
+    {
         feature.setField(m_pcStatsField, stacFileInfo.statistics());
+        feature.setField(m_projBboxField, stacFileInfo.bbox());
+    }
 }
 
 } // namespace pdal

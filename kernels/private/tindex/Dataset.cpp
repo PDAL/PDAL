@@ -72,6 +72,11 @@ void Feature::setField(Field *field, const tm& tyme)
         tyme.tm_min, tyme.tm_sec, 100);
 }
 
+void Feature::setField(Field *field, const std::vector<double>& values)
+{
+    OGR_F_SetFieldDoubleList(m_feature, field->m_index, values.size(), values.data());
+}
+
 bool Feature::setGeometry(const Polygon& polygon)
 {
     return OGR_F_SetGeometry(m_feature, const_cast<Polygon &>(polygon).getOGRHandle()) ==
