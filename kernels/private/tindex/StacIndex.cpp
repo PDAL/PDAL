@@ -55,6 +55,9 @@ void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     if (m_writeStats)
         stats = &(manager.makeFilter("filters.stats", reader));
 
+    // We have 4 cases here: fast or slow boundary, with and w/o stats.
+    // Depending on the case (and what reader is used), the stacFileInfo fields
+    // will be set differently.
     if (runBoundary(fileInfo, manager))
     {
         StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
@@ -67,7 +70,8 @@ void StacIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
 
         MetadataNode schema = 
             manager.pointTable().layout()->toMetadata().clone("schema");
-        // Schema may not exist if fastBoundary was run
+        // Schema may not exist if fastBoundary was run; already added to 
+        // the StacFileInfo in that case.
         if (schema)
             stacFileInfo.addSchema(schema);
         stacFileInfo.addMetadata(readerMeta, statsMeta);
@@ -92,6 +96,10 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
     // to execute the whole thing in order to get stats metadata.
     if (manager.stages().size() > 1)
         return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
+
+    // If there isn't a stats filter, get the point count from quickInfo. Otherwise
+    // it will be set from the stats metadata.
+    stacFileInfo.m_count = qi.m_pointCount;
 
     // If the manager isn't executed, dimensions won't be in the layout, so we 
     // have to make a schema from the dimension names.
@@ -122,8 +130,8 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     feature.setField(m_stacVersionField, STAC_VERSION);
     feature.setField(m_stacExtensionsField, m_extensions);
     feature.setField(m_srsField, SpatialReference(stacFileInfo.m_srs).getPROJJSON());
-    feature.setField(m_pcCountField, stacFileInfo.count());
-    feature.setField(m_pcEncodingField, stacFileInfo.encoding());
+    feature.setField(m_pcCountField, stacFileInfo.m_count);
+    feature.setField(m_pcEncodingField, stacFileInfo.m_encoding);
     feature.setField(m_pcTypeField, m_pcType);
     feature.setField(m_datetimeField, stacFileInfo.datetime());
     feature.setField(m_pcSchemasField, stacFileInfo.schemas());

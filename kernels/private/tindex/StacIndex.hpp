@@ -28,13 +28,14 @@ struct StacFileInfo : FileInfo
 
     void addMetadata(MetadataNode& readerMeta, MetadataNode& statsMeta)
     {
-        // stageMetadata will always have reader metadata, but may not have stats.
         if (!statsMeta.empty())
         {
             auto props = statsMeta.findChildren([](MetadataNode& n)
                 { return n.name()=="statistic"; });
             for (auto& p : props)
                 m_root.addList(p.clone("pc:statistics"));
+            // Might as well get the count from here since we have it.
+            m_count = props[0].findChild("count").value<point_count_t>();
 
             MetadataNode bbox = 
                 statsMeta.findChild("bbox").findChild("native").findChild("bbox");
@@ -48,16 +49,22 @@ struct StacFileInfo : FileInfo
                 m_projBbox.push_back(getChild(bbox, "maxz").value<double>());
             }
         }
+        else if (m_count == 0)
+        {
+            // Get LAS/COPC/EPT point count - We only need to do this in the
+            // "slow boundary + no stats" case. (m_count is set in FastBoundary,
+            // or from the stats). Note that for readers that don't write the count
+            // to metadata, it will be 0.
 
-        // get LAS/COPC/EPT point count
-        // EPT
-        MetadataNode points = readerMeta.findChild("points");
-        // LAS/COPC
-        MetadataNode count = readerMeta.findChild("count");
-        if (!points.empty())
-            m_count = points.value<point_count_t>();
-        else if (!count.empty())
-            m_count = count.value<point_count_t>();
+            // EPT
+            MetadataNode points = readerMeta.findChild("points");
+            // LAS/COPC
+            MetadataNode count = readerMeta.findChild("count");
+            if (!points.empty())
+                m_count = points.value<point_count_t>();
+            else if (!count.empty())
+                m_count = count.value<point_count_t>();
+        }
 
         addDatetime(m_root, readerMeta);
     }
@@ -77,15 +84,11 @@ struct StacFileInfo : FileInfo
         return getChild(m_root, "datetime").value();
     }
 
-    int count()
-        { return m_count; }
-
-    std::string encoding()
-        { return m_encoding; }
-
     std::vector<double> bbox()
         { return m_projBbox; }
 
+    std::string m_encoding;
+    point_count_t m_count;
 private:
     std::string jsonElement(MetadataNodeList nodeList)
     {
@@ -100,9 +103,6 @@ private:
     }
 
     MetadataNode m_root;
-
-    std::string m_encoding;
-    point_count_t m_count;
     std::vector<double> m_projBbox;
 };
 
