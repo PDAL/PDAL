@@ -299,7 +299,7 @@ void EptReader::initialize()
     }
 
     // Adding point count info from ept.json to metadata
-    m_metadata.add<point_count_t>("points", m_p->info->pointCount(),
+    m_metadata.add<point_count_t>("points", m_p->info->points(),
         "The total number of points indexed into this EPT dataset");
 
     // Figure out our max depth.
