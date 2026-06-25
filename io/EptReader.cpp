@@ -298,9 +298,17 @@ void EptReader::initialize()
         throwError(e.what());
     }
 
-    // Adding point count info from ept.json to metadata
-    m_metadata.add<point_count_t>("points", m_p->info->points(),
+    // Adding info from ept.json to metadata
+    MetadataNode m = getMetadata();
+    MetadataNode eptMeta = m.add("ept_info");
+
+    eptMeta.add<point_count_t>("points", m_p->info->points(),
         "The total number of points indexed into this EPT dataset");
+    eptMeta.add<uint64_t>("span", m_p->info->span(),
+        "The span of voxels in each spatial dimension defining the "
+        "grid size used for the octree");
+    eptMeta.add("version", m_p->info->version(),
+        "The version number of the EPT file");
 
     // Figure out our max depth.
     const double queryResolution(m_args->m_resolution);
