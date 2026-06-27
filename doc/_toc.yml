@@ -38,8 +38,8 @@ parts:
       - file: stages/readers.buffer
       - file: stages/readers.copc
       - file: stages/readers.draco
-      - file: stages/readers.ept
       - file: stages/readers.e57
+      - file: stages/readers.ept
       - file: stages/readers.faux
       - file: stages/readers.fbi
       - file: stages/readers.gdal
@@ -48,8 +48,8 @@ parts:
       - file: stages/readers.ilvis2
       - file: stages/readers.las
       - file: stages/readers.matlab
-      - file: stages/readers.memoryview
       - file: stages/readers.mbio
+      - file: stages/readers.memoryview
       - file: stages/readers.nitf
       - file: stages/readers.numpy
       - file: stages/readers.obj
@@ -63,8 +63,8 @@ parts:
       - file: stages/readers.rdb
       - file: stages/readers.rxp
       - file: stages/readers.sbet
-      - file: stages/readers.smrmsg
       - file: stages/readers.slpk
+      - file: stages/readers.smrmsg
       - file: stages/readers.spz
       - file: stages/readers.stac
       - file: stages/readers.terrasolid
@@ -78,8 +78,8 @@ parts:
       - file: stages/writers.bpf
       - file: stages/writers.copc
       - file: stages/writers.draco
-      - file: stages/writers.ept_addon
       - file: stages/writers.e57
+      - file: stages/writers.ept_addon
       - file: stages/writers.fbi
       - file: stages/writers.fbx
       - file: stages/writers.gdal
@@ -99,118 +99,94 @@ parts:
       - file: stages/writers.tiledb
     - file: stages/filters
       sections:
-      # create ground
+      - file: stages/filters.approximatecoplanar
+      - file: stages/filters.assign
+      - file: stages/filters.chipper
+      - file: stages/filters.cluster
+      - file: stages/filters.colorinterp
+      - file: stages/filters.colorization
+      - file: stages/filters.covariancefeatures
+      - file: stages/filters.cpd
+      - file: stages/filters.crop
       - file: stages/filters.csf
-      - file: stages/filters.pmf
-      - file: stages/filters.skewnessbalancing
-      - file: stages/filters.smrf
-      - file: stages/filters.sparsesurface
-      - file: stages/filters.trajectory
-      # create noise
+      - file: stages/filters.dbscan
+      - file: stages/filters.decimation
+      - file: stages/filters.delaunay
+      - file: stages/filters.dem
+      - file: stages/filters.divider
+      - file: stages/filters.eigenvalues
       - file: stages/filters.elm
-      - file: stages/filters.outlier
-      # create consensus
-      - file: stages/filters.neighborclassifier
-      # create HAG
+      - file: stages/filters.estimaterank
+      - file: stages/filters.expression
+      - file: stages/filters.expressionstats
+      - file: stages/filters.faceraster
+      - file: stages/filters.ferry
+      - file: stages/filters.fps
+      - file: stages/filters.geomdistance
+      - file: stages/filters.georeference
+      - file: stages/filters.gpstimeconvert
+      - file: stages/filters.greedyprojection
+      - file: stages/filters.griddecimation
+      - file: stages/filters.groupby
+      - file: stages/filters.h3
       - file: stages/filters.hag_delaunay
       - file: stages/filters.hag_dem
       - file: stages/filters.hag_nn
-      # create colorization
-      - file: stages/filters.colorinterp
-      - file: stages/filters.colorization
-      # create clustering
-      - file: stages/filters.cluster
-      - file: stages/filters.dbscan
+      - file: stages/filters.head
+      - file: stages/filters.hexbin
+      - file: stages/filters.icp
+      - file: stages/filters.info
+      - file: stages/filters.iqr
+      - file: stages/filters.julia
+      - file: stages/filters.label_duplicates
       - file: stages/filters.litree
       - file: stages/filters.lloydkmeans
-      - file: stages/filters.supervoxel
-      # create features
-      - file: stages/filters.approximatecoplanar
-      - file: stages/filters.covariancefeatures
-      - file: stages/filters.eigenvalues
-      - file: stages/filters.estimaterank
-      - file: stages/filters.label_duplicates
+      - file: stages/filters.locate
       - file: stages/filters.lof
       - file: stages/filters.m3c2
+      - file: stages/filters.mad
+      - file: stages/filters.matlab
+      - file: stages/filters.merge
       - file: stages/filters.miniball
+      - file: stages/filters.mongo
+      - file: stages/filters.mortonorder
+      - file: stages/filters.neighborclassifier
       - file: stages/filters.nndistance
       - file: stages/filters.normal
       - file: stages/filters.optimalneighborhood
-      - file: stages/filters.planefit
-      - file: stages/filters.radialdensity
-      - file: stages/filters.reciprocity
-      - file: stages/filters.zsmooth
-      - file: stages/filters.griddecimation
-      # create assignment
-      - file: stages/filters.assign
+      - file: stages/filters.outlier
       - file: stages/filters.overlay
-      # create dimension
-      - file: stages/filters.ferry
-      # order
-      - file: stages/filters.mortonorder
-      - file: stages/filters.randomize
-      - file: stages/filters.sort
-      # move registration
-      - file: stages/filters.cpd
-      - file: stages/filters.icp
-      - file: stages/filters.teaser
-      # move predefined
+      - file: stages/filters.planefit
+      - file: stages/filters.pmf
+      - file: stages/filters.poisson
       - file: stages/filters.projpipeline
-      - file: stages/filters.reprojection
-      - file: stages/filters.transformation
-      - file: stages/filters.straighten
-      - file: stages/filters.georeference
-      - file: stages/filters.h3
-      # cull spatial
-      - file: stages/filters.crop
-      - file: stages/filters.geomdistance
-      # cull resample
-      - file: stages/filters.decimation
-      - file: stages/filters.fps
+      - file: stages/filters.python
+      - file: stages/filters.radialdensity
+      - file: stages/filters.randomize
+      - file: stages/filters.range
+      - file: stages/filters.reciprocity
       - file: stages/filters.relaxationdartthrowing
+      - file: stages/filters.reprojection
+      - file: stages/filters.returns
       - file: stages/filters.sample
-      # cull conditional
-      - file: stages/filters.dem
-      - file: stages/filters.iqr
-      - file: stages/filters.mad
-      # cull voxel
+      - file: stages/filters.separatescanline
+      - file: stages/filters.skewnessbalancing
+      - file: stages/filters.smrf
+      - file: stages/filters.sort
+      - file: stages/filters.sparsesurface
+      - file: stages/filters.splitter
+      - file: stages/filters.stats
+      - file: stages/filters.straighten
+      - file: stages/filters.streamcallback
+      - file: stages/filters.supervoxel
+      - file: stages/filters.tail
+      - file: stages/filters.teaser
+      - file: stages/filters.trajectory
+      - file: stages/filters.transformation
       - file: stages/filters.voxelcenternearestneighbor
       - file: stages/filters.voxelcentroidnearestneighbor
       - file: stages/filters.voxeldownsize
-      # cull position
-      - file: stages/filters.expression
-      - file: stages/filters.head
-      - file: stages/filters.locate
-      - file: stages/filters.mongo
-      - file: stages/filters.range
-      - file: stages/filters.tail
-      # new spatial
-      - file: stages/filters.chipper
-      - file: stages/filters.divider
-      - file: stages/filters.splitter
-      # new dimension
-      - file: stages/filters.gpstimeconvert
-      - file: stages/filters.groupby
-      - file: stages/filters.returns
-      - file: stages/filters.separatescanline
-      # join
-      - file: stages/filters.merge
-      # metadata
-      - file: stages/filters.hexbin
-      - file: stages/filters.info
-      - file: stages/filters.stats
-      - file: stages/filters.expressionstats
-      # mesh
-      - file: stages/filters.delaunay
-      - file: stages/filters.greedyprojection
-      - file: stages/filters.poisson
-      - file: stages/filters.faceraster
-      # languages
-      - file: stages/filters.matlab
-      - file: stages/filters.python
-      - file: stages/filters.julia
-      # other
-      - file: stages/filters.streamcallback
+      - file: stages/filters.zsmooth
   - file: dimensions
   - file: types
   - file: python
