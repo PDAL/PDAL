@@ -528,6 +528,17 @@ std::vector<std::string> glob(std::string path)
     return filenames;
 }
 
+// Create a std::filesystem::path from a string containing a UTF-8-encoded path.
+std::filesystem::path u8path(const std::string& path)
+{
+#ifdef __cpp_lib_char8_t  // C++20
+    char8_t *pU8path = reinterpret_cast<const char8_t *>(path.data());
+    return std::filesystem::path(std::u8string_view(pU8path, path.size()));
+#else                     // C++17
+    return std::filesystem::u8path(path);
+#endif
+}
+
 
 MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, uintmax_t size)
 {

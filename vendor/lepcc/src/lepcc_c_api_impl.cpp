@@ -21,7 +21,7 @@ http://github.com/Esri/lepcc/
 Contributors:  Ronald Poirrier, Thomas Maurer
 */
 
-#include "lepcc_c_api.h"
+#include "include/lepcc_c_api.h"
 #include "LEPCC.h"
 #include "ClusterRGB.h"
 #include "Intensity.h"
@@ -55,9 +55,9 @@ void lepcc_deleteContext(lepcc_ContextHdl* ctx)
   *ctx = nullptr;
 }
 
-// ---- XYZ: 
+// ---- XYZ:
 
-lepcc_status lepcc_computeCompressedSizeXYZ(lepcc_ContextHdl _ctx, unsigned int nPts, const double* xyzArray, 
+lepcc_status lepcc_computeCompressedSizeXYZ(lepcc_ContextHdl _ctx, unsigned int nPts, const double* xyzArray,
   double maxXErr, double maxYErr, double maxZErr, unsigned int* nBytes, unsigned int* orderOut)
 {
   CtxImpl* ctx = reinterpret_cast<CtxImpl*>(_ctx);
@@ -85,7 +85,7 @@ lepcc_status lepcc_encodeXYZ(lepcc_ContextHdl _ctx, unsigned char** ppByteOut, i
   CtxImpl* ctx = reinterpret_cast<CtxImpl*>(_ctx);
   if (!ctx || !ctx->xyz)
     return (lepcc_status)ErrCode::WrongParam;
- 
+
   auto hr = ctx->xyz->Encode(ppByteOut, int64(bufferSizeOut));
   return (lepcc_status)hr;
 }
@@ -107,7 +107,7 @@ lepcc_status lepcc_decodeXYZ(lepcc_ContextHdl _ctx, const unsigned char** ppByte
   return (lepcc_status)ctx->xyz->Decode(ppByte, bufferSize, *nPtsInOut, reinterpret_cast<Point3D*>(xyzBuffOut));
 }
 
-// ---- RGB: 
+// ---- RGB:
 
 lepcc_status lepcc_computeCompressedSizeRGB(lepcc_ContextHdl _ctx, unsigned int nRGB, const unsigned char* rgbArray, unsigned int* nBytes)
 {
@@ -155,7 +155,7 @@ lepcc_status lepcc_decodeRGB(lepcc_ContextHdl _ctx, const unsigned char** ppByte
   return (lepcc_status)ctx->rgb->Decode(ppByte, bufferSize, *nRGBInOut, reinterpret_cast<RGB_t*>(rbgBuffOut));
 }
 
-// ---- Intensity: 
+// ---- Intensity:
 
 lepcc_status lepcc_computeCompressedSizeIntensity(lepcc_ContextHdl _ctx, unsigned int nValues, const unsigned short* valArray, unsigned int* nBytes)
 {
@@ -201,7 +201,7 @@ lepcc_status lepcc_decodeIntensity(lepcc_ContextHdl _ctx, const unsigned char** 
   return (lepcc_status)ctx->inty->Decode(ppByte, bufferSize, *nElemInOut, valBuffOut);
 }
 
-// ---- Flag bytes: 
+// ---- Flag bytes:
 
 lepcc_status lepcc_computeCompressedSizeFlagBytes(lepcc_ContextHdl _ctx, unsigned int nValues, const unsigned char* valArray, unsigned int* nBytes)
 {

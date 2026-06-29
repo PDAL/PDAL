@@ -27,7 +27,7 @@ Contributors:  Thomas Maurer
 #include <vector>
 #include <cstring>
 #include <utility>
-#include "lepcc_types.h"
+#include "include/lepcc_types.h"
 
 namespace lepcc
 {
@@ -37,11 +37,11 @@ namespace lepcc
     Huffman() : m_maxHistoSize(1 << 15), m_maxNumBitsLUT(12), m_numBitsToSkipInTree(0), m_root(0) {};
     ~Huffman() { Clear(); };
 
-    // Limitation: We limit the max Huffman code length to 32 bit. If this happens, the function ComputeCodes() 
-    // returns false. In that case don't use Huffman coding but Lerc only instead. 
-    // This won't happen easily. For the worst case input maximizing the Huffman code length the counts in the 
+    // Limitation: We limit the max Huffman code length to 32 bit. If this happens, the function ComputeCodes()
+    // returns false. In that case don't use Huffman coding but Lerc only instead.
+    // This won't happen easily. For the worst case input maximizing the Huffman code length the counts in the
     // histogram have to follow the Fibonacci sequence. Even then, for < 9,227,465 data values, 32 bit is
-    // the max Huffman code length possible. 
+    // the max Huffman code length possible.
 
     int64 ComputeNumBytesNeededToEncode(const std::vector<int>& histo);
 

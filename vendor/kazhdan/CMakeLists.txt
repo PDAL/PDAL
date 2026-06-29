@@ -1,17 +1,6 @@
-get_property(EXISTS GLOBAL PROPERTY _PDAL_KAZHDAN_INCLUDED)
-if (EXISTS)
-    return()
-endif()
 
-PDAL_ADD_FREE_LIBRARY(${PDAL_KAZHDAN_LIB_NAME} STATIC ${PDAL_LIB_TYPE}
-    Factor.cpp
-    Geometry.cpp
-    MarchingCubes.cpp
-)
-if (UNIX)
-    target_compile_options(${PDAL_KAZHDAN_LIB_NAME} PRIVATE -fPIC)
-    target_compile_options(${PDAL_KAZHDAN_LIB_NAME} PRIVATE -Wno-maybe-uninitialized)
-endif()
-target_link_libraries(${PDAL_KAZHDAN_LIB_NAME})
-
-set_property(GLOBAL PROPERTY _PDAL_KAZHDAN_INCLUDED TRUE)
+set(KAZHDAN_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MarchingCubes.cpp
+    PARENT_SCOPE)

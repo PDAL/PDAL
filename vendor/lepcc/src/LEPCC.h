@@ -27,7 +27,7 @@ Contributors:  Thomas Maurer
 #include <cstring>
 #include <string>
 #include <vector>
-#include "lepcc_types.h"
+#include "include/lepcc_types.h"
 
 namespace lepcc
 {
