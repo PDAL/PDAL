@@ -253,7 +253,7 @@ TEST(TIndex, test5)
     "--fast_boundary=true 2>&1";
 
     Utils::run_shell_command(cmd, output);
-    pos = output.find("supports a maximum of 254");
+    pos = output.find("exceeds supported length of 254.");
     EXPECT_NE(pos, std::string::npos);
     FileUtils::deleteDirectory(outSpec);
 }
@@ -322,4 +322,62 @@ TEST(TIndex, test8)
     std::string desc = it->get<std::string>();
 
     EXPECT_EQ(desc, "foo");
+}
+
+
+// Testing stac-geoparquet
+TEST(TIndex, test9)
+{
+    std::string inSpec(Support::datapath("tindex/*.txt"));
+    std::string outSpec(Support::temppath("tindex.parquet"));
+
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout " +
+        "--stac-geoparquet=true -f GeoJSON 2>&1";
+
+    FileUtils::deleteFile(outSpec);
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+    std::string::size_type pos =
+        output.find("Can't specify OGR driver when outputting to STAC GeoParquet");
+    EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --threshold=1 " +
+        "--resolution=1.0 --log=stdout " +
+        "--stac-geoparquet=true --statistics=true 2>&1";
+
+    FileUtils::deleteFile(outSpec);
+    Utils::run_shell_command(cmd, output);
+
+    cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
+    std::string info;
+    if (Utils::run_shell_command(cmd, info)) {
+        std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
+        return;
+    }
+
+    // Not checking full filename (assets.data.href) since it depends on relative path
+    pos = info.find("pc:encoding (String) = .txt");
+    EXPECT_NE(pos, std::string::npos);
+
+    pos = info.find("pc:count (Integer) = 4");
+    EXPECT_NE(pos, std::string::npos);
+
+    pos = info.find("pc:statistics (String(JSON)) = [");
+    EXPECT_NE(pos, std::string::npos);
+
+    pos = info.find("pc:encoding (String) = .txt");
+    EXPECT_NE(pos, std::string::npos);
+
+    pos = info.find("pc:schemas (String(JSON)) = [");
+    EXPECT_NE(pos, std::string::npos);
+
+    pos = info.find("proj:projjson (String(JSON)) = {");
+    EXPECT_NE(pos, std::string::npos);
+
+    pos = info.find("id (String) = t1.txt");
+    EXPECT_NE(pos, std::string::npos);
+
+    FileUtils::deleteFile(outSpec);
 }
