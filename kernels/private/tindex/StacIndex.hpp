@@ -1,5 +1,7 @@
 
 #include <kernels/private/stac/StacInfo.hpp>
+#include <nlohmann/json.hpp>
+
 #include "TIndexProcessor.hpp"
 
 namespace pdal
@@ -8,6 +10,7 @@ namespace tindex
 {
 
 struct Field;
+struct StaticField;
 
 static const std::string STAC_VERSION = "1.1.0";
 
@@ -110,7 +113,7 @@ class StacIndexBuilder : public TIndexProcessor
 {
 public:
     StacIndexBuilder(const Args& args, const std::string& pcType,
-        bool statistics);
+        bool statistics, NL::json& staticFields);
 
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
@@ -121,24 +124,21 @@ private:
 
     StringList m_extensions;
     StringList m_assetTypes;
-    std::string m_pcType;
     bool m_writeStats;
 
-    Field *m_assetTypeField;
     Field *m_srsField;
     Field *m_datetimeField;
     Field *m_linksField;
     Field *m_idField;
-    Field *m_stacExtensionsField;
-    Field *m_stacVersionField;
     Field *m_pcCountField;
     Field *m_pcEncodingField;
-    Field *m_pcTypeField;
     Field *m_pcSchemasField;
 
     // Optional fields
     Field *m_pcStatsField;
     Field *m_projBboxField;
+
+    std::vector<StaticField *> m_staticFields;
 };
 
 } // namespace tindex

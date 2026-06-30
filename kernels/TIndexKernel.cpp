@@ -98,6 +98,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "eopc, radar, sonar, other).", m_pcType, "lidar");
         args.add("statistics", "Show stats on all points for STAC generation "
             "(reads entire dataset)", m_showStats);
+        args.add("static_fields", "JSON array of field names and values to include "
+            "in tile index; specified as { \"fieldName\": value, ...}", m_staticFields);
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
@@ -185,7 +187,9 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
             if (args.set("tindex_name"))
                 throw pdal_error("Can't specify tile index column name when "
                     "outputting to STAC GeoParquet.");
-
+            if (args.set("static_fields") && !m_staticFields.is_object())
+                throw pdal_error("Static fields must be specified as a "
+                    "JSON object of key/value pairs.");
             m_args->lcOptions.push_back("WRITE_COVERING_BBOX=YES");
         }
         if (args.set("a_srs"))
@@ -324,7 +328,8 @@ void TIndexKernel::createFile()
     }
 
     if (m_writeStacGeoparquet)
-        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType, m_showStats));
+        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType, m_showStats, 
+            m_staticFields));
     else
         m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
             m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));

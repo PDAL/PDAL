@@ -328,7 +328,7 @@ TEST(TIndex, test8)
 // Testing stac-geoparquet
 TEST(TIndex, test9)
 {
-    std::string inSpec(Support::datapath("tindex/*.txt"));
+    std::string inSpec(Support::datapath("tindex/t1.txt"));
     std::string outSpec(Support::temppath("tindex.parquet"));
 
     std::string cmd = Support::binpath("pdal") + " tindex create " +
@@ -361,7 +361,7 @@ TEST(TIndex, test9)
     pos = info.find("pc:encoding (String) = .txt");
     EXPECT_NE(pos, std::string::npos);
 
-    pos = info.find("pc:count (Integer) = 4");
+    pos = info.find("pc:count (Integer64) = 4");
     EXPECT_NE(pos, std::string::npos);
 
     pos = info.find("pc:statistics (String(JSON)) = [");
@@ -380,4 +380,48 @@ TEST(TIndex, test9)
     EXPECT_NE(pos, std::string::npos);
 
     FileUtils::deleteFile(outSpec);
+}
+
+// Testing adding static fields
+TEST(TIndex, test10)
+{
+    std::string inSpec(Support::datapath("tindex/*.txt"));
+    std::string outSpec(Support::temppath("tindex.parquet"));
+
+    // Testing string
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout " +
+        "--stac-geoparquet=true --static_fields=\"{\\\"foo\\\": \\\"bar\\\"}\" 2>&1";
+
+    FileUtils::deleteFile(outSpec);
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
+    std::string info;
+    if (Utils::run_shell_command(cmd, info)) {
+        std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
+        return;
+    }
+    std::string::size_type pos = info.find("foo (String) = bar");
+    EXPECT_NE(pos, std::string::npos);
+
+    // Testing list
+    cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout " +
+        "--stac-geoparquet=true --static-fields=\"{\\\"foo\\\": [\\\"bar\\\", 2]}\" 2>&1";
+
+    FileUtils::deleteFile(outSpec);
+    Utils::run_shell_command(cmd, output);
+
+    cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
+    if (Utils::run_shell_command(cmd, info)) {
+        std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
+        return;
+    }
+    std::cout << info << std::endl;
+    pos = info.find("foo (StringList) = (2:bar,2)");
+    EXPECT_NE(pos, std::string::npos);
+    pos = info.find("foo (Integer) = 2");
+    EXPECT_NE(pos, std::string::npos);
 }

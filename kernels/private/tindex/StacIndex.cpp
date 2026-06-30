@@ -7,25 +7,21 @@ namespace tindex
 {
 
 StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
-    bool statistics)
+    bool statistics, NL::json& staticFields)
     : TIndexProcessor(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
-      m_pcType(pcType), m_writeStats(statistics)
+      m_writeStats(statistics)
 {
 #if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,9,0)
     throw TIndexError("STAC GeoParquet support requires GDAL 3.9.0 or later");
 #endif
     // Add STAC-specific fields
-    m_assetTypeField = m_dataset->defineField("assets.data.type", OFTStringList);
     m_srsField = m_dataset->defineField("proj:projjson", OFTString, OFSTJSON);
     m_datetimeField = m_dataset->defineField("datetime", OFTDateTime);
     // Empty field, so that it stays in the schema.
     m_linksField = m_dataset->defineField("links", OFTString, OFSTJSON);
     m_idField = m_dataset->defineField("id", OFTString);
-    m_stacExtensionsField = m_dataset->defineField("stac_extensions", OFTStringList);
-    m_stacVersionField = m_dataset->defineField("stac_version", OFTString);
-    m_pcCountField = m_dataset->defineField("pc:count", OFTInteger);
+    m_pcCountField = m_dataset->defineField("pc:count", OFTInteger64);
     m_pcEncodingField = m_dataset->defineField("pc:encoding", OFTString);
-    m_pcTypeField = m_dataset->defineField("pc:type", OFTString);
     m_pcSchemasField = m_dataset->defineField("pc:schemas", OFTString, OFSTJSON);
     // Optional fields that require filters.stats
     if (m_writeStats)
@@ -34,9 +30,19 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
         m_projBboxField = m_dataset->defineField("proj:bbox", OFTRealList);
     }
 
-    m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
+    // Add static fields
+    std::vector<std::string> extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
-    m_assetTypes = { "data" };
+    std::vector <std::string> assetTypes = { "data" };
+    m_staticFields.push_back(m_dataset->defineField("stac_extensions", extensions));
+    m_staticFields.push_back(m_dataset->defineField("assets.data.type", assetTypes));
+    m_staticFields.push_back(m_dataset->defineField("stac_version", STAC_VERSION));
+    m_staticFields.push_back(m_dataset->defineField("pc:type", pcType));
+    for (auto& [key, value] : staticFields.items())
+        m_staticFields.push_back(m_dataset->defineField(key, value));
+
+    // Sort fields alphabetically for better structure
+    m_dataset->sortFields();
 }
 
 FileInfoPtr StacIndexBuilder::makeFileInfo(const std::string& filename)
@@ -125,14 +131,13 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
 {
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
-    feature.setField(m_assetTypeField, m_assetTypes);
+    for (auto& field : m_staticFields)
+        feature.setField(field);
+
     feature.setField(m_idField, FileUtils::getFilename(stacFileInfo.m_filename));
-    feature.setField(m_stacVersionField, STAC_VERSION);
-    feature.setField(m_stacExtensionsField, m_extensions);
     feature.setField(m_srsField, SpatialReference(stacFileInfo.m_srs).getPROJJSON());
     feature.setField(m_pcCountField, stacFileInfo.m_count);
     feature.setField(m_pcEncodingField, stacFileInfo.m_encoding);
-    feature.setField(m_pcTypeField, m_pcType);
     feature.setField(m_datetimeField, stacFileInfo.datetime());
     feature.setField(m_pcSchemasField, stacFileInfo.schemas());
     if (m_writeStats)

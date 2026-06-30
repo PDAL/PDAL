@@ -5,6 +5,7 @@
 #include <deque>
 
 #include <ogr_api.h>
+#include <nlohmann/json.hpp>
 
 #if __has_include(<gdal_fwd.h>)
 #include <gdal_fwd.h>
@@ -29,16 +30,33 @@ namespace tindex
 
 struct Field
 {
-    Field(const std::string& name, OGRFieldType fieldType, OGRFieldSubType subtype = OFSTNone) :
-        m_name(name), m_fieldType(fieldType), m_subtype(subtype)
+    Field(const std::string& name, OGRFieldType fieldType, OGRFieldSubType subtype) :
+        m_name(name), m_type(fieldType), m_subtype(subtype)
     {}
+    virtual ~Field() {}
 
     bool valid() const { return !m_name.empty(); }
 
     std::string m_name;
-    OGRFieldType m_fieldType;
+    OGRFieldType m_type;
     OGRFieldSubType m_subtype;
     int m_index = -1;  // Integer value proxy for field.
+};
+
+struct StaticField : public Field
+{
+    StaticField(const std::string& name, const NL::json& value) :
+        Field(name, OFTString, OFSTNone), m_value(value)
+    {
+        if (m_value.is_number_integer() || m_value.is_number_unsigned())
+            m_type = OFTInteger;
+        else if (m_value.is_number_float())
+            m_type = OFTReal;
+        else if (m_value.is_array())
+            m_type = OFTStringList;
+    }
+
+    NL::json m_value;
 };
 
 class Feature
@@ -50,9 +68,12 @@ public:
 
     OGRFeatureH getFeature() { return m_feature; }
 
+    void setField(StaticField *field);
     void setField(Field *field, const std::string& value);
     void setField(Field *field, const StringList& values);
     void setField(Field *field, const int value);
+    void setField(Field *field, const uint64_t value);
+    void setField(Field *field, const double value);
     void setField(Field *field, const tm& tyme);
     void setField(Field *field, const std::vector<double>& values);
     std::string getField(Field *field);
@@ -82,9 +103,10 @@ public:
     void getFieldIndexes();
     bool queryLayer(const std::string& query);
     void setSpatialFilter(const Polygon& polygon);
-    Field *defineField(const std::string& name, const OGRFieldType fieldType);
     Field *defineField(const std::string& name, const OGRFieldType fieldType,
-        const OGRFieldSubType subtype);
+        const OGRFieldSubType subtype = OFSTNone);
+    StaticField *defineField(const std::string& name, const NL::json& value);
+    void sortFields();
 
 private:
     OGRLayerH m_layer;
@@ -94,7 +116,9 @@ private:
     std::string m_idxFilename;
     std::string m_driverName;
     size_t m_maxFieldSize;
-    std::deque<Field> m_fields;
+    std::vector<Field *> m_fields;
+    std::deque<Field> m_dynamicFields;
+    std::deque<StaticField> m_staticFields;
 };
 
 } // namespace tindex

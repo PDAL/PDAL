@@ -3,6 +3,7 @@
 #include "TIndexError.hpp"
 
 #include <pdal/Polygon.hpp>
+#include <pdal/util/private/JsonSupport.hpp>
 
 #include <ogr_api.h>
 #include <cpl_string.h>
@@ -36,6 +37,19 @@ std::string Feature::getField(Field *field)
     return OGR_F_GetFieldAsString(m_feature, field->m_index);
 }
 
+void Feature::setField(StaticField *field)
+{
+    // All the types supported for now
+    if (field->m_type == OFTInteger)
+        setField(field, Utils::jsonValue<int>(field->m_value));
+    else if (field->m_type == OFTReal)
+        setField(field, Utils::jsonValue<double>(field->m_value));
+    else if (field->m_type == OFTStringList)
+        setField(field, Utils::jsonValue<StringList>(field->m_value));
+    else
+        setField(field, Utils::jsonValue<std::string>(field->m_value));
+}
+
 void Feature::setField(Field *field, const std::string& value)
 {
     if (m_maxFieldSize == 0 || value.size() <= (size_t)m_maxFieldSize)
@@ -63,6 +77,16 @@ void Feature::setField(Field *field, const StringList& values)
 void Feature::setField(Field *field, const int value)
 {
     OGR_F_SetFieldInteger(m_feature, field->m_index, value);
+}
+
+void Feature::setField(Field *field, const uint64_t value)
+{
+    OGR_F_SetFieldInteger64(m_feature, field->m_index, value);
+}
+
+void Feature::setField(Field *field, const double value)
+{
+    OGR_F_SetFieldDouble(m_feature, field->m_index, value);
 }
 
 void Feature::setField(Field *field, const tm& tyme)
@@ -101,15 +125,25 @@ Dataset::Dataset(const std::string& idxFilename, const std::string& driverName)
         m_maxFieldSize = 254;
 }
 
-Field *Dataset::defineField(const std::string& name, const OGRFieldType fieldType)
-{
-    return &m_fields.emplace_back(name, fieldType);
-}
-
 Field *Dataset::defineField(const std::string& name, const OGRFieldType fieldType,
         const OGRFieldSubType subtype)
 {
-    return &m_fields.emplace_back(name, fieldType, subtype);
+    Field* field = &m_dynamicFields.emplace_back(name, fieldType, subtype);
+    m_fields.push_back(field);
+    return field;
+}
+
+StaticField *Dataset::defineField(const std::string& name, const NL::json& value)
+{
+    StaticField* field = &m_staticFields.emplace_back(name, value);
+    m_fields.push_back(field);
+    return field;
+}
+
+void Dataset::sortFields()
+{
+    std::sort(m_fields.begin(), m_fields.end(),
+        [](Field* a, Field* b) { return a->m_name < b->m_name; });
 }
 
 bool Dataset::openDataset()
@@ -164,10 +198,11 @@ bool Dataset::createLayer(const std::string& layerName, const std::string& srsSt
 
 void Dataset::createFields()
 {
-    for (Field& field : m_fields)
+    for (auto field : m_fields)
     {
-        OGRFieldDefnH hFieldDefn = OGR_Fld_Create(field.m_name.c_str(), field.m_fieldType);
-        OGR_Fld_SetSubType(hFieldDefn, field.m_subtype);
+        OGRFieldDefnH hFieldDefn = 
+            OGR_Fld_Create(field->m_name.c_str(), field->m_type);
+        OGR_Fld_SetSubType(hFieldDefn, field->m_subtype);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
     }
@@ -180,9 +215,9 @@ void Dataset::getFieldIndexes()
 {
     if (!m_layerDefn)
         m_layerDefn = OGR_L_GetLayerDefn(m_layer);
-    for (Field& field : m_fields)
+    for (auto field : m_fields)
     {
-        field.m_index = OGR_FD_GetFieldIndex(m_layerDefn, field.m_name.c_str());
+        field->m_index = OGR_FD_GetFieldIndex(m_layerDefn, field->m_name.c_str());
     }
 }
 

@@ -40,6 +40,8 @@
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <nlohmann/json.hpp>
+
 namespace pdal
 {
     class Polygon;
@@ -94,6 +96,7 @@ private:
     bool m_usestdin;
     bool m_writeStacGeoparquet;
     bool m_showStats;
+    NL::json m_staticFields;
     std::string m_originalSrs;
     size_t m_maxFieldSize;
 };
