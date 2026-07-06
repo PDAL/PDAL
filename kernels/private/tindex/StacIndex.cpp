@@ -101,7 +101,15 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
     // If the optional stats filter was added in fillFileInfo, we still need 
     // to execute the whole thing in order to get stats metadata.
     if (manager.stages().size() > 1)
-        return !(manager.execute(ExecMode::PreferStream).m_mode == ExecMode::None);
+    {
+        // If fastBoundary is run after a slowBoundary failure, we can't rerun
+        // the manager. This is a really stupid fix.
+        PointTable table;
+        Stage* stage = manager.getStage();
+        stage->prepare(table);
+        stage->execute(table);
+        return true;
+    }
 
     // If there isn't a stats filter, get the point count from quickInfo. Otherwise
     // it will be set from the stats metadata.
