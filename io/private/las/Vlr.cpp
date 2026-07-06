@@ -38,6 +38,9 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
+#ifdef _WIN32
+#include <pdal/util/Stackwalker.h>
+#endif
 
 namespace pdal
 {
@@ -358,22 +361,44 @@ VlrCatalog::VlrCatalog(VlrCatalog::ReadFunc f) : m_fetch(f)
 VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
     uint64_t evlrOffset, uint32_t evlrCount, VlrCatalog::ReadFunc f) : m_fetch(f)
 {
+    std::cerr << "VLR offset/count = " << vlrOffset << "/" << vlrCount << "!\n";
+    std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     load(vlrOffset, vlrCount, evlrOffset, evlrCount);
 }
 
 void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
     uint64_t evlrOffset, uint32_t evlrCount)
 {
+std::cerr << "VLR offset/count = " << vlrOffset << "/" << vlrCount << "!\n";
+std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
     auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
 
-    ThreadPool pool(2);
+    std::thread t1(vlrWalker);
+    std::thread t2(evlrWalker);
 
-    if (vlrCount)
-        pool.add(vlrWalker);
-    if (evlrCount)
-        pool.add(evlrWalker);
-    pool.await();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::cerr << "Waiting for threads!\n";
+#ifdef _WIN32
+    class MyStackWalker : public StackWalker
+    {
+    protected:
+        virtual void OnOutput(LPCSTR text)
+        {
+            std::cerr << std::string(text) << "!\n";
+            StackWalker::OnOutput(text);
+        }
+    };
+
+
+    MyStackWalker s1;
+    s1.ShowCallstack(t1.native_handle());
+    MyStackWalker s2;
+    s2.ShowCallstack(t2.native_handle());
+#endif
+    t1.join();
+    t2.join();
+    std::cerr << "Done Waiting for threads!\n";
 }
 
 void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
