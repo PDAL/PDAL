@@ -40,8 +40,6 @@
 
 #include <io/CopcReader.hpp>
 #include <io/LasReader.hpp>
-#include <io/private/las/Vlr.hpp>
-#include <io/private/connector/Connector.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
 #include <filters/SortFilter.hpp>
@@ -86,19 +84,6 @@ void testURLs(const std::string& url, const BOX2D& bounds)
 
 }
 
-/**
-TEST(CopcRemoteReaderTest, hang)
-{
-    std::string url( "/vsicurl/https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
-
-    connector::Connector conn;
-    las::VlrCatalog catalog([&conn](uint64_t offset, int32_t size) -> std::vector<char>
-        {
-            return conn.getBinary(offset, size);
-        });
-    catalog.load(vlrOffset, vlrCount, evlrOffset, evlrCount);
-}
-**/
 
 TEST(CopcRemoteReaderTest, vsi)
 {
@@ -116,7 +101,7 @@ TEST(CopcRemoteReaderTest, vsi)
     std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
     std::string vsi ("/vsicurl/"+url);
 
-//    testURLs(url, bounds);
+    testURLs(url, bounds);
     testURLs(vsi, bounds);
 
 
