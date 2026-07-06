@@ -38,9 +38,11 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
+/**
 #ifdef _WIN32
 #include <pdal/util/Stackwalker.h>
 #endif
+**/
 
 namespace pdal
 {
@@ -379,6 +381,7 @@ std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::cerr << "Waiting for threads!\n";
+    /**
 #ifdef _WIN32
     class MyStackWalker : public StackWalker
     {
@@ -396,6 +399,7 @@ std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     MyStackWalker s2;
     s2.ShowCallstack(t2.native_handle());
 #endif
+    **/
     t1.join();
     t2.join();
     std::cerr << "Done Waiting for threads!\n";
