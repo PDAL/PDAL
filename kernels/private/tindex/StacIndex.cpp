@@ -33,9 +33,9 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
     // Add static fields
     std::vector<std::string> extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
-    std::vector <std::string> assetTypes = { "data" };
+    std::vector <std::string> assetRoles = { "data" };
     m_staticFields.push_back(m_dataset->defineField("stac_extensions", extensions));
-    m_staticFields.push_back(m_dataset->defineField("assets.data.type", assetTypes));
+    m_staticFields.push_back(m_dataset->defineField("assets.data.roles", assetRoles));
     m_staticFields.push_back(m_dataset->defineField("stac_version", STAC_VERSION));
     m_staticFields.push_back(m_dataset->defineField("pc:type", pcType));
     for (auto& [key, value] : staticFields.items())

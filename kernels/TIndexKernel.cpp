@@ -98,7 +98,7 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "eopc, radar, sonar, other).", m_pcType, "lidar");
         args.add("statistics", "Show stats on all points for STAC generation "
             "(reads entire dataset)", m_showStats);
-        args.add("static_fields", "JSON array of field names and values to include "
+        args.add("static_fields", "JSON object of field names and values to include "
             "in tile index; specified as { \"fieldName\": value, ...}", m_staticFields);
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");

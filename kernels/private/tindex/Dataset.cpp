@@ -40,8 +40,13 @@ std::string Feature::getField(Field *field)
 void Feature::setField(StaticField *field)
 {
     // All the types supported for now
-    if (field->m_type == OFTInteger)
-        setField(field, Utils::jsonValue<int>(field->m_value));
+    if (field->m_type == OFTInteger64)
+    {
+        if (field->m_value.is_number_unsigned())
+            setField(field, Utils::jsonValue<uint64_t>(field->m_value));
+        else
+            setField(field, Utils::jsonValue<int64_t>(field->m_value));
+    }
     else if (field->m_type == OFTReal)
         setField(field, Utils::jsonValue<double>(field->m_value));
     else if (field->m_type == OFTStringList)
@@ -74,9 +79,10 @@ void Feature::setField(Field *field, const StringList& values)
     OGR_F_SetFieldStringList(m_feature, field->m_index, sl.data());
 }
 
-void Feature::setField(Field *field, const int value)
+// Duplicated for signed & unsigned
+void Feature::setField(Field *field, const int64_t value)
 {
-    OGR_F_SetFieldInteger(m_feature, field->m_index, value);
+    OGR_F_SetFieldInteger64(m_feature, field->m_index, value);
 }
 
 void Feature::setField(Field *field, const uint64_t value)

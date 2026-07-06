@@ -48,8 +48,8 @@ struct StaticField : public Field
     StaticField(const std::string& name, const NL::json& value) :
         Field(name, OFTString, OFSTNone), m_value(value)
     {
-        if (m_value.is_number_integer() || m_value.is_number_unsigned())
-            m_type = OFTInteger;
+        if (m_value.is_number_integer())
+            m_type = OFTInteger64;
         else if (m_value.is_number_float())
             m_type = OFTReal;
         else if (m_value.is_array())
@@ -71,7 +71,7 @@ public:
     void setField(StaticField *field);
     void setField(Field *field, const std::string& value);
     void setField(Field *field, const StringList& values);
-    void setField(Field *field, const int value);
+    void setField(Field *field, const int64_t value);
     void setField(Field *field, const uint64_t value);
     void setField(Field *field, const double value);
     void setField(Field *field, const tm& tyme);
