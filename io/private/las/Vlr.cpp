@@ -369,6 +369,8 @@ VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
 void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
     uint64_t evlrOffset, uint32_t evlrCount)
 {
+std::cerr << "VLR offset/count = " << vlrOffset << "/" << vlrCount << "!\n";
+std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
     auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
 
