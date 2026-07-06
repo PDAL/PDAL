@@ -4829,12 +4829,21 @@ void Pool::run()
 {
     while (true)
     {
-        // Add ready transfers to the multi handle to run.
-        handleReady();
+        if (m_stop)
+            break;
 
-        int still_running;
-        CURLMcode result = curl_multi_perform(m_multi, &still_running);
-        if (result == CURLM_OK)
+        // Add ready transfers to the multi handle to run. If there is nothing to run, wait
+        // for the 1 sec. timeout. If a new handle is added, the poll will break before
+        // the 1 sec. timeout (see wakeup())
+        if (handleReady() == 0)
+        {
+            curl_multi_poll(m_multi, NULL, 0, 1000, NULL);
+            continue;
+        }
+
+        int stillRunning;
+        CURLMcode result = curl_multi_perform(m_multi, &stillRunning);
+        if (result == CURLM_OK && stillRunning)
             result = curl_multi_poll(m_multi, NULL, 0, 200, NULL);
 
         bool notify;
@@ -4846,24 +4855,27 @@ void Pool::run()
         // If any threads have completed, notify waiters.
         if (notify)
             m_poolCv.notify_all();
-        if (m_stop)
-            break;
     }
 }
 
 // For any any transfers that are ready, set the state to running, clear the code and
 // add the handle.
-void Pool::handleReady()
+int Pool::handleReady()
 {
     std::lock_guard l(m_mutex);
 
+    int runningCount = 0;
     for (Curl& curl : m_curls)
+    {
         if (curl.m_state == Curl::State::READY)
         {
             curl.m_state = Curl::State::RUNNING;
             curl.m_code = 0;
             curl_multi_add_handle(m_multi, curl.m_curl);
         }
+        runningCount += (curl.m_state == Curl::State::RUNNING);
+    }
+    return runningCount;
 }
 
 // See if any curl requests completed. If so, mark the state as DONE.
