@@ -1,13 +1,15 @@
 #include "StacIndex.hpp"
 #include "Dataset.hpp"
 
+#include <pdal/util/private/JsonSupport.hpp>
+
 namespace pdal
 {
 namespace tindex
 {
 
 StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
-    bool statistics, NL::json& staticFields)
+    bool statistics, std::string fieldsJson)
     : TIndexProcessor(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
       m_writeStats(statistics)
 {
@@ -31,6 +33,15 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
     }
 
     // Add static fields
+    if (fieldsJson.size())
+    {
+        NL::json j;
+        if (!Utils::parseJson(fieldsJson, j) || !j.is_object())
+            throw TIndexError("Static fields must be a valid JSON object");
+
+        for (auto& [key, value] : j.items())
+            m_staticFields.push_back(m_dataset->defineField(key, value));
+    }
     std::vector<std::string> extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
     std::vector <std::string> assetRoles = { "data" };
@@ -38,8 +49,6 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
     m_staticFields.push_back(m_dataset->defineField("assets.data.roles", assetRoles));
     m_staticFields.push_back(m_dataset->defineField("stac_version", STAC_VERSION));
     m_staticFields.push_back(m_dataset->defineField("pc:type", pcType));
-    for (auto& [key, value] : staticFields.items())
-        m_staticFields.push_back(m_dataset->defineField(key, value));
 
     // Sort fields alphabetically for better structure
     m_dataset->sortFields();
@@ -98,19 +107,6 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
         stacFileInfo.m_srs = qi.m_srs.getWKT();
     stacFileInfo.m_gridHeight = 0.0;
 
-    // If the optional stats filter was added in fillFileInfo, we still need 
-    // to execute the whole thing in order to get stats metadata.
-    if (manager.stages().size() > 1)
-    {
-        // If fastBoundary is run after a slowBoundary failure, we can't rerun
-        // the manager. This is a really stupid fix.
-        PointTable table;
-        Stage* stage = manager.getStage();
-        stage->prepare(table);
-        stage->execute(table);
-        return true;
-    }
-
     // If there isn't a stats filter, get the point count from quickInfo. Otherwise
     // it will be set from the stats metadata.
     stacFileInfo.m_count = qi.m_pointCount;
@@ -130,6 +126,18 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
         root.addList(dim);
     }
     stacFileInfo.addSchema(root);
+
+    // If the optional stats filter was added in fillFileInfo, we still need 
+    // to execute the whole thing in order to get stats metadata.
+    if (manager.stages().size() > 1)
+    {
+        // If fastBoundary is run after a slowBoundary failure, we can't rerun
+        // the manager. This is a really stupid fix.
+        PointTable table;
+        Stage* stage = manager.getStage();
+        stage->prepare(table);
+        stage->execute(table);
+    }
 
     return true;
 }

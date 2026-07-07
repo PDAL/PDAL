@@ -395,7 +395,7 @@ TEST(TIndex, test10)
 
     FileUtils::deleteFile(outSpec);
     std::string output;
-    Utils::run_shell_command(cmd, output);
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
 
     cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
     std::string info;
@@ -409,19 +409,37 @@ TEST(TIndex, test10)
     // Testing list
     cmd = Support::binpath("pdal") + " tindex create " +
         outSpec + " \"" + inSpec + "\" --log=stdout " +
-        "--stac-geoparquet=true --static-fields=\"{\\\"foo\\\": [\\\"bar\\\", 2]}\" 2>&1";
+        "--stac-geoparquet=true --static_fields=\"{\\\"foo\\\": [\\\"bar\\\"],"
+        "\\\"test\\\": 2 }\" 2>&1";
 
     FileUtils::deleteFile(outSpec);
-    Utils::run_shell_command(cmd, output);
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
 
     cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
     if (Utils::run_shell_command(cmd, info)) {
         std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
         return;
     }
-    std::cout << info << std::endl;
-    pos = info.find("foo (StringList) = (2:bar,2)");
+    pos = info.find("foo (StringList) = (1:bar)");
     EXPECT_NE(pos, std::string::npos);
-    pos = info.find("foo (Integer) = 2");
+    pos = info.find("test (Integer64) = 2");
+    EXPECT_NE(pos, std::string::npos);
+
+    // Testing file input
+    cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout " +
+        "--stac-geoparquet=true --static_fields=\"" +
+        Support::datapath("tindex/fields.json") + "\" 2>&1";
+
+    FileUtils::deleteFile(outSpec);
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+
+    cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
+    if (Utils::run_shell_command(cmd, info)) {
+        std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
+        return;
+    }
+    EXPECT_NE(pos, std::string::npos);
+    pos = info.find("foo (Integer64) = -100");
     EXPECT_NE(pos, std::string::npos);
 }

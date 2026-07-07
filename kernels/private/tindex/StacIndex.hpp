@@ -113,10 +113,11 @@ class StacIndexBuilder : public TIndexProcessor
 {
 public:
     StacIndexBuilder(const Args& args, const std::string& pcType,
-        bool statistics, NL::json& staticFields);
+        bool statistics, std::string fieldsJson);
 
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
+    void initStaticFields(std::string staticFields);
     void fillFileInfo(FileInfoPtr& fileInfo) override;
     bool fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,

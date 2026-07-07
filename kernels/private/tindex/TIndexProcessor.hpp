@@ -4,6 +4,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/Options.hpp>
 
+#include "TIndexError.hpp"
 #include "TIndexBoundary.hpp"
 
 namespace pdal

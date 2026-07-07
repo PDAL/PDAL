@@ -51,6 +51,8 @@ void Feature::setField(StaticField *field)
         setField(field, Utils::jsonValue<double>(field->m_value));
     else if (field->m_type == OFTStringList)
         setField(field, Utils::jsonValue<StringList>(field->m_value));
+    else if (field->m_subtype == OFSTJSON)
+        setField(field, field->m_value.dump());
     else
         setField(field, Utils::jsonValue<std::string>(field->m_value));
 }

@@ -40,6 +40,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/private/JsonSupport.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <kernels/private/tindex/TileIndex.hpp>
@@ -187,9 +188,13 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
             if (args.set("tindex_name"))
                 throw pdal_error("Can't specify tile index column name when "
                     "outputting to STAC GeoParquet.");
-            if (args.set("static_fields") && !m_staticFields.is_object())
-                throw pdal_error("Static fields must be specified as a "
-                    "JSON object of key/value pairs.");
+            // If the static fields arg was a file, read it into m_staticFields
+            if (args.set("static_fields"))
+            {
+                if (FileUtils::fileExists(m_staticFields))
+                    m_staticFields = FileUtils::readFileIntoString(
+                        m_staticFields);
+            }
             m_args->lcOptions.push_back("WRITE_COVERING_BBOX=YES");
         }
         if (args.set("a_srs"))
@@ -254,7 +259,7 @@ void TIndexKernel::mergeFile()
     }
     catch (tindex::TIndexError& e)
     {
-        throw pdal_error(e.what());    
+        throw pdal_error(e.what());
     }
 
     m_log->get(LogLevel::Info) << "Merge filecount: " <<
@@ -328,7 +333,7 @@ void TIndexKernel::createFile()
     }
 
     if (m_writeStacGeoparquet)
-        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType, m_showStats, 
+        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType, m_showStats,
             m_staticFields));
     else
         m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
