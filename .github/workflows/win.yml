@@ -43,6 +43,10 @@ jobs:
         cache-downloads: true
 
 
+    - uses: TheMrMilchmann/setup-msvc-dev@v4
+      with:
+        arch: x64
+
     - name: Setup
       run: |
           source ./scripts/ci/win/setup.sh
