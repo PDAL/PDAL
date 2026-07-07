@@ -47,6 +47,8 @@ $ pdal tindex create <tindex> <glob>
 --statistics           Write detailed statistics on all points
 --pc_type              Pointcloud type for STAC generation (lidar, eopc, radar, 
                        sonar, other)
+--static-fields        JSON array of field names and values to include "
+                       in tile index; specified as { \"fieldName\": value, ...}
 ```
 
 This command will index the files referred to by `glob` and place the
@@ -82,6 +84,21 @@ driver.
 The `--statistics` option controls whether `pc:statistics` and `proj:bbox` fields
 are written to the output. Since these require {ref}`filters.stats` to be run
 (reading all points), index creation may be slower.
+
+Additional fields other than those created by default, containing static values, 
+can be written using the `--static_fields` option. By specifying a JSON object 
+containing pairs of `"fieldName": value` to write, values can be interpreted as 
+`String`, `StringList`, `Integer64` or `Real` OGR field types. 
+
+For example, the STAC asset media type for an index composed of LAZ files can be 
+specified as follows:
+
+```
+$ pdal tindex create <tindex> <glob> \
+    --stac-geoparquet \
+    --static_fields={\"assets.data.type\":\"application/vnd.laszip\"}
+
+```
 
 ## tindex Merge Mode
 
