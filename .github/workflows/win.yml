@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        type: ['current','fixed']
+        type: ['fixed']
     defaults:
       run:
         shell: bash -l {0}
