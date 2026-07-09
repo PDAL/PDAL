@@ -4,11 +4,10 @@ pwd
 where cl.exe
 export CC=cl.exe
 export CXX=cl.exe
-cmake .. --trace-expand -G "Ninja" \
+cmake .. --trace --trace-expand -G "Ninja" \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
     -DWITH_TESTS=ON \
-    -DCMAKE_VERBOSE_MAKEFILE=OFF \
     -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
     -DOPENSSL_ROOT_DIR="$CONDA_PREFIX/Library" \
     -DPython3_ROOT_DIR:FILEPATH="$CONDA_PREFIX" \
