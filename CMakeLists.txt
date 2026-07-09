@@ -37,9 +37,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#ABELL
-variable_watch(LINK_LIBRARIES)
-
 #
 # Name of C++ library
 #
@@ -218,7 +215,6 @@ if (NOT PDAL_HAVE_LZMA)
         ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
-message("*** ${SRCS} ***")
 if (NOT WIN32)
     list(REMOVE_ITEM SRCS ${PDAL_SRC_DIR}/util/Stackwalker.cpp)
 endif()
