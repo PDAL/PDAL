@@ -39,9 +39,6 @@ jobs:
         init-shell: bash
         environment-file: "scripts/ci/${{ matrix.type }}-environment.yml"
         environment-name: "pdal-build"
-        cache-environment: true
-        cache-downloads: true
-
 
     - name: Setup
       run: |
