@@ -48,7 +48,7 @@ struct StaticField : public Field
     StaticField(const std::string& name, const NL::json& value) :
         Field(name, OFTString, OFSTNone), m_value(value)
     {
-        if (m_value.is_number_integer() || m_value.is_boolean())
+        if (m_value.is_number_integer())
             m_type = OFTInteger64;
         else if (m_value.is_number_float())
             m_type = OFTReal;

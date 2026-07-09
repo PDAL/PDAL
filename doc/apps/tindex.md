@@ -97,7 +97,6 @@ specified as follows:
 $ pdal tindex create <tindex> <glob> \
     --stac-geoparquet \
     --static_fields={\"assets.data.type\":\"application/vnd.laszip\"}
-
 ```
 
 ## tindex Merge Mode

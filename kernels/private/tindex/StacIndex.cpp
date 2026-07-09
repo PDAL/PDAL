@@ -107,8 +107,8 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
         stacFileInfo.m_srs = qi.m_srs.getWKT();
     stacFileInfo.m_gridHeight = 0.0;
 
-    // If there isn't a stats filter, get the point count from quickInfo. Otherwise
-    // it will be set from the stats metadata.
+    // Get the point count from quickInfo. If filters.stats is run, will
+    // be overwritten with the value from the filter metadata.
     stacFileInfo.m_count = qi.m_pointCount;
 
     // If the manager isn't executed, dimensions won't be in the layout, so we 
