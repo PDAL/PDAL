@@ -395,7 +395,8 @@ TEST(TIndex, test10)
 
     FileUtils::deleteFile(outSpec);
     std::string output;
-    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0) 
+        << "failed with output: " << output;
 
     cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
     std::string info;
@@ -413,7 +414,8 @@ TEST(TIndex, test10)
         "\\\"test\\\": 2 }\" 2>&1";
 
     FileUtils::deleteFile(outSpec);
-    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0)
+        << "failed with output: " << output;
 
     cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
     if (Utils::run_shell_command(cmd, info)) {
@@ -432,7 +434,8 @@ TEST(TIndex, test10)
         Support::datapath("tindex/fields.json") + "\" 2>&1";
 
     FileUtils::deleteFile(outSpec);
-    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0)
+        << "failed with output: " << output;
 
     cmd = "ogrinfo -al -q " + outSpec + " 2>&1";
     if (Utils::run_shell_command(cmd, info)) {
