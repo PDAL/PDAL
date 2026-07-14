@@ -56,6 +56,7 @@ struct SchemaUrls
     std::string catalog;
     std::string collection;
     std::string item;
+    bool validateSchemaSchema = true;
 };
 
 class Item
