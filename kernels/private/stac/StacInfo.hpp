@@ -39,6 +39,8 @@
 
 namespace pdal
 {
+namespace stac
+{
 
 class StacKey
 {
@@ -214,5 +216,5 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     }
 }
 
-
-}
+} // namespace stac
+} // namespace pdal

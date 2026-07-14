@@ -172,6 +172,9 @@ bool Dataset::openLayer(const std::string& layerName)
 
 bool Dataset::createDataset()
 {
+    if (m_dataset)
+        return true;
+
     OGRSFDriverH hDriver = OGRGetDriverByName(m_driverName.c_str());
     if (!hDriver)
     {

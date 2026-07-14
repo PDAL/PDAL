@@ -26,7 +26,7 @@ void TileIndexBuilder::fillFileInfo(FileInfoPtr& fileInfo)
     manager.commonOptions() = m_commonOptions;
     manager.stageOptions() = m_stageOptions;
 
-    Stage& reader = manager.makeReader(fileInfo->m_filename, "");
+    manager.makeReader(fileInfo->m_filename, "");
     runBoundary(fileInfo, manager);
 }
 

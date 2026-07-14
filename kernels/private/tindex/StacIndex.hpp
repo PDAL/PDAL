@@ -44,12 +44,12 @@ struct StacFileInfo : FileInfo
                 statsMeta.findChild("bbox").findChild("native").findChild("bbox");
             if (!bbox.empty())
             {
-                m_projBbox.push_back(getChild(bbox, "minx").value<double>());
-                m_projBbox.push_back(getChild(bbox, "miny").value<double>());
-                m_projBbox.push_back(getChild(bbox, "minz").value<double>());
-                m_projBbox.push_back(getChild(bbox, "maxx").value<double>());
-                m_projBbox.push_back(getChild(bbox, "maxy").value<double>());
-                m_projBbox.push_back(getChild(bbox, "maxz").value<double>());
+                m_projBbox.push_back(stac::getChild(bbox, "minx").value<double>());
+                m_projBbox.push_back(stac::getChild(bbox, "miny").value<double>());
+                m_projBbox.push_back(stac::getChild(bbox, "minz").value<double>());
+                m_projBbox.push_back(stac::getChild(bbox, "maxx").value<double>());
+                m_projBbox.push_back(stac::getChild(bbox, "maxy").value<double>());
+                m_projBbox.push_back(stac::getChild(bbox, "maxz").value<double>());
             }
         }
         else if (m_count == 0)
@@ -69,7 +69,7 @@ struct StacFileInfo : FileInfo
                 m_count = count.value<point_count_t>();
         }
 
-        addDatetime(m_root, readerMeta);
+        stac::addDatetime(m_root, readerMeta);
     }
 
     std::string schemas()
@@ -84,7 +84,7 @@ struct StacFileInfo : FileInfo
 
     std::string datetime()
     {
-        return getChild(m_root, "datetime").value();
+        return stac::getChild(m_root, "datetime").value();
     }
 
     std::vector<double> bbox()

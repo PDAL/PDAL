@@ -14,7 +14,7 @@ public:
     TileIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs);
-    //void create(const StringList& files) override;
+
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
     void fillFileInfo(FileInfoPtr& fileInfo) override;

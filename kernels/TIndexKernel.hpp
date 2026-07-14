@@ -40,8 +40,6 @@
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <nlohmann/json.hpp>
-
 namespace pdal
 {
     class Polygon;
