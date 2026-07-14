@@ -551,6 +551,7 @@ TEST(StacReaderTest, wrench_test)
     Options options;
     options.add("filename", Support::datapath("stac/wrench.vpc"));
     options.add("validate_schema", "true");
+    options.add("validate_schema_schema", "false");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -574,6 +575,7 @@ TEST(StacReaderTest, schema_validate_test)
     options.add("asset_names", "ept.json");
     options.add("asset_names", "data");
     options.add("validate_schema", "true");
+    options.add("validate_schema_schema", "false");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
