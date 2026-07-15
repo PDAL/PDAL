@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        type: ['current','fixed']
+        type: ['fixed']
     defaults:
       run:
         shell: bash -l {0}
@@ -32,16 +32,13 @@ jobs:
       BUILD_TYPE: ${{ matrix.type }}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
         environment-file: "scripts/ci/${{ matrix.type }}-environment.yml"
         environment-name: "pdal-build"
-        cache-environment: true
-        cache-downloads: true
-
 
     - name: Setup
       run: |
