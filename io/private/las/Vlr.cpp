@@ -370,13 +370,14 @@ void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
     uint64_t evlrOffset, uint32_t evlrCount)
 {
     auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
-    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
+//    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
 
     std::thread t1(vlrWalker);
-    std::thread t2(evlrWalker);
+//    std::thread t2(evlrWalker);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::cerr << "Waiting for threads!\n";
+/**
 #ifdef _WIN32
     class MyStackWalker : public StackWalker
     {
@@ -394,8 +395,13 @@ void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
     MyStackWalker s2;
     s2.ShowCallstack(t2.native_handle());
 #endif
+**/
     t1.join();
+std::cerr << "Joined t1!\n";
+    /**
     t2.join();
+std::cerr << "Joined t2!\n";
+    **/
     std::cerr << "Done Waiting for threads!\n";
 }
 
