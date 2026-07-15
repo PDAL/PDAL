@@ -43,6 +43,7 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
         ${PDAL_IO_DIR}/private/las/Vlr.cpp
         ${PDAL_IO_DIR}/private/connector/Connector.cpp
+        ${PDAL_UTIL_DIR}/Stackwalker.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
