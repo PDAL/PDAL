@@ -41,8 +41,13 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
     FILES
         io/CopcRemoteReaderTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_IO_DIR}/private/las/Vlr.cpp
+        ${PDAL_IO_DIR}/private/connector/Connector.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
+    LINK_WITH
+        ${PDAL_ARBITER_LIB_NAME}
 )
 
 set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES TIMEOUT 300)
