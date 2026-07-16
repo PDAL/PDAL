@@ -86,7 +86,34 @@ void testURLs(const std::string& url, const BOX2D& bounds)
 
 }
 
+TEST(CopcRemoteReaderTest, hang)
+{
+    std::string url( "/vsicurl/https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
 
+    uint32_t size = 54;  // VLR Header size
+    std::thread t([url, size]
+        {
+            std::vector<char> buf(size);
+            std::istream *in = FileUtils::openFile(url, true);
+            in->seekg(375);
+            in->read(buf.data(), size);
+            if (!in)
+                std::cerr << "Read failed!\n";
+            std::cerr << "Deleting stream!\n";
+            delete in;
+            std::cerr << "Calculating sum!\n";
+            int64_t sum = 0;
+            for (char c : buf)
+                sum += (uint8_t)c;
+            std::cerr << "Sum = " << sum << "!\n";
+        });
+
+    std::cerr << "Thread running!\n";
+    t.join();
+    std::cerr << "Thread joined!\n";
+}
+
+/**
 TEST(CopcRemoteReaderTest, hang)
 {
     std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
@@ -98,27 +125,7 @@ std::cerr << "About to catalog!\n";
             { return conn.getBinary(offset, size); } );
 std::cerr << "Cataloging done!\n";
 }
+**/
 
-TEST(CopcRemoteReaderTest, vsi)
-{
-
-    /*
-          "maxx": 639003.73,
-          "maxy": 853534.37,
-          "maxz": 615.26,
-          "minx": 635579.2,
-          "miny": 848887.49,
-          "minz": 406.56
-    */
-
-    BOX2D bounds(635700,848900, 637000, 853300);
-    std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
-    std::string vsi ("/vsicurl/"+url);
-
-//    testURLs(url, bounds);
-    testURLs(vsi, bounds);
-
-
-}
 
 } // namespace pdal

@@ -40,10 +40,10 @@ PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
     FILES
         io/CopcRemoteReaderTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
-        ${PDAL_IO_DIR}/private/las/Vlr.cpp
-        ${PDAL_IO_DIR}/private/connector/Connector.cpp
-        ${PDAL_UTIL_DIR}/Stackwalker.cpp
+#        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+#        ${PDAL_IO_DIR}/private/las/Vlr.cpp
+#        ${PDAL_IO_DIR}/private/connector/Connector.cpp
+#        ${PDAL_UTIL_DIR}/Stackwalker.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
