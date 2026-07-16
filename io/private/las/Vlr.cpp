@@ -38,9 +38,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
-#ifdef _WIN32
-#include <pdal/util/Stackwalker.h>
-#endif
 
 namespace pdal
 {
@@ -377,25 +374,6 @@ void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::cerr << "Waiting for threads!\n";
-/**
-#ifdef _WIN32
-    class MyStackWalker : public StackWalker
-    {
-    protected:
-        virtual void OnOutput(LPCSTR text)
-        {
-            std::cerr << std::string(text) << "!\n";
-            StackWalker::OnOutput(text);
-        }
-    };
-
-
-    MyStackWalker s1;
-    s1.ShowCallstack(t1.native_handle());
-    MyStackWalker s2;
-    s2.ShowCallstack(t2.native_handle());
-#endif
-**/
     t1.join();
 std::cerr << "Joined t1!\n";
     /**
