@@ -6,7 +6,7 @@ dependencies:
   - libpq
   - geotiff
   - gtest
-  - curl
+  - curl=8.21.0=h8206538_1
   - hdf5
   - tiledb
   - draco

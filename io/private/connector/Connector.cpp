@@ -191,9 +191,13 @@ std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
                 message += " File does not exist.";
             throw pdal_error(message);
         }
+        std::cerr << "Seek!\n";
         in->seekg(offset);
+        std::cerr << "Read!\n";
         in->read(buf.data(), size);
+        std::cerr << "Delete!\n";
         delete in;
+        std::cerr << "Done Delete!\n";
         return buf;
     }
     else

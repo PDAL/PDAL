@@ -47,6 +47,8 @@
 #include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+#include <io/private/las/Vlr.hpp>
+#include <io/private/connector/Connector.hpp>
 
 #include "Support.hpp"
 
@@ -84,6 +86,18 @@ void testURLs(const std::string& url, const BOX2D& bounds)
 
 }
 
+
+TEST(CopcRemoteReaderTest, hang)
+{
+    std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
+    std::string vsi ("/vsicurl/"+url);
+    connector::Connector conn(vsi);
+std::cerr << "About to catalog!\n";
+    las::VlrCatalog catalog(375, 3, 81'114'086, 1,
+        [&conn](uint64_t offset, int32_t size)
+            { return conn.getBinary(offset, size); } );
+std::cerr << "Cataloging done!\n";
+}
 
 TEST(CopcRemoteReaderTest, vsi)
 {

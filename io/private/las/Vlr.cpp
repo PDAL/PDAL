@@ -369,16 +369,15 @@ VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
 void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
     uint64_t evlrOffset, uint32_t evlrCount)
 {
-std::cerr << "VLR offset/count = " << vlrOffset << "/" << vlrCount << "!\n";
-std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
-    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
+//    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
 
     std::thread t1(vlrWalker);
-    std::thread t2(evlrWalker);
+//    std::thread t2(evlrWalker);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::cerr << "Waiting for threads!\n";
+/**
 #ifdef _WIN32
     class MyStackWalker : public StackWalker
     {
@@ -396,8 +395,13 @@ std::cerr << "EVLR offset/count = " << evlrOffset << "/" << evlrCount << "!\n";
     MyStackWalker s2;
     s2.ShowCallstack(t2.native_handle());
 #endif
+**/
     t1.join();
+std::cerr << "Joined t1!\n";
+    /**
     t2.join();
+std::cerr << "Joined t2!\n";
+    **/
     std::cerr << "Done Waiting for threads!\n";
 }
 
@@ -406,7 +410,7 @@ void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
     while (vlrOffset && vlrCount)
     {
         std::vector<char> buf = m_fetch(vlrOffset, Vlr::HeaderSize);
-
+std::cerr << "Done fetch!\n";
         Vlr vlr;
         vlr.fillHeader(buf.data());
         Entry entry { vlr.userId, vlr.recordId, vlrOffset + Vlr::HeaderSize, vlr.promisedDataSize };
@@ -414,6 +418,7 @@ void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
         vlrOffset += Vlr::HeaderSize + vlr.promisedDataSize;
         vlrCount--;
     }
+std::cerr << "Done walk!\n";
 }
 
 void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
@@ -421,7 +426,7 @@ void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
     while (evlrOffset && evlrCount)
     {
         std::vector<char> buf = m_fetch(evlrOffset, Evlr::HeaderSize);
-
+std::cerr << "Done evlr fetch!\n";
         Evlr vlr;
         vlr.fillHeader(buf.data());
         Entry entry { vlr.userId, vlr.recordId, evlrOffset + Evlr::HeaderSize,
@@ -430,6 +435,7 @@ void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
         evlrOffset += Evlr::HeaderSize + vlr.promisedDataSize;
         evlrCount--;
     }
+std::cerr << "Done evlr walk!\n";
 }
 
 void VlrCatalog::insert(const VlrCatalog::Entry& entry)
