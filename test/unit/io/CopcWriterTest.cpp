@@ -259,6 +259,43 @@ TEST(CopcWriterTest, scaling)
     FileUtils::deleteFile(filename);
 }
 
+TEST(CopcWriterTest, unicodeFilename)
+{
+    // Use escaped UTF-8 bytes so this source stays independent of the compiler
+    // source-file encoding. autzen_trim.las has enough points to exercise both
+    // the initial output stream and the random-access chunk writes.
+    const std::string filename = Support::temppath(
+        "copc-\xE8\xB7\xAF\xE5\xBE\x84.laz");
+    constexpr PointId pointCount = 110000;
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/autzen_trim.las"));
+    LasReader input;
+    input.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", filename);
+    CopcWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(input);
+
+    PointTable table;
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options outputReaderOps;
+    outputReaderOps.add("filename", filename);
+    CopcReader reader;
+    reader.setOptions(outputReaderOps);
+
+    PointTable readTable;
+    reader.prepare(readTable);
+    const PointViewSet views = reader.execute(readTable);
+    ASSERT_EQ(views.size(), 1u);
+    EXPECT_EQ((*views.begin())->size(), pointCount);
+    FileUtils::deleteFile(filename);
+}
+
 TEST(CopcWriterTest, extradim)
 {
     std::string filename(Support::datapath("las/1.2-with-color.las"));
