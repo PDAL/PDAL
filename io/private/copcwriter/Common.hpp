@@ -36,7 +36,6 @@
 
 #include <stdint.h>
 #include <array>
-#include <filesystem>
 #include <map>
 #include <set>
 #include <string>
@@ -74,19 +73,6 @@ enum class Index
 
 namespace copcwriter
 {
-
-// std::fstream's narrow-string overload uses the active Windows code page.
-// PDAL filenames are UTF-8, so use the filesystem path overload on Windows to
-// preserve non-ASCII characters.  Other platforms retain their byte-path
-// behavior.
-inline std::filesystem::path nativePath(const std::string& filename)
-{
-#ifdef _WIN32
-    return std::filesystem::u8path(filename);
-#else
-    return std::filesystem::path(filename);
-#endif
-}
 
 // These are hopes, not absolutes.
 const int MaxPointsPerNode = 100000;

@@ -40,6 +40,7 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/Extractor.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <lazperf/filestream.hpp>
 
@@ -109,7 +110,7 @@ Output::Output(const BaseInfo& b) : b(b)
     // as points are written.
     m_pointPos = m_chunkOffsetPos + sizeof(uint64_t);
 
-    m_f.open(nativePath(b.filename), std::ios::out | std::ios::binary);
+    m_f.open(FileUtils::toNative(b.filename), std::ios::out | std::ios::binary);
 }
 
 // For this to work properly, the VLRs can't change size.
