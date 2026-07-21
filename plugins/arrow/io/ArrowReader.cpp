@@ -337,7 +337,11 @@ void ArrowReader::initialize()
         const auto metadata = m_arrow_reader->parquet_reader()->metadata();
         loadParquetGeoMetadata(metadata->key_value_metadata());
 
-        auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader({0},&m_parquetReader);
+        // Get the indexes of all row groups
+        std::vector<int> rowGroupIds(m_arrow_reader->num_row_groups());
+        std::iota(rowGroupIds.begin(), rowGroupIds.end(), 0);
+
+        auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader(rowGroupIds, &m_parquetReader);
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
@@ -352,7 +356,7 @@ void ArrowReader::initialize()
         }
         auto closeStatus = m_parquetReader->Close();
 
-        batchOpenStatus = m_arrow_reader->GetRecordBatchReader({0}, &m_parquetReader);
+        batchOpenStatus = m_arrow_reader->GetRecordBatchReader(rowGroupIds, &m_parquetReader);
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;

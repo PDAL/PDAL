@@ -115,6 +115,12 @@ TEST(ArrowParquetReaderTest, ReadingPoints)
                              Support::datapath("las/1.2-with-color.las"));
 }
 
+TEST(ArrowParquetReaderTest, ReadingPoints_RowGroups)
+{
+    compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color_rowgroups.parquet"),
+                             Support::datapath("las/1.2-with-color.las"));
+}
+
 TEST(ArrowFeatherReaderTest, ReadingPoints)
 {
     compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color.feather"),
