@@ -455,13 +455,12 @@ PDAL_ADD_TEST(pdal_filters_splitter_test
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
-    PDAL_ADD_TEST(pdal_filters_hexbin_test
+PDAL_ADD_TEST(pdal_filters_hexbin_test
     FILES
         filters/HexbinFilterTest.cpp
+        ${H3_SRCS}
     INCLUDES
         ${PDAL_VENDOR_DIR}/h3/include
-    LINK_WITH
-        ${PDAL_H3_LIB_NAME}
 )
 target_compile_definitions(pdal_filters_hexbin_test
     PRIVATE

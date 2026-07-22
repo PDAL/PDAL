@@ -32,7 +32,7 @@ Contributors:  Thomas Maurer
 #include <algorithm>
 #include <chrono>
 #include "lepcc_c_api.h"
-#include "lepcc_types.h"
+#include "include/lepcc_types.h"
 
 using namespace std;
 using namespace std::chrono;

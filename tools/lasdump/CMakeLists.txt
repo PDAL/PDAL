@@ -11,14 +11,11 @@ add_executable(lasdump
     ${PDAL_UTIL_DIR}/Bounds.cpp
     ${PDAL_UTIL_DIR}/FileUtils.cpp
     ${PDAL_UTIL_DIR}/Utils.cpp
+    ${LAZPERF_SRCS}
 )
 
-# Explicitly link and tell CMake to link libstdc++
 target_link_libraries(lasdump PRIVATE
-    ${PDAL_LAZPERF_LIB_NAME}
     GDAL::GDAL
-    "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
-    "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++>"
 )
 
 target_include_directories(lasdump PRIVATE

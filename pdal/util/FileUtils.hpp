@@ -37,6 +37,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <filesystem>
 #include <istream>
 #include <ostream>
 #include <stdexcept>
@@ -292,6 +293,8 @@ namespace FileUtils
     PDAL_EXPORT std::string toNative(const std::string& in);
     PDAL_EXPORT std::string fromNative(const std::string& in);
 #endif
+
+    PDAL_EXPORT std::filesystem::path u8path(const std::string& path);
 
     struct MapContext
     {
