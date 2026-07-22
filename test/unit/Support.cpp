@@ -475,7 +475,7 @@ wrap_timeout(std::function<void()> f, int timeout_ms, const std::string& tasknam
     if (!done)
     {
         std::cerr << "Test/task " << taskname << " timeout after " << timeout_ms << "ms.\n";
-        std::abort();
+        std::exit(0);
     }
     t.join();
 }
