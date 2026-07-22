@@ -36,8 +36,12 @@
 
 #include "Support.hpp"
 
+#include <condition_variable>
+#include <exception>
 #include <iostream>
+#include <mutex>
 #include <string>
+#include <thread>
 
 #include <stdio.h>
 
@@ -444,6 +448,36 @@ Tempfile::~Tempfile()
 std::string Tempfile::filename()
 {
     return m_name;
+}
+
+void
+wrap_timeout(std::function<void()> f, int timeout_ms, const std::string& taskname)
+{
+    std::mutex m;
+    std::condition_variable cv;
+    bool done = false;
+
+    std::thread t([&f, &m, &cv, &done]() {
+        f();
+        std::lock_guard<std::mutex> _(m);
+        done = true;
+        cv.notify_all();
+    });
+
+    std::unique_lock<std::mutex> lock(m);
+    cv.wait_for(lock, std::chrono::milliseconds(timeout_ms),
+        [&done, &taskname]()
+        {
+            if (done)
+                std::cerr << "Completed test/task " << taskname << ".\n";
+            return done;
+        });
+    if (!done)
+    {
+        std::cerr << "Test/task " << taskname << " timeout after " << timeout_ms << "ms.\n";
+        std::terminate();
+    }
+    t.join();
 }
 
 } // namespace Support

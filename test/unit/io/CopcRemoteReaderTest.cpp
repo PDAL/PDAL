@@ -53,19 +53,8 @@
 namespace pdal
 {
 
-namespace
-{
-    const std::string copcPath(Support::datapath("copc/lone-star.copc.laz"));
-    const std::string copcAutzenPath(Support::datapath("copc/1.2-with-color.copc.laz"));
-    const BOX3D pointBounds(515368.60225, 4918340.364, 2322.89625,
-        515401.043, 4918381.12375, 2338.5755);
-    const point_count_t numPoints(518862);
-}
-
-
 void testURLs(const std::string& url, const BOX2D& bounds)
 {
-
     CopcReader reader;
     {
         Options options;
@@ -81,30 +70,34 @@ void testURLs(const std::string& url, const BOX2D& bounds)
 
     pdal::BOX3D bounds3d = qi.m_bounds;
     EXPECT_EQ(pdal::Bounds(bounds).to2d(), pdal::Bounds(bounds3d).to2d());
-
 }
 
 
+TEST(CopcRemoteReaderTest, plain)
+{
+    BOX2D bounds(635700, 848900, 637000, 853300);
+    std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
+    testURLs(url, bounds);
+}
+
+void testVsi()
+{
+    BOX2D bounds(635700, 848900, 637000, 853300);
+    std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
+    std::string vsi ("/vsicurl/" + url);
+    testURLs(vsi, bounds);
+}
+
 TEST(CopcRemoteReaderTest, vsi)
 {
+    Support::wrap_timeout(testVsi, 5000, "COPC VSI");
 
-    /*
-          "maxx": 639003.73,
-          "maxy": 853534.37,
-          "maxz": 615.26,
-          "minx": 635579.2,
-          "miny": 848887.49,
-          "minz": 406.56
-    */
-
-    BOX2D bounds(635700,848900, 637000, 853300);
+    /**
+    BOX2D bounds(635700, 848900, 637000, 853300);
     std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
-    std::string vsi ("/vsicurl/"+url);
-
-    testURLs(url, bounds);
+    std::string vsi ("/vsicurl/" + url);
     testURLs(vsi, bounds);
-
-
+    **/
 }
 
 } // namespace pdal

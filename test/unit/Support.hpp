@@ -136,6 +136,8 @@ private:
     std::string m_name;
 };
 
+void wrap_timeout(std::function<void()> f, int timeout_ms, const std::string& taskname);
+
 } // namespace Support
 } // namespace pdal
 
