@@ -261,6 +261,10 @@ TEST(CopcWriterTest, scaling)
 
 TEST(CopcWriterTest, unicodeFilename)
 {
+#ifndef _WIN32
+    GTEST_SKIP() << "This regression covers Windows native-path conversion.";
+#endif
+
     // Use escaped UTF-8 bytes so this source stays independent of the compiler
     // source-file encoding.
     const std::string filename = Support::temppath(
