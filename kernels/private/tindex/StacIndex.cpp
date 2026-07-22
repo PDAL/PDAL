@@ -97,8 +97,7 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
 {
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
-    Stage* reader = manager.stages().front();
-    QuickInfo qi = reader->preview();
+    QuickInfo qi = manager.preview();
     if (!qi.valid())
         return false;
 
@@ -129,12 +128,12 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
 
     // If the optional stats filter was added in fillFileInfo, we still need 
     // to execute the whole thing in order to get stats metadata.
-    if (manager.stages().size() > 1)
+    if (m_writeStats)
     {
-        // If fastBoundary is run after a slowBoundary failure, we can't rerun
-        // the manager. This is a really stupid fix.
+        // If fastBoundary is run after a slowBoundary failure, we can't rerun the manager.
+        // Get the second stage, which is stats, since there might be a third (hexbin).
         PointTable table;
-        Stage* stage = manager.getStage();
+        Stage* stage = manager.stages()[1];
         stage->prepare(table);
         stage->execute(table);
     }
