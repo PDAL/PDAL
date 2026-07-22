@@ -43,6 +43,7 @@ RUN \
         gdal-tools \
         gdal-driver-jpeg \
         gdal-driver-arrow \
+        gdal-driver-parquet \
         gdal-driver-tiledb \
         apache-arrow-dev \
         tiledb-dev \
