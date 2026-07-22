@@ -43,6 +43,11 @@
 namespace pdal
 {
 
+namespace connector
+{
+    class Connector;
+}
+
 namespace stac
 {
     class Item;
@@ -64,6 +69,8 @@ namespace stac
 
     pdal_error stac_error(std::string id, std::string stacType, std::string const& msg);
     pdal_error stac_error(std::string const& msg);
+    NL::json loadSchemaJson(const connector::Connector& connector,
+        const std::string& url, bool validateSchemaSchema);
 
 
 namespace StacUtils

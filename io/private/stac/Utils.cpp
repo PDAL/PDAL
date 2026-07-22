@@ -34,6 +34,8 @@
 
 #include "Utils.hpp"
 
+#include "../connector/Connector.hpp"
+
 namespace pdal
 {
 
@@ -49,6 +51,18 @@ pdal_error stac_error(std::string id, std::string stacType,
 pdal_error stac_error(std::string const& msg)
 {
     return pdal_error("STACError: " + msg);
+}
+
+NL::json loadSchemaJson(const connector::Connector& connector,
+    const std::string& url, bool validateSchemaSchema)
+{
+    // Avoid intermittent failures while resolving remote JSON Schema
+    // metaschemas; STAC schemas are still fetched and used for validation.
+    if (!validateSchemaSchema &&
+        url.find("json-schema.org") != std::string::npos)
+        return true;
+
+    return connector.getJson(url);
 }
 
 namespace StacUtils
