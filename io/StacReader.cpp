@@ -187,7 +187,7 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("validate_schema", "Use JSON schema to validate your STAC objects."
         " Default: false", m_p->m_args->validateSchema, false);
     args.add("validate_schema_schema", "Validate schema documents that are "
-        "referenced by STAC schemas. Default: true",
+        "referenced by STAC schemas.",
         m_p->m_args->schemaUrls.validateSchemaSchema, true);
     args.add("reader_args", "Map of reader arguments to their values to pass"
         " through.", m_p->m_args->rawReaderArgs);
