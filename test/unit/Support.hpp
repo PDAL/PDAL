@@ -36,8 +36,10 @@
 
 // support functions for unit testing
 
-#include <pdal/pdal_types.hpp>
+#include <functional>
 #include <string>
+
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
