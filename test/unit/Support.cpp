@@ -37,13 +37,13 @@
 #include "Support.hpp"
 
 #include <condition_variable>
-#include <cstdlib>
 #include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -475,7 +475,7 @@ wrap_timeout(std::function<void()> f, int timeout_ms, const std::string& tasknam
     if (!done)
     {
         std::cerr << "Test/task " << taskname << " timeout after " << timeout_ms << "ms.\n";
-        std::exit(0);
+        _Exit(0);
     }
     t.join();
 }
