@@ -21,7 +21,6 @@ $ pdal tindex create <tindex> <glob>
 --glob                 Glob pattern of files to index
 --stdin, -s            Read list of input files from standard input
 --filelist             Text file to read list of input files from (newline delimited)
---fast_boundary        Use extent instead of exact boundary
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
 --ogrdriver, -f        OGR driver name to use
@@ -31,6 +30,9 @@ $ pdal tindex create <tindex> <glob>
 --write_absolute_path  Write absolute rather than relative file paths
 --skip_different_srs   Reject files to be indexed with different SRS values
 --threads              Number of threads to use for file boundary creation
+
+/** Boundary Generation **/
+--fast_boundary        Use extent instead of exact boundary
 --simplify             Simplify the file's exact boundary
 --threshold            Number of points a cell must contain to be declared 
                        positive space, when creating exact boundaries
@@ -39,6 +41,14 @@ $ pdal tindex create <tindex> <glob>
                        hexbin filter (exact boundary)
 --where                Expression describing points to be processed for exact
                        boundary creation
+
+/** STAC-GeoParquet **/
+--stac-geoparquet      Whether to write tile index as a STAC GeoParquet file
+--statistics           Write detailed statistics on all points
+--pc_type              Pointcloud type for STAC generation (lidar, eopc, radar, 
+                       sonar, other)
+--static-fields        JSON array of field names and values to include "
+                       in tile index; specified as { \"fieldName\": value, ...}
 ```
 
 This command will index the files referred to by `glob` and place the
@@ -61,6 +71,33 @@ are created with a grid of tessellated hexagons, in a modified version of
 
 Creation mode also supports parallel file processing by specifying the `threads`
 option.
+
+### STAC-GeoParquet Creation
+
+When generating a tile index, the `--stac-geoparquet` flag will create a file that
+is conformant with the [STAC-Geoparquet] specification. The target SRS is implicitly
+set to `EPSG:4326`, and the OGR driver is implicitly set to `"Parquet"`. 
+
+Your GDAL installation must be built with Arrow/Parquet support to use the Parquet 
+driver.
+
+The `--statistics` option controls whether `pc:statistics` and `proj:bbox` fields
+are written to the output. Since these require {ref}`filters.stats` to be run
+(reading all points), index creation may be slower.
+
+Additional fields other than those created by default, containing static values, 
+can be written using the `--static_fields` option. By specifying a JSON object 
+containing pairs of `"fieldName": value` to write, values can be interpreted as 
+`String`, `StringList`, `Integer64` or `Real` OGR field types. 
+
+For example, the STAC asset media type for an index composed of LAZ files can be 
+specified as follows:
+
+```
+$ pdal tindex create <tindex> <glob> \
+    --stac-geoparquet \
+    --static_fields={\"assets.data.type\":\"application/vnd.laszip\"}
+```
 
 ## tindex Merge Mode
 
@@ -119,3 +156,4 @@ $ pdal tindex create index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" \
 [gdal]: https://gdal.org
 [gdaltindex]: https://gdal.org/en/latest/programs/gdaltindex.html
 [sqlite]: http://www.sqlite.org
+[STAC-Geoparquet] https://radiantearth.github.io/stac-geoparquet-spec/latest/
