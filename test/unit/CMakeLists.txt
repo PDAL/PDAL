@@ -207,6 +207,8 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+    LINK_WITH
+        GDAL::GDAL
 )
 set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES TIMEOUT 300)
 PDAL_ADD_TEST(pdal_io_copc_writer_test

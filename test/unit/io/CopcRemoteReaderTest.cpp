@@ -48,6 +48,9 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
+#include "gdal.h"
+#include "cpl_vsi_virtual.h"
+
 #include "Support.hpp"
 
 namespace pdal
@@ -86,6 +89,43 @@ void testVsi()
     std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
     std::string vsi ("/vsicurl/" + url);
     testURLs(vsi, bounds);
+}
+
+void testVsiSimple()
+{
+    GDALAllRegister();
+
+    std::string url("/vsicurl/https://github.com/PDAL/data/raw/refs/heads/main/"
+                    "autzen/autzen-classified.copc.laz");
+    uint32_t size = 54;
+
+    std::vector<char> buf(size);
+
+    std::cerr << "Enter!\n";
+    VSILFILE *file = VSIFOpenL(url.c_str(), "rb");
+    if (!file)
+    {
+        std::cerr << "Couldn't open file - perhaps no CURL support?\n";
+    }
+    else
+    {
+        std::cerr << "Opened!\n";
+        VSIFSeekL(file, 375, SEEK_SET);
+        std::cerr << "Seeked!\n";
+        VSIFReadL(buf.data(), 1, size, file);
+        std::cerr << "Read!\n";
+        VSIFCloseL(file);
+        std::cerr << "Closed!\n";
+        int sum = 0;
+        for (char c : buf)
+            sum += (uint8_t)c;
+        std::cerr << "Sum = " << sum << "!\n";
+    }
+}
+
+TEST(CopcRemoteReaderTest, simplevsi)
+{
+    Support::wrap_timeout(testVsiSimple, 5000, "COPC VSI SIMPLE");
 }
 
 TEST(CopcRemoteReaderTest, vsi)
