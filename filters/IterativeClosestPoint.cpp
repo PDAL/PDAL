@@ -155,7 +155,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     int iterations(0);
     for (int iter = 0; iter < m_max_iters; ++iter)
     {
-        iterations = iter + 1
+        iterations = iter + 1;
         // At the beginning of each iteration, transform our centered, moving
         // PointView by the current final_transformation.
         PointViewPtr tempMovingTransformed =
@@ -335,7 +335,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     root.add("centroid", ss.str());
     root.add("converged", converged);
     root.add("fitness", mse);
-    root.add("iterations", iterations)
+    root.add("iterations", iterations);
 
     return moving;
 }
