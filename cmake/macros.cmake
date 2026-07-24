@@ -79,6 +79,15 @@ macro(PDAL_ADD_LIBRARY _name)
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
+# Deprecated compatibility stub for external consumers that still check for
+# this macro.
+macro(PDAL_ADD_FREE_LIBRARY _name _library_type _pdal_lib_type)
+    message(DEPRECATION
+        "PDAL_ADD_FREE_LIBRARY is deprecated and no longer creates a target. "
+        "Use standard CMake target commands instead.")
+endmacro(PDAL_ADD_FREE_LIBRARY)
+
+###############################################################################
 # Add a plugin target.
 # _name The plugin name.
 # ARGN :
