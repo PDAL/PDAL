@@ -42,6 +42,36 @@
 #include <pdal/PluginInfo.hpp>
 #include <pdal/Kernel.hpp>
 
+#define CREATE_STATIC_KERNEL(T, info) \
+    static bool T ## _b = \
+        pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info);
+
+#define CREATE_STATIC_STAGE(T, info) \
+    static bool T ## _b =  \
+        pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info);
+
+#ifdef PDAL_STATIC_BUILD
+
+//DEPRECATED
+#define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
+    static bool T ## _b = []() \
+    {\
+        bool stage = std::is_convertible<T*, Stage *>::value; \
+        if (stage) \
+            pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); \
+        else \
+            pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
+        return true; \
+    }();
+
+#define CREATE_SHARED_KERNEL(T, info) \
+    CREATE_STATIC_KERNEL(T, info)
+
+#define CREATE_SHARED_STAGE(T, info) \
+    CREATE_STATIC_STAGE(T, info)
+
+#else
+
 //DEPRECATED
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_EXPORT void PF_initPlugin() \
@@ -61,11 +91,4 @@
     extern "C" PDAL_EXPORT void PF_initPlugin() \
     { pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); }
 
-#define CREATE_STATIC_KERNEL(T, info) \
-    static bool T ## _b = \
-        pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info);
-
-#define CREATE_STATIC_STAGE(T, info) \
-    static bool T ## _b =  \
-        pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info);
-
+#endif

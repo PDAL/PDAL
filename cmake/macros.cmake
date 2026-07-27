@@ -49,14 +49,17 @@
 #  attempting to build anything else in the library.
 #
 macro(PDAL_ADD_LIBRARY _name)
-    add_library(${_name} ${ARGN})
+    add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
     add_dependencies(${_name} generate_dimension_hpp)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
     pdal_lib_compile_settings(${_name})
-    if (BUILD_SHARED_LIBS)
+    if (PDAL_LIB_TYPE STREQUAL "SHARED")
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
+    else ()
+        target_compile_definitions(${_name} PUBLIC PDAL_STATIC_BUILD)
+        set_target_properties(${_name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
     target_compile_features (${_name}
@@ -113,7 +116,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
 
-    add_library(${${_name}} ${PDAL_ADD_PLUGIN_FILES})
+    add_library(${${_name}} ${PDAL_LIB_TYPE} ${PDAL_ADD_PLUGIN_FILES})
     pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
@@ -125,7 +128,12 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         # Enable C++17 standard compliance
         CXX_STANDARD 17
     )
-    target_compile_definitions(${${_name}} PRIVATE PDAL_DLL_EXPORT)
+    if (PDAL_LIB_TYPE STREQUAL "SHARED")
+        target_compile_definitions(${${_name}} PRIVATE PDAL_DLL_EXPORT)
+    else()
+        target_compile_definitions(${${_name}} PRIVATE PDAL_STATIC_BUILD)
+        set_target_properties(${${_name}} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif()
     if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
         target_include_directories(${${_name}} SYSTEM PRIVATE
             ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
@@ -155,6 +163,47 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endmacro(PDAL_ADD_PLUGIN)
+
+###############################################################################
+# Link the PDAL library into an executable.
+#
+# Static stage/kernel registration happens through static initializers in each
+# stage translation unit. Static archives only pull objects that satisfy a
+# referenced symbol, so static PDAL consumers must whole-archive pdalcpp to make
+# every built-in registration initializer available at runtime.
+function(PDAL_TARGET_LINK_PDAL _target _scope)
+    if (PDAL_LIB_TYPE STREQUAL "STATIC")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+            target_link_libraries(${_target}
+                ${_scope}
+                    "$<LINK_LIBRARY:WHOLE_ARCHIVE,${PDAL_LIB_NAME}>")
+        elseif(MSVC)
+            target_link_libraries(${_target}
+                ${_scope}
+                    ${PDAL_LIB_NAME})
+            target_link_options(${_target}
+                ${_scope}
+                    "LINKER:/WHOLEARCHIVE:$<TARGET_FILE:${PDAL_LIB_NAME}>")
+        elseif(APPLE)
+            target_link_libraries(${_target}
+                ${_scope}
+                    ${PDAL_LIB_NAME})
+            target_link_options(${_target}
+                ${_scope}
+                    "LINKER:-force_load,$<TARGET_FILE:${PDAL_LIB_NAME}>")
+        else()
+            target_link_libraries(${_target}
+                ${_scope}
+                    "-Wl,--whole-archive"
+                    ${PDAL_LIB_NAME}
+                    "-Wl,--no-whole-archive")
+        endif()
+    else()
+        target_link_libraries(${_target}
+            ${_scope}
+                ${PDAL_LIB_NAME})
+    endif()
+endfunction()
 
 ###############################################################################
 # Add a test target.
@@ -201,9 +250,9 @@ macro(PDAL_ADD_TEST _name)
             ${PDAL_ADD_TEST_SYSTEM_INCLUDES})
     endif()
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
+    PDAL_TARGET_LINK_PDAL(${_name} PRIVATE)
     target_link_libraries(${_name}
         PRIVATE
-            ${PDAL_LIB_NAME}
             GTest::gtest
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
@@ -223,11 +272,18 @@ macro(PDAL_ADD_TEST _name)
             "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
     # Ensure plugins are loaded from build dir
     # https://github.com/PDAL/PDAL/issues/840
+    set(_pdal_test_environment)
     if (WIN32)
-        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        list(APPEND _pdal_test_environment
             "PDAL_DRIVER_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
     else()
-        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        list(APPEND _pdal_test_environment
             "PDAL_DRIVER_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+        if (APPLE AND PDAL_LIB_TYPE STREQUAL "SHARED")
+            list(APPEND _pdal_test_environment
+                "DYLD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}:$ENV{DYLD_LIBRARY_PATH}")
+        endif()
     endif()
+    set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        ${_pdal_test_environment})
 endmacro(PDAL_ADD_TEST)
