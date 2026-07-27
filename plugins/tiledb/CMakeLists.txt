@@ -66,6 +66,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         FILES
             test/TileDBWriterTest.cpp
         LINK_WITH
+            ${reader_libname}
             ${writer_libname}
             ${TileDB_LIBRARIES}
         INCLUDES

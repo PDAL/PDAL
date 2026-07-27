@@ -133,6 +133,52 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     else()
         target_compile_definitions(${${_name}} PRIVATE PDAL_STATIC_BUILD)
         set_target_properties(${${_name}} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        set(_pdal_static_plugin_symbols)
+        foreach(_pdal_plugin_file IN LISTS PDAL_ADD_PLUGIN_FILES)
+            if (IS_ABSOLUTE "${_pdal_plugin_file}")
+                set(_pdal_plugin_path "${_pdal_plugin_file}")
+            else()
+                set(_pdal_plugin_path
+                    "${CMAKE_CURRENT_SOURCE_DIR}/${_pdal_plugin_file}")
+            endif()
+            if (EXISTS "${_pdal_plugin_path}")
+                file(READ "${_pdal_plugin_path}" _pdal_plugin_contents)
+                string(REGEX MATCHALL
+                    "CREATE_SHARED_(STAGE|KERNEL)\\([ \t\r\n]*[A-Za-z_][A-Za-z0-9_]*"
+                    _pdal_static_stage_matches
+                    "${_pdal_plugin_contents}")
+                foreach(_pdal_static_stage_match IN LISTS
+                    _pdal_static_stage_matches)
+                    string(REGEX REPLACE
+                        ".*\\([ \t\r\n]*([A-Za-z_][A-Za-z0-9_]*).*"
+                        "pdal_static_plugin_registration_\\1"
+                        _pdal_static_plugin_symbol
+                        "${_pdal_static_stage_match}")
+                    list(APPEND _pdal_static_plugin_symbols
+                        ${_pdal_static_plugin_symbol})
+                endforeach()
+                string(REGEX MATCHALL
+                    "CREATE_SHARED_PLUGIN\\([^,]+,[^,]+,[ \t\r\n]*[A-Za-z_][A-Za-z0-9_]*"
+                    _pdal_static_plugin_matches
+                    "${_pdal_plugin_contents}")
+                foreach(_pdal_static_plugin_match IN LISTS
+                    _pdal_static_plugin_matches)
+                    string(REGEX REPLACE
+                        ".*,[ \t\r\n]*([A-Za-z_][A-Za-z0-9_]*).*"
+                        "pdal_static_plugin_registration_\\1"
+                        _pdal_static_plugin_symbol
+                        "${_pdal_static_plugin_match}")
+                    list(APPEND _pdal_static_plugin_symbols
+                        ${_pdal_static_plugin_symbol})
+                endforeach()
+            endif()
+        endforeach()
+        if (_pdal_static_plugin_symbols)
+            list(REMOVE_DUPLICATES _pdal_static_plugin_symbols)
+            set_target_properties(${${_name}} PROPERTIES
+                PDAL_STATIC_PLUGIN_REGISTRATION_SYMBOLS
+                    "${_pdal_static_plugin_symbols}")
+        endif()
     endif()
     if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
         target_include_directories(${${_name}} SYSTEM PRIVATE
@@ -206,6 +252,45 @@ function(PDAL_TARGET_LINK_PDAL _target _scope)
 endfunction()
 
 ###############################################################################
+# Link libraries into a target. Static plugin registration anchors are kept
+# undefined until link time so only the registration objects are pulled from
+# static plugin archives.
+function(PDAL_TARGET_LINK_STATIC_PLUGINS _target _scope)
+    foreach(_library IN LISTS ARGN)
+        set(_registration_symbols)
+        if (PDAL_LIB_TYPE STREQUAL "STATIC" AND TARGET ${_library})
+            get_target_property(_registration_symbols ${_library}
+                PDAL_STATIC_PLUGIN_REGISTRATION_SYMBOLS)
+            if (NOT _registration_symbols)
+                set(_registration_symbols)
+            endif()
+            foreach(_registration_symbol IN LISTS _registration_symbols)
+                if (MSVC)
+                    target_link_options(${_target}
+                        ${_scope}
+                            "LINKER:/INCLUDE:${_registration_symbol}")
+                elseif(APPLE)
+                    target_link_options(${_target}
+                        ${_scope}
+                            "LINKER:-u,_${_registration_symbol}")
+                else()
+                    target_link_options(${_target}
+                        ${_scope}
+                            "LINKER:-u,${_registration_symbol}")
+                endif()
+            endforeach()
+            if (_registration_symbols)
+                add_dependencies(${_target} ${_library})
+            endif()
+        endif()
+
+        target_link_libraries(${_target}
+            ${_scope}
+                ${_library})
+    endforeach()
+endfunction()
+
+###############################################################################
 # Add a test target.
 # _name The driver name.
 # ARGN :
@@ -250,13 +335,13 @@ macro(PDAL_ADD_TEST _name)
             ${PDAL_ADD_TEST_SYSTEM_INCLUDES})
     endif()
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    PDAL_TARGET_LINK_PDAL(${_name} PRIVATE)
     target_link_libraries(${_name}
         PRIVATE
             GTest::gtest
-            ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
+    PDAL_TARGET_LINK_STATIC_PLUGINS(${_name} PRIVATE ${PDAL_ADD_TEST_LINK_WITH})
+    PDAL_TARGET_LINK_PDAL(${_name} PRIVATE)
     foreach(_include IN LISTS PDAL_ADD_TEST_INCLUDES)
         if(TARGET ${_include})
             target_include_directories(${_name} PRIVATE $<TARGET_PROPERTY:${_include},INTERFACE_INCLUDE_DIRECTORIES>)

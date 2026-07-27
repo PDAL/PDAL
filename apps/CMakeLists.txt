@@ -17,9 +17,9 @@ else (APPLE AND PDAL_BUNDLE)
     add_executable(${PDAL_APP} pdal.cpp)
 endif(APPLE AND PDAL_BUNDLE)
 pdal_target_compile_settings(${PDAL_APP})
+PDAL_TARGET_LINK_PDAL(${PDAL_APP} PRIVATE)
 target_link_libraries(${PDAL_APP}
     PRIVATE
-        ${PDAL_LIB_NAME}
         GDAL::GDAL
         ${WINSOCK_LIBRARY}
 )
