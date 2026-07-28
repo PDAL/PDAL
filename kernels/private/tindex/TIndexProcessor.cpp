@@ -34,6 +34,11 @@ TIndexProcessor::TIndexProcessor(const Args& args, const std::string& tileIndexC
     m_srsColumnNameField = m_dataset->defineField(m_srsColumnName, OFTString);
 }
 
+TIndexProcessor::TIndexProcessor(const Args& args)
+    : m_dataset(new Dataset()),
+      m_args(args)
+{}
+
 TIndexProcessor::~TIndexProcessor()
 {}
 

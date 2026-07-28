@@ -15,7 +15,6 @@ get_filename_component(GDAL_LIBRARY_DIR ${GDAL_LIBRARY_PATH} DIRECTORY)
 set(GDAL_PLUGINS_PATHS
   "${GDAL_LIBRARY_DIR}/gdalplugins"
   "$ENV{GDAL_DRIVER_PATH}")
-message(STATUS "GDAL_LIBRARY: ${GDAL_PLUGINS_PATHS}")
 
 find_file(OGR_PARQUET_LIBRARY
   NAMES ogr_Parquet.so ogr_Parquet.dylib ogr_Parquet.dll

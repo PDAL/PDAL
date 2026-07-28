@@ -1,4 +1,5 @@
 
+#include <pdal/pdal_features.hpp>
 #include <kernels/private/stac/StacInfo.hpp>
 #include <nlohmann/json.hpp>
 
@@ -112,6 +113,10 @@ private:
 class StacIndexBuilder : public TIndexProcessor
 {
 public:
+#ifndef PDAL_HAVE_OGR_PARQUET
+    StacIndexBuilder(const Args& args, const std::string& pcType,
+        bool statistics, std::string fieldsJson): TIndexProcessor(args) {}
+#else
     StacIndexBuilder(const Args& args, const std::string& pcType,
         bool statistics, std::string fieldsJson);
 
@@ -139,6 +144,7 @@ private:
     Field *m_projBboxField;
 
     std::vector<StaticField *> m_staticFields;
+#endif // PDAL_HAVE_OGR_PARQUET
 };
 
 } // namespace tindex

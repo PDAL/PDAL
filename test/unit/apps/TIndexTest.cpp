@@ -34,6 +34,7 @@
 #include <iostream>
 #include <string>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Polygon.hpp>
@@ -324,7 +325,7 @@ TEST(TIndex, test8)
     EXPECT_EQ(desc, "foo");
 }
 
-
+#ifdef PDAL_HAVE_OGR_PARQUET
 // Testing stac-geoparquet
 TEST(TIndex, test9)
 {
@@ -446,3 +447,4 @@ TEST(TIndex, test10)
     pos = info.find("foo (Integer64) = -100");
     EXPECT_NE(pos, std::string::npos);
 }
+#endif // PDAL_HAVE_OGR_PARQUET

@@ -73,6 +73,7 @@ public:
     TIndexProcessor(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName,
         const std::string& tgtSrs, const std::string& assignSrs);
+    TIndexProcessor(const Args& args);
     virtual ~TIndexProcessor();
 
     void create(const StringList& files, PipelineManager& mgr);

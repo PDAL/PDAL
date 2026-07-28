@@ -37,6 +37,7 @@
 #include <memory>
 #include <vector>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -179,6 +180,10 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
                 "--path_prefix options.");
         if (m_writeStacGeoparquet)
         {
+#ifndef PDAL_HAVE_OGR_PARQUET
+                throw pdal_error("Can't output to STAC-GeoParquet; GDAL was "
+                    "built without the OGR Parquet driver.");
+#endif
             if (args.set("ogrdriver") && m_driverName != "Parquet")
                 throw pdal_error("Can't specify OGR driver when outputting "
                     "to STAC GeoParquet.");
