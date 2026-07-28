@@ -117,6 +117,11 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} ${PDAL_LIB_TYPE} ${PDAL_ADD_PLUGIN_FILES})
+    set_property(GLOBAL APPEND PROPERTY PDAL_PLUGIN_TARGETS ${${_name}})
+    if ("${_type}" STREQUAL "kernel")
+        set_property(GLOBAL APPEND PROPERTY PDAL_KERNEL_PLUGIN_TARGETS
+            ${${_name}})
+    endif()
     pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
@@ -184,6 +189,15 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         target_include_directories(${${_name}} SYSTEM PRIVATE
             ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
     endif()
+    set(_pdal_plugin_link_libraries ${PDAL_ADD_PLUGIN_LINK_WITH}
+        ${WINSOCK_LIBRARY})
+    list(REMOVE_ITEM _pdal_plugin_link_libraries
+        ${PDAL_LIB_NAME}
+        PDAL::PDAL
+        ${PDAL_LIBRARIES})
+    set_target_properties(${${_name}} PROPERTIES
+        PDAL_STATIC_PLUGIN_LINK_LIBRARIES
+            "${_pdal_plugin_link_libraries}")
     target_link_libraries(${${_name}}
         PRIVATE
             ${PDAL_LIB_NAME}
@@ -259,6 +273,7 @@ function(PDAL_TARGET_LINK_STATIC_PLUGINS _target _scope)
     foreach(_library IN LISTS ARGN)
         set(_registration_symbols)
         if (PDAL_LIB_TYPE STREQUAL "STATIC" AND TARGET ${_library})
+            add_dependencies(${_target} ${_library})
             get_target_property(_registration_symbols ${_library}
                 PDAL_STATIC_PLUGIN_REGISTRATION_SYMBOLS)
             if (NOT _registration_symbols)
@@ -279,14 +294,23 @@ function(PDAL_TARGET_LINK_STATIC_PLUGINS _target _scope)
                             "LINKER:-u,${_registration_symbol}")
                 endif()
             endforeach()
-            if (_registration_symbols)
-                add_dependencies(${_target} ${_library})
-            endif()
-        endif()
 
-        target_link_libraries(${_target}
-            ${_scope}
-                ${_library})
+            target_link_libraries(${_target}
+                ${_scope}
+                    "$<TARGET_FILE:${_library}>")
+
+            get_target_property(_plugin_link_libraries ${_library}
+                PDAL_STATIC_PLUGIN_LINK_LIBRARIES)
+            if (_plugin_link_libraries)
+                target_link_libraries(${_target}
+                    ${_scope}
+                        ${_plugin_link_libraries})
+            endif()
+        else()
+            target_link_libraries(${_target}
+                ${_scope}
+                    ${_library})
+        endif()
     endforeach()
 endfunction()
 
