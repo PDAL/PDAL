@@ -17,8 +17,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/PDALTargets.cmake")
 #   a change would be nice.
 #
 set(PDAL_LIBRARIES @PDAL_LIB_NAME@)
-set(PDAL_WITH_ZLIB @WITH_ZLIB@)
-set(PDAL_WITH_ZSTD @WITH_ZSTD@)
+set(PDAL_WITH_ZLIB @PDAL_HAVE_ZLIB@)
+set(PDAL_WITH_ZSTD @PDAL_HAVE_ZSTD@)
 if (NOT @BUILD_SHARED_LIBS@)
   find_package(CURL REQUIRED)
   find_package(GDAL CONFIG REQUIRED)
