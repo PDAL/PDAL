@@ -149,7 +149,12 @@ public:
 
     // Get the point table data.
     PointTableRef pointTable() const
-        { return m_table; }
+    { 
+        if (m_streamTable.layout()->finalized())
+            return *m_streamTablePtr;
+        else
+            return m_table;
+    }
 
     MetadataNode getMetadata() const;
     Options& commonOptions()

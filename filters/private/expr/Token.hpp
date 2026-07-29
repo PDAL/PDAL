@@ -43,7 +43,7 @@ class Token
     // Union with string requires a bunch of muck, so...
     struct Value
     {
-        double d;
+        double d {0.0};
         std::string s;
     };
 

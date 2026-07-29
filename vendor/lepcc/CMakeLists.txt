@@ -20,5 +20,10 @@ target_include_directories(${PDAL_LEPCC_LIB_NAME} PRIVATE
     src/include
 )
 
+if (UNIX)
+    target_compile_options(${PDAL_LEPCC_LIB_NAME} PRIVATE -Wno-uninitialized)
+    target_compile_options(${PDAL_LEPCC_LIB_NAME} PRIVATE -Wno-maybe-uninitialized)
+endif()
+
 
 set_property(GLOBAL PROPERTY _PDAL_LEPCC_INCLUDED TRUE)

@@ -87,7 +87,7 @@ void PlyWriter::prepared(PointTableRef table)
     {
         for (auto& dimspec : m_dimNames)
         {
-            Dimension::Type type;
+            Dimension::Type type(Dimension::Type::None);
             StringList parts = Utils::split2(dimspec, '=');
             std::string name = parts[0];
             Utils::trim(name);
