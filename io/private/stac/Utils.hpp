@@ -76,7 +76,9 @@ namespace stac
 namespace StacUtils
 {
 
-    std::string handleRelativePath(std::string srcPath, std::string linkPath);
+    // Exported so it can be unit tested.
+    PDAL_EXPORT std::string handleRelativePath(std::string srcPath,
+        std::string linkPath);
     std::time_t getStacTime(std::string in);
     std::string stacId(const NL::json& stac);
     std::string stacType(const NL::json& stac);
