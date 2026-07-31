@@ -228,7 +228,7 @@ int TranslateKernel::execute()
         return 0;
     }
 
-    m_manager.pointTable().layout()->setAllowedDims(m_dimNames);
+    m_manager.setAllowedDims(m_dimNames);
     if (m_manager.execute(m_mode).m_mode == ExecMode::None)
         throw pdal_error("Couldn't run translation pipeline in requested "
             "execution mode.");
