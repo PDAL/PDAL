@@ -149,7 +149,7 @@ int PipelineKernel::execute()
     m_manager.readPipeline(m_inputFile);
     if (!m_manager.hasReader())
         throw pdal_error("Pipeline does not start with a reader.");
-    m_manager.pointTable().layout()->setAllowedDims(m_dimNames);
+    m_manager.setAllowedDims(m_dimNames);
     if (m_manager.execute(m_mode).m_mode == ExecMode::None)
         throw pdal_error("Couldn't run pipeline in requested execution mode.");
 
