@@ -31,5 +31,10 @@ format
 : `geoarrow` or `geoparquet` option to override any filename extension
   hinting of data type \[Optional\]
 
+geo_dimension_name
+
+: The name of the GeoParquet or GeoArrow geometry field from which points will be read
+  \[Optional\] \[Defaults: "xyz" (GeoArrow), "geometry", "wkb" (GeoParquet)\]
+
 ```{include} reader_opts.md
 ```

@@ -80,7 +80,6 @@ ArrowReader::ArrowReader()
     , m_currentBatchIndex(0)
     , m_currentBatchPointIndex(0)
     , m_readMetadata(false)
-
 {}
 
 
@@ -88,7 +87,8 @@ ArrowReader::ArrowReader()
 void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
-    args.add("geoarrow_dimension_name", "", m_geoArrowDimName, "xyz");
+    m_geomDimNameArg = &args.add("geoarrow_dimension_name", "", m_geomDimName);
+    args.addSynonym("geoarrow_dimension_name", "geo_dimension_name");
     args.add("format", "", m_formatTypeString, "");
 }
 
@@ -269,6 +269,9 @@ void ArrowReader::initialize()
                 << result.status().ToString() <<"'";
             throwError(msg.str());
         }
+        // Current ArrowWriter default field name for Feather
+        if (!m_geomDimNameArg->set())
+            m_geomDimName = "xyz";
 
         m_ipcReader = status.ValueOrDie();
         m_batchCount = m_ipcReader->num_record_batches();
@@ -396,6 +399,25 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
     // batches don't match the schema, we're f'd
 
     std::shared_ptr<arrow::Schema> schema = m_currentBatch->schema();
+
+    // the Feather default field name is set in initialize(); we need the schema
+    // to get this one.
+    // "geometry": GeoParquet standard dim name, prioritized if exists
+    // "wkb": PDAL ArrowWriter former default parquet field name
+    if ((m_formatType == arrowsupport::Parquet) && !m_geomDimNameArg->set())
+    {
+        if (schema->GetFieldByName("geometry"))
+            m_geomDimName = "geometry";
+        else
+            m_geomDimName = "wkb";
+    }
+
+    m_geomFieldIdx = schema->GetFieldByName(m_geomDimName);
+    //!! Throw instead? We don't usually punish for missing XYZ AFAICT
+    if (m_geomFieldIdx == -1)
+        log()->get(LogLevel::Warning) << "Could not find geometry field '"
+            << m_geomDimName << "' in file '" << m_filename << "'";
+
     int fieldPosition(0);
     for(auto& f: schema->fields())
     {
@@ -405,13 +427,12 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
 
         if ((t == arrow::Type::FIXED_SIZE_LIST) || (t == arrow::Type::BINARY))
         {
-            if (Utils::iequals(name, m_geoArrowDimName))
+            if (Utils::iequals(name, m_geomDimName))
             {
                 layout->registerDim(pdal::Dimension::Id::X);
                 layout->registerDim(pdal::Dimension::Id::Y);
                 layout->registerDim(pdal::Dimension::Id::Z);
             }
-
         }
 
         pdal::Dimension::Type pt = pdalType(t);
@@ -499,12 +520,71 @@ bool ArrowReader::readNextBatchData()
 
 bool ArrowReader::fillPoint(PointRef& point)
 {
-
-
     for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
     {
         // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
         std::shared_ptr<arrow::Array> array = m_currentBatch->column(columnNum);
+
+        // Doing this earlier, so that we can never mix up the geometry columns 
+        // if for some reason there are multiple.
+        if (columnNum == m_geomFieldIdx)
+        {
+            // These should work for parquet GEOMETRY/GEOGRAPHY types - maybe some
+            // remote possibility that it would be LARGE_BINARY.
+            switch (array->type_id())
+            {
+                case arrow::Type::BINARY:
+                {
+                    // We assume any binary arrays are WKB. If they aren't we are
+                    // throwing an error
+                    const auto castArray =
+                        static_cast<const arrow::BinaryArray*>(array.get());
+                    std::string_view wkb = castArray->Value(m_currentBatchPointIndex);
+                    pdal::Geometry pt = pdal::Geometry(std::string(wkb));
+                    OGRGeometry* g = (OGRGeometry*) pt.getOGRHandle();
+                    OGRPoint* p = dynamic_cast<OGRPoint*>(g->toPoint());
+                    if (p)
+                    {
+                        point.setField<double>(Dimension::Id::X, p->getX());
+                        point.setField<double>(Dimension::Id::Y, p->getY());
+                        point.setField<double>(Dimension::Id::Z, p->getZ());
+                    }
+                    else
+                    {
+                        throwError("Could not read WKB point from binary field '" +
+                            m_geomDimName + "'!");
+                    }
+                    break;
+                }
+                case arrow::Type::FIXED_SIZE_LIST:
+                {
+                    const auto listArray = 
+                        static_cast<const arrow::FixedSizeListArray*>(array.get());
+                    assert(listArray->values()->type_id() == arrow::Type::DOUBLE);
+                    const auto pointValues =
+                        std::static_pointer_cast<arrow::DoubleArray>(listArray->values());
+
+                    int nDim(3); // only xyz for now
+
+                    point.setField<double>(Dimension::Id::X,
+                        pointValues->Value((nDim * m_currentBatchPointIndex)));
+                    point.setField<double>(Dimension::Id::Y,
+                        pointValues->Value((nDim * m_currentBatchPointIndex) + 1));
+                    point.setField<double>(Dimension::Id::Z,
+                        pointValues->Value((nDim * m_currentBatchPointIndex) + 2));
+                    break;
+                }
+                default:
+                {
+                    std::stringstream msg;
+                    msg << "Point geometry field '" << m_geomDimName <<
+                        "' is not a supported geometry type! Found arrow type '"
+                        << array->type()->ToString() << "'; expected BINARY or FIXED_SIZE_LIST";
+                    throwError(msg.str());
+                }
+            }
+            continue;
+        }
 
         pdal::Dimension::Id pDimId = m_arrayIds[columnNum];
         switch (array->type_id())
@@ -570,40 +650,8 @@ bool ArrowReader::fillPoint(PointRef& point)
                 break;
             }
             case arrow::Type::BINARY:
-            {
-                // We assume any binary arrays are WKB. If they aren't we are throwing
-                // an error
-                const auto castArray = static_cast<const arrow::BinaryArray*>(array.get());
-                std::string_view wkb = castArray->Value(m_currentBatchPointIndex);
-                pdal::Geometry pt = pdal::Geometry(std::string(wkb));
-                OGRGeometry* g = (OGRGeometry*) pt.getOGRHandle();
-                OGRPoint* p = dynamic_cast<OGRPoint*>(g->toPoint());
-                if (p)
-                {
-                    point.setField<double>(Dimension::Id::X, p->getX());
-                    point.setField<double>(Dimension::Id::Y, p->getY());
-                    point.setField<double>(Dimension::Id::Z, p->getZ());
-                } else
-                {
-                    throwError("BinaryArray field was not WKB of type point!");
-                }
-                break;
-            }
             case arrow::Type::FIXED_SIZE_LIST:
             case arrow::Type::LIST:
-            {
-                const auto listArray = static_cast<const arrow::FixedSizeListArray*>(array.get());
-                assert(listArray->values()->type_id() == arrow::Type::DOUBLE);
-                const auto pointValues =
-                    std::static_pointer_cast<arrow::DoubleArray>(listArray->values());
-
-                int nDim(3); // only xyz for now
-
-                point.setField<double>(Dimension::Id::X, pointValues->Value((nDim * m_currentBatchPointIndex)));
-                point.setField<double>(Dimension::Id::Y, pointValues->Value((nDim * m_currentBatchPointIndex) + 1));
-                point.setField<double>(Dimension::Id::Z, pointValues->Value((nDim * m_currentBatchPointIndex) + 2));
-                break;
-            }
             case arrow::Type::STRING:
             case arrow::Type::STRUCT:
             {
@@ -611,9 +659,12 @@ bool ArrowReader::fillPoint(PointRef& point)
                 continue;
             }
             default:
-                throw pdal_error("Unrecognized PDAL dimension type for dimension");
-
-
+            {
+                std::stringstream msg;
+                msg << "Unrecognized PDAL dimension type for dimension with "
+                    "Arrow type '" << array->type()->ToString() << "'.";
+                throwError(msg.str());
+            }
         }
 
     }
