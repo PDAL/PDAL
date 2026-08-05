@@ -412,7 +412,7 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
             m_geomDimName = "wkb";
     }
 
-    m_geomFieldIdx = schema->GetFieldByName(m_geomDimName);
+    m_geomFieldIdx = schema->GetFieldIndex(m_geomDimName);
     //!! Throw instead? We don't usually punish for missing XYZ AFAICT
     if (m_geomFieldIdx == -1)
         log()->get(LogLevel::Warning) << "Could not find geometry field '"
