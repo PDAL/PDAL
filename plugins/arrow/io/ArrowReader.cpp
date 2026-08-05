@@ -88,7 +88,8 @@ ArrowReader::ArrowReader()
 void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
-    args.add("geoarrow_dimension_name", "", m_geoArrowDimName, "xyz");
+    args.add("geoarrow_dimension_name", "Name of the packed XYZ struct dimension for "
+        "GeoArrow (Feather) input.", m_geoArrowDimName, "xyz");
     args.add("format", "", m_formatTypeString, "");
 }
 
@@ -191,6 +192,8 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
             NL::json column = metadata["columns"][primary_column];
 
             log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
+
+            m_geoArrowDimName = primary_column;
 
             if (!column.contains("crs"))
             {
