@@ -194,7 +194,8 @@ private:
 class WkbHandler : public BaseDimHandler
 {
 public:
-    WkbHandler(arrow::MemoryPool *pool) : m_builder(arrow::fixed_size_binary(29), pool)
+    WkbHandler(arrow::MemoryPool *pool, const std::string& pipelineMetadata = std::string()) :
+        m_pipelineMetadata(pipelineMetadata), m_builder(arrow::fixed_size_binary(29), pool)
     {}
 
     FieldPtr field() override
@@ -208,6 +209,8 @@ public:
 
         auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
         kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");
+        if (m_pipelineMetadata.size())
+            kvMetadata->Append("PDAL:pipeline:metadata", m_pipelineMetadata);
         kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
 
         // Must be binary instead of fixed-length binary to conform to GeoParquet.
@@ -253,6 +256,7 @@ public:
     { return m_builder; }
 
 private:
+    std::string m_pipelineMetadata;
     arrow::BinaryBuilder m_builder;
 };
 
@@ -323,8 +327,8 @@ void ArrowWriter::addArgs(ProgramArgs& args)
 {
     args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString,
         "feather");
-    args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct",
-        m_geoArrowDimensionName, "xyz");
+    args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct "
+        "(Feather output only)", m_geoArrowDimensionName, "xyz");
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 4);
     args.add("write_pipeline_metadata", "Write PDAL metadata to schema",
         m_writePipelineMetadata, true);
@@ -338,14 +342,19 @@ void ArrowWriter::prepared(PointTableRef table)
     // Eliminate worries about copying arrow classes.
     m_dimHandlers.reserve(table.layout()->dims().size());
 
-    //Always do XYZ.
     std::string pipelineMetadata;
     if (m_writePipelineMetadata)
         pipelineMetadata = Utils::toJSON(table.metadata());
-    m_dimHandlers.push_back(std::make_unique<XyzHandler>(m_pool, m_geoArrowDimensionName,
-        pipelineMetadata));
+
+    // For Parquet, the WKB column is the GeoParquet-spec geometry column and is
+    // sufficient on its own, so the packed GeoArrow xyz struct is redundant and
+    // not written. For Feather, there's no WKB column, so xyz is the only
+    // geometry representation.
     if (m_formatType == arrowsupport::Parquet)
-        m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool));
+        m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool, pipelineMetadata));
+    else
+        m_dimHandlers.push_back(std::make_unique<XyzHandler>(m_pool, m_geoArrowDimensionName,
+            pipelineMetadata));
     for (Id id : table.layout()->dims())
     {
         // Aready taken care of.

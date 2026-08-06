@@ -62,7 +62,11 @@ format
 
 geoarrow_dimension_name
 
-: Dimension name to write GeoArrow struct \[Default: xyz\]
+: Dimension name to write GeoArrow struct \[Default: xyz\]. Only
+  applies to Feather output. Parquet output always uses a `wkb`
+  column (WKB point geometry) to satisfy the GeoParquet geometry
+  requirement; the packed GeoArrow struct is not written since it
+  would be redundant.
 
 geoparquet
 
