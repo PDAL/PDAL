@@ -121,6 +121,13 @@ TEST(ArrowParquetReaderTest, ReadingPoints_RowGroups)
                              Support::datapath("las/1.2-with-color.las"));
 }
 
+TEST(ArrowParquetReaderTest, ReadingPoints_GeoParquetPrimaryColumn)
+{
+    // input file that only has a 'wkb' geometry column (no 'xyz' struct)
+    compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color_wkb.parquet"),
+                             Support::datapath("las/1.2-with-color.las"));
+}
+
 TEST(ArrowFeatherReaderTest, ReadingPoints)
 {
     compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color.feather"),
