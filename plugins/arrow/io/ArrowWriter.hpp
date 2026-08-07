@@ -70,13 +70,9 @@ private:
     virtual void write(const PointViewPtr view);
 
     void setupParquet(PointTableRef table);
-    void setupFeather(PointTableRef table);
     void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
-        const SpatialReference& ref);
+        const SpatialReference& ref, const std::string& pipelineMetadata);
     void flushBatch();
-
-    std::string m_formatString;
-    arrowsupport::ArrowFormatType m_formatType;
 
     arrowsupport::SchemaPtr m_schema;
     arrow::MemoryPool* m_pool;
@@ -85,11 +81,10 @@ private:
 
     std::shared_ptr<arrow::io::FileOutputStream> m_file;
     std::unique_ptr<parquet::arrow::FileWriter> m_parquetFileWriter;
-    std::shared_ptr<arrow::ipc::RecordBatchWriter> m_arrowFileWriter;
 
     std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
 
-    std::string m_geoArrowDimensionName;
+    std::string m_geoDimensionName;
     point_count_t m_batchIndex;
     bool m_writePipelineMetadata;
 
