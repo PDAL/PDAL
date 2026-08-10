@@ -55,6 +55,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc_impl_linux-64-13.3.0-hfea6d02_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc_linux-64-13.3.0-hc28eda2_7.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/geos-3.14.1-h480dda7_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.4-h2712d98_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gflags-2.2.2-h5888daf_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gfortran-13.3.0-h9576a4e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gfortran_impl_linux-64-13.3.0-h10434e7_1.conda
@@ -237,6 +238,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/gcc_impl_linux-aarch64-13.3.0-h80a1502_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/gcc_linux-aarch64-13.3.0-h1cd514b_8.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/geos-3.14.1-h57520ee_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/geotiff-1.7.4-had9f669_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/gflags-2.2.2-h5ad3122_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/gfortran-13.3.0-h8a56e6e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/gfortran_impl_linux-aarch64-13.3.0-h9c0531c_2.conda
@@ -436,6 +438,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/fortran-compiler-1.8.0-h33d1f46_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/freexl-2.0.0-h3ec172f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/geos-3.14.1-he483b9e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.4-h7f16be2_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/gflags-2.2.2-hac325c4_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/gfortran-13.2.0-h2c809b3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/gfortran_impl_osx-64-13.2.0-h2bc304d_3.conda
@@ -608,6 +611,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fortran-compiler-1.8.0-hc3477c4_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/freexl-2.0.0-hfbad9fb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geos-3.14.1-h5afe852_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.4-h645e05f_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/gflags-2.2.2-hf9b8971_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/gfortran-13.2.0-h1ca8e4b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/gfortran_impl_osx-arm64-13.2.0-h252ada1_3.conda
@@ -775,6 +779,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/fortran-compiler-1.8.0-h95e3450_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/freexl-2.0.0-h8276f4a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/geos-3.14.1-hdade9fe_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.4-h511353b_5.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/gflags-2.2.2-he0c23c2_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/glog-0.7.1-h3ff59bf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/hdf5-1.14.4-nompi_hd5d9e70_105.conda
@@ -907,7 +912,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/freexl-2.0.0-h9dce30a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/geos-3.13.0-h5888daf_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.3-h77b800c_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.4-h3551947_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/giflib-5.2.2-hd590300_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/greenlet-3.1.1-py312h2ec8cdc_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/h2-4.1.0-pyhd8ed1ab_1.conda
@@ -1308,7 +1313,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/freexl-2.0.0-h3183152_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/geos-3.13.0-hac325c4_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.3-h2b6e260_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.4-h0978cfe_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/giflib-5.2.2-h10d778d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/greenlet-3.1.1-py312h5861a67_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/h2-4.1.0-pyhd8ed1ab_1.conda
@@ -1501,7 +1506,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/freexl-2.0.0-h3ab3353_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geos-3.13.0-hf9b8971_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.3-h82bf549_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.4-hbef4fa4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/giflib-5.2.2-h93a5062_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/greenlet-3.1.1-py312hde4cb15_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/h2-4.1.0-pyhd8ed1ab_1.conda
@@ -1694,7 +1699,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/freexl-2.0.0-hf297d47_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/geos-3.13.0-h5a68840_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.3-h496ac4d_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.4-h887f4e7_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/greenlet-3.1.1-py312h275cf98_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/h2-4.1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/hpack-4.0.0-pyhd8ed1ab_1.conda
@@ -1946,7 +1951,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-1.0.1-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-base-1.0.1-pyha770c72_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/geos-3.13.0-h5888daf_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.3-h77b800c_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.4-h3551947_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gflags-2.2.2-h5888daf_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/giflib-5.2.2-hd590300_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/glog-0.7.1-hbabe93e_0.conda
@@ -2759,7 +2764,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-1.0.1-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-base-1.0.1-pyha770c72_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/geos-3.13.0-hac325c4_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.3-h2b6e260_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.4-h0978cfe_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/gflags-2.2.2-hac325c4_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/giflib-5.2.2-h10d778d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/glog-0.7.1-h2790a97_0.conda
@@ -3095,7 +3100,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-1.0.1-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-base-1.0.1-pyha770c72_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geos-3.13.0-hf9b8971_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.3-h82bf549_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.4-hbef4fa4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/gflags-2.2.2-hf9b8971_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/giflib-5.2.2-h93a5062_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/glog-0.7.1-heb240a5_0.conda
@@ -3437,7 +3442,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-1.0.1-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/geopandas-base-1.0.1-pyha770c72_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/geos-3.13.0-h5a68840_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.3-h496ac4d_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.4-h887f4e7_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/gflags-2.2.2-he0c23c2_1005.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/giflib-5.2.2-h64bf75a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/glog-0.7.1-h3ff59bf_0.conda
@@ -10118,22 +10123,59 @@ packages:
   license: LGPL-2.1-only
   size: 1772787
   timestamp: 1761593910217
-- conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.3-h77b800c_3.conda
-  sha256: 94c7d002c70a4802a78ac2925ad6b36327cff85e0af6af2825b11a968c81ec20
-  md5: 4eb52aecb43e7c72f8e4fca0c386354e
+- conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.4-h2712d98_5.conda
+  sha256: 008ffd3b7fee74a2f66c601cebad281748d4496cffb3b772a9ba61c6d05b8eac
+  md5: 141cb00be936171cf59a7d70f0ec84e1
+  depends:
+  - proj
+  - zlib
+  - libjpeg-turbo
+  - libtiff
+  - libstdcxx >=14
+  - libgcc >=14
+  - __glibc >=2.17,<3.0.a0
+  - proj >=9.8.0,<9.9.0a0
+  - libjpeg-turbo >=3.1.2,<4.0a0
+  - libzlib >=1.3.1,<2.0a0
+  - libtiff >=4.7.1,<4.8.0a0
+  license: MIT
+  license_family: MIT
+  size: 144476
+  timestamp: 1772594092500
+- conda: https://conda.anaconda.org/conda-forge/linux-64/geotiff-1.7.4-h3551947_0.conda
+  sha256: a5c6bf5654cf7e96d44aaac68b4b654a9e148b811e5b0f36ba7d70db87416fff
+  md5: 5998212641e3feb3660295eacc717139
   depends:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=13
   - libjpeg-turbo >=3.0.0,<4.0a0
   - libstdcxx >=13
-  - libtiff >=4.6.0,<4.8.0a0
+  - libtiff >=4.7.0,<4.8.0a0
   - libzlib >=1.3.1,<2.0a0
-  - proj >=9.5.0,<9.6.0a0
+  - proj >=9.5.1,<9.6.0a0
   - zlib
   license: MIT
   license_family: MIT
-  size: 131394
-  timestamp: 1726602918349
+  size: 129359
+  timestamp: 1739974781272
+- conda: https://conda.anaconda.org/conda-forge/linux-aarch64/geotiff-1.7.4-had9f669_5.conda
+  sha256: 73051379231f912c127eedd784ae80566b0461ce7f60672e7135332eab98c3a1
+  md5: 6db4075d11330e52afd10b1a6a875220
+  depends:
+  - proj
+  - zlib
+  - libjpeg-turbo
+  - libtiff
+  - libstdcxx >=14
+  - libgcc >=14
+  - proj >=9.8.0,<9.9.0a0
+  - libtiff >=4.7.1,<4.8.0a0
+  - libzlib >=1.3.1,<2.0a0
+  - libjpeg-turbo >=3.1.2,<4.0a0
+  license: MIT
+  license_family: MIT
+  size: 154512
+  timestamp: 1772594115726
 - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/geotiff-1.7.4-hcc3869d_2.conda
   sha256: 0d164bb7e6f99b82936744f6f07cda9f9c271ce145e59547c8835d3974929272
   md5: 147b232166639e6ef4c35dfa8f57db68
@@ -10149,52 +10191,107 @@ packages:
   license_family: MIT
   size: 134311
   timestamp: 1742402483205
-- conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.3-h2b6e260_3.conda
-  sha256: 7e58d94340a499c3c62022ba070231f1dcc7c55a98f8f2a7e982d2071dfd421c
-  md5: bbc58a544b03990b3bc8c2139cc6c34f
+- conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.4-h0978cfe_0.conda
+  sha256: 6584253f6ec369125d866c11ef66aa4dcde7c33211ec7bff7360c26f1d400738
+  md5: cf49cf3d1c8c7c0151f3b8af5be490a4
   depends:
   - __osx >=10.13
-  - libcxx >=17
+  - libcxx >=18
   - libjpeg-turbo >=3.0.0,<4.0a0
-  - libtiff >=4.6.0,<4.8.0a0
+  - libtiff >=4.7.0,<4.8.0a0
   - libzlib >=1.3.1,<2.0a0
-  - proj >=9.5.0,<9.6.0a0
+  - proj >=9.5.1,<9.6.0a0
   - zlib
   license: MIT
   license_family: MIT
-  size: 115513
-  timestamp: 1726603109733
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.3-h82bf549_3.conda
-  sha256: 7ce4d6dced3cd313ea170db69d6929b88d77ebd40715f9f38c3bcba3633d6c65
-  md5: cb84033d7c167a16c4577272b4493bc5
+  size: 113701
+  timestamp: 1739974790619
+- conda: https://conda.anaconda.org/conda-forge/osx-64/geotiff-1.7.4-h7f16be2_5.conda
+  sha256: 97e1e2269dd118818c190d7baa7d4a608c6595ac7abc63203f1423fd6243f5f4
+  md5: 0faea17ffd3c517714dd17fb2083ba96
+  depends:
+  - proj
+  - zlib
+  - libjpeg-turbo
+  - libtiff
+  - __osx >=11.0
+  - libcxx >=19
+  - libzlib >=1.3.1,<2.0a0
+  - libtiff >=4.7.1,<4.8.0a0
+  - libjpeg-turbo >=3.1.2,<4.0a0
+  - proj >=9.8.0,<9.9.0a0
+  license: MIT
+  license_family: MIT
+  size: 130570
+  timestamp: 1772594124521
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.4-h645e05f_5.conda
+  sha256: 1bd8554c2c8ab84b010f4791dd33b6e6550ea8d179715613bacdf98c40dc07a8
+  md5: 1d28004e7dccfba8c33d658aae8592c5
+  depends:
+  - proj
+  - zlib
+  - libjpeg-turbo
+  - libtiff
+  - libcxx >=19
+  - __osx >=11.0
+  - libtiff >=4.7.1,<4.8.0a0
+  - proj >=9.8.0,<9.9.0a0
+  - libzlib >=1.3.1,<2.0a0
+  - libjpeg-turbo >=3.1.2,<4.0a0
+  license: MIT
+  license_family: MIT
+  size: 128029
+  timestamp: 1772594158970
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/geotiff-1.7.4-hbef4fa4_0.conda
+  sha256: e0d914bab03a578ace37cb45446249f8e23a36d80cf866e37c582e7f9d6eca0e
+  md5: c01fde51346f834d3f80affab45f0740
   depends:
   - __osx >=11.0
-  - libcxx >=17
+  - libcxx >=18
   - libjpeg-turbo >=3.0.0,<4.0a0
-  - libtiff >=4.6.0,<4.8.0a0
+  - libtiff >=4.7.0,<4.8.0a0
   - libzlib >=1.3.1,<2.0a0
-  - proj >=9.5.0,<9.6.0a0
+  - proj >=9.5.1,<9.6.0a0
   - zlib
   license: MIT
   license_family: MIT
-  size: 113739
-  timestamp: 1726603324989
-- conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.3-h496ac4d_3.conda
-  sha256: 116120a2f4411618800c2a5ce246dfc313298e545ce1ffaa85f28cc3ac2236ac
-  md5: fb20f424102030f3952532cc7aebdbd8
+  size: 112457
+  timestamp: 1739974826028
+- conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.4-h511353b_5.conda
+  sha256: e9186a2cf4d777ff49527aee9deafeb64fd1404e7493db174f939c7a0d26295e
+  md5: 077bdd02cdb3f4dc9c69349520e9aea2
+  depends:
+  - proj
+  - zlib
+  - libjpeg-turbo
+  - libtiff
+  - vc >=14.3,<15
+  - vc14_runtime >=14.44.35208
+  - ucrt >=10.0.20348.0
+  - libzlib >=1.3.1,<2.0a0
+  - libtiff >=4.7.1,<4.8.0a0
+  - libjpeg-turbo >=3.1.2,<4.0a0
+  - proj >=9.8.0,<9.9.0a0
+  license: MIT
+  license_family: MIT
+  size: 137589
+  timestamp: 1772594121260
+- conda: https://conda.anaconda.org/conda-forge/win-64/geotiff-1.7.4-h887f4e7_0.conda
+  sha256: f0435dd63c97ad9e8d35a2c1d55c823c50dac82a8dffd8d41c79c0305fa0cc2b
+  md5: d5edee34ab83553450b1225cf0a14273
   depends:
   - libjpeg-turbo >=3.0.0,<4.0a0
-  - libtiff >=4.6.0,<4.8.0a0
+  - libtiff >=4.7.0,<4.8.0a0
   - libzlib >=1.3.1,<2.0a0
-  - proj >=9.5.0,<9.6.0a0
+  - proj >=9.5.1,<9.6.0a0
   - ucrt >=10.0.20348.0
   - vc >=14.2,<15
   - vc14_runtime >=14.29.30139
   - zlib
   license: MIT
   license_family: MIT
-  size: 123087
-  timestamp: 1726603487099
+  size: 123341
+  timestamp: 1739975151946
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gflags-2.2.2-h5888daf_1005.conda
   sha256: 6c33bf0c4d8f418546ba9c250db4e4221040936aef8956353bc764d4877bc39a
   md5: d411fc29e338efb48c5fd4576d71d881

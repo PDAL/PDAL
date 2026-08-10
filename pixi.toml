@@ -20,6 +20,7 @@ ceres-solver = "*"
 python = "*"
 libarrow = ">=21.0"
 libparquet = ">=21.0"
+geotiff = "*"
 
 [feature.doc.dependencies]
 jupyter-book = ">=1.0.3,<2"
