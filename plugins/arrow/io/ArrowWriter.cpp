@@ -283,8 +283,9 @@ void ArrowWriter::prepared(PointTableRef table)
     if (m_writePipelineMetadata)
         pipelineMetadata = Utils::toJSON(table.metadata());
     // For Parquet, the WKB column is the GeoParquet-spec geometry column. The 
-    // packed GeoArrow xyz struct is redundant and no longer written
-    m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool, pipelineMetadata));
+    // packed GeoArrow xyz struct is no longer written
+    m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool, m_geoDimensionName,
+        pipelineMetadata));
     for (Id id : table.layout()->dims())
     {
         // Aready taken care of.
@@ -356,11 +357,11 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
     column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
 
     NL::json wkb;
-    wkb["wkb"] = column;
+    wkb[m_geoDimensionName] = column;
 
     NL::json geo {
         { "version", m_geoParquetVersion },
-        { "primary_column", "wkb" },
+        { "primary_column", m_geoDimensionName },
         { "columns", wkb }
     };
 
