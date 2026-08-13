@@ -45,6 +45,7 @@ RUN \
         gdal-driver-arrow \
         gdal-driver-tiledb \
         gdal-driver-parquet \
-        apache-arrow-dev \
+        libparquet>21 \
+        apache-arrow-dev>21 \
         tiledb-dev \
     ; \
