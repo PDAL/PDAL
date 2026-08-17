@@ -24,15 +24,11 @@ cloud data.
 
 The entire website is available as a single PDF at <https://pdal.org/_/downloads/en/latest/pdf/>
 
-## News
+## Download and Install
 
-### **06-19-2025**
+Visit {ref}`download` to obtain the latest source code.
 
-PDAL 2.9.0 was released. Visit {ref}`download` to grab a copy.
-
-### **02-03-2025**
-
-PDAL 2.8.4 was released. Visit {ref}`download` to grab a copy.
+Visit {ref}`quickstart` to learn how to install binaries on your system.
 
 ## Indices and tables
 
