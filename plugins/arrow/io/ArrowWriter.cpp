@@ -532,11 +532,8 @@ void ArrowWriter::flushBatch()
 
     if (m_formatType == arrowsupport::Parquet)
     {
-#if ARROW_VERSION_MAJOR >= 20
         auto result = m_parquetFileWriter->NewRowGroup();
-#else
-        auto result = m_parquetFileWriter->NewRowGroup(m_batchSize);
-#endif
+
         if (!result.ok())
             throwError("Unable to make NewRowGroup: " + result.ToString());
 
@@ -546,7 +543,6 @@ void ArrowWriter::flushBatch()
             if (!result.ok())
                 throwError("Unable to make WriteColumnChunk: " + result.ToString());
         }
-
     }
     else  // Feather
     {
