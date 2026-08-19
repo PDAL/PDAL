@@ -77,7 +77,6 @@ private:
     void loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
 
     std::shared_ptr<arrow::io::ReadableFile> m_file;
-    std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_ipcReader;
     std::unique_ptr<::arrow::RecordBatchReader> m_parquetReader;
     std::unique_ptr<parquet::arrow::FileReader> m_arrow_reader;
 

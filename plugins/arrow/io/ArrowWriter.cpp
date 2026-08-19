@@ -467,16 +467,6 @@ void ArrowWriter::flushBatch()
             throwError("Unable to make WriteColumnChunk: " + result.ToString());
     }
 
-    }
-    else  // Feather
-    {
-        std::shared_ptr<arrow::RecordBatch> batch =
-            arrow::RecordBatch::Make(m_schema, m_batchIndex, arrays);
-
-        auto result = m_arrowFileWriter->WriteRecordBatch(*batch);
-        if (!result.ok())
-            throwError("Unable to write arrow batch" + result.ToString());
-    }
     m_batchIndex = 0;
 }
 
