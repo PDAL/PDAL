@@ -82,7 +82,6 @@ ArrowReader::ArrowReader()
 {}
 
 
-
 void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
@@ -104,68 +103,65 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
         try
         {
             metadata = NL::json::parse(*geo);
-            } catch (NL::json::parse_error& e)
-            {
-                log()->get(LogLevel::Warning) << "unable to parse GeoParquet 'geo' metadata with error '"
-                                              << e.what() << "'" << std::endl;
-                return;
-            }
+        }
+        catch (NL::json::parse_error& e)
+        {
+            log()->get(LogLevel::Warning) << "unable to parse GeoParquet 'geo' metadata with error '"
+                                        << e.what() << "'" << std::endl;
+            return;
+        }
 
-            if (!metadata.contains("primary_column"))
-            {
-                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry"
-                                              << std::endl;
-                return;
+        if (!metadata.contains("primary_column"))
+        {
+            log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry"
+                                            << std::endl;
+            return;
+        }
 
-            }
+        if (!metadata.contains("columns"))
+        {
+            log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry"
+                                            << std::endl;
+            return;
+        }
+        NL::json columns = metadata["columns"];
 
-            if (!metadata.contains("columns"))
-            {
-                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry"
-                                              << std::endl;
-                return;
-            }
-            NL::json columns = metadata["columns"];
+        std::string primary_column = metadata["primary_column"];
+        NL::json column = metadata["columns"][primary_column];
 
-            std::string primary_column = metadata["primary_column"];
-            NL::json column = metadata["columns"][primary_column];
+        log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
 
-            log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
+        m_geoArrowDimName = primary_column;
 
-            m_geoArrowDimName = primary_column;
+        if (!column.contains("crs"))
+        {
+            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to 4326" << std::endl;
+            setSpatialReference("EPSG:4326");
+            return;
+        }
 
-            if (!column.contains("crs"))
-            {
-                log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to 4326" << std::endl;
-                setSpatialReference("EPSG:4326");
-                return;
-            }
+        SpatialReference ref;
+        NL::json crs = column["crs"];
+        if (crs.is_object())
+        {
+            ref.set(crs.dump());
+        }
+        else if (crs.is_string())
+        {
+            ref.set(column["crs"].get<std::string>());
+        }
 
-            SpatialReference ref;
-            NL::json crs = column["crs"];
-            if (crs.is_object())
-            {
-                ref.set(crs.dump());
-            }
-            else if (crs.is_string())
-            {
+        if (column.contains("epoch"))
+        {
+            ref.setEpoch(column["epoch"].get<double>());
+        }
 
-                ref.set(column["crs"].get<std::string>());
-            }
-
-            if (column.contains("epoch"))
-            {
-
-                ref.setEpoch(column["epoch"].get<double>());
-            }
-
-            setSpatialReference(ref);
+        setSpatialReference(ref);
     } else
     {
         log()->get(LogLevel::Warning) << "unable to fetch GeoArrow metadata with error '"
                                       << geo.status().ToString() << "'" << std::endl;
     }
-
 }
 
 void ArrowReader::initialize()
@@ -188,7 +184,6 @@ void ArrowReader::initialize()
     reader_builder.memory_pool(m_pool);
     reader_builder.properties(arrow_reader_props);
 
-#if ARROW_VERSION_MAJOR >= 21
     auto reader_result = parquet::arrow::OpenFile(m_file, m_pool);
     if (!reader_result.ok())
     {
@@ -198,16 +193,6 @@ void ArrowReader::initialize()
         throwError(msg.str());
     }
     m_arrow_reader = std::move(reader_result).ValueOrDie();
-#else
-    auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &m_arrow_reader);
-    if (!pOpenStatus.ok())
-    {
-        std::stringstream msg;
-        msg << "Unable to open file '" << m_filename << "' with message '"
-            << pOpenStatus.ToString() <<"'";
-        throwError(msg.str());
-    }
-#endif
 
     const auto metadata = m_arrow_reader->parquet_reader()->metadata();
     loadParquetGeoMetadata(metadata->key_value_metadata());
@@ -216,14 +201,15 @@ void ArrowReader::initialize()
     std::vector<int> rowGroupIds(m_arrow_reader->num_row_groups());
     std::iota(rowGroupIds.begin(), rowGroupIds.end(), 0);
 
-    auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader(rowGroupIds, &m_parquetReader);
-    if (!batchOpenStatus.ok())
+    auto batchOpenResult = m_arrow_reader->GetRecordBatchReader();
+    if (!batchOpenResult.ok())
     {
         std::stringstream msg;
         msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
             << result.status().ToString() <<"'";
         throwError(msg.str());
     }
+    m_parquetReader = std::move(batchOpenResult).ValueOrDie();
 
     for (arrow::Result<std::shared_ptr<arrow::RecordBatch>> maybe_batch : *m_parquetReader) {
 
@@ -231,14 +217,15 @@ void ArrowReader::initialize()
     }
     auto closeStatus = m_parquetReader->Close();
 
-    batchOpenStatus = m_arrow_reader->GetRecordBatchReader(rowGroupIds, &m_parquetReader);
-    if (!batchOpenStatus.ok())
+    batchOpenResult = m_arrow_reader->GetRecordBatchReader();
+    if (!batchOpenResult.ok())
     {
         std::stringstream msg;
         msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
             << result.status().ToString() <<"'";
         throwError(msg.str());
     }
+    m_parquetReader = std::move(batchOpenResult).ValueOrDie();
 
     auto batchIterator = m_parquetReader->begin();
     auto batchResult = *batchIterator;
@@ -284,7 +271,6 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
                 layout->registerDim(pdal::Dimension::Id::Y);
                 layout->registerDim(pdal::Dimension::Id::Z);
             }
-
         }
 
         pdal::Dimension::Type pt = pdalType(t);
@@ -343,7 +329,6 @@ bool ArrowReader::readNextBatchHeaders()
 
 bool ArrowReader::readNextBatchData()
 {
-
     m_arrays.clear();
     for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
     {
@@ -356,8 +341,6 @@ bool ArrowReader::readNextBatchData()
 
 bool ArrowReader::fillPoint(PointRef& point)
 {
-
-
     for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
     {
         // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
@@ -469,10 +452,7 @@ bool ArrowReader::fillPoint(PointRef& point)
             }
             default:
                 throw pdal_error("Unrecognized PDAL dimension type for dimension");
-
-
         }
-
     }
     return true;
 }
@@ -480,7 +460,6 @@ bool ArrowReader::fillPoint(PointRef& point)
 
 bool ArrowReader::processOne(PointRef& point)
 {
-
     if (m_currentBatchPointIndex == m_currentBatch->num_rows())
     {
         // go read a new batch
@@ -498,8 +477,6 @@ bool ArrowReader::processOne(PointRef& point)
     bool retval = fillPoint(point);
     m_currentBatchPointIndex++;
     return retval;
-
-
 }
 
 
@@ -516,6 +493,5 @@ void ArrowReader::done(PointTableRef table)
 
     result = m_file->Close();
 }
-
 
 } // namespace pdal
