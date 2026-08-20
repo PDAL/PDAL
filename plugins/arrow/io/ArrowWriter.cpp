@@ -222,6 +222,22 @@ ArrowWriter::~ArrowWriter()
 
 void ArrowWriter::initialize()
 {
+    using namespace arrowsupport;
+
+    StringList versionNums = Utils::split(m_geoParquetVersionString, '.');
+    int majorVersion = std::stoi(versionNums[0]);
+    int minorVersion = std::stoi(versionNums[1]);
+
+    if (majorVersion == 1 && minorVersion == 0)
+        m_version = ParquetVersion::GeoParquet10;
+    else if (majorVersion == 1 && minorVersion == 1)
+        m_version = ParquetVersion::GeoParquet11;
+    else if (majorVersion == 2)
+        m_version = ParquetVersion::GeoParquet20;
+    else
+        throwError("Invalid GeoParquet version string: '" +
+            m_geoParquetVersionString + "'. Expected 1.0.0, 1.1.0 or 2.0.0");
+
     auto result = arrow::io::FileOutputStream::Open(filename(), /*append=*/false);
     if (result.ok())
         m_file = result.ValueOrDie();
@@ -269,7 +285,7 @@ void ArrowWriter::addArgs(ProgramArgs& args)
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 4);
     args.add("write_pipeline_metadata", "Write PDAL metadata to file metadata",
         m_writePipelineMetadata, true);
-    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
+    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersionString, "1.0.0");
 }
 
 void ArrowWriter::prepared(PointTableRef table)
@@ -352,7 +368,7 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
 {
     NL::json column = {
         { "encoding", "WKB" },
-        { "geometry_types", { "Point" } }
+        { "geometry_types", { "Point Z" } }
     };
     column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
 
@@ -360,7 +376,7 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
     wkb[m_geoDimensionName] = column;
 
     NL::json geo {
-        { "version", m_geoParquetVersion },
+        { "version", m_geoParquetVersionString },
         { "primary_column", m_geoDimensionName },
         { "columns", wkb }
     };

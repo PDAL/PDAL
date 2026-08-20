@@ -77,7 +77,8 @@ private:
     arrowsupport::SchemaPtr m_schema;
     arrow::MemoryPool* m_pool;
     int m_batchSize;
-    std::string m_geoParquetVersion;
+    std::string m_geoParquetVersionString;
+    arrowsupport::ParquetVersion m_version;
 
     std::shared_ptr<arrow::io::FileOutputStream> m_file;
     std::unique_ptr<parquet::arrow::FileWriter> m_parquetFileWriter;

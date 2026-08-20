@@ -50,6 +50,13 @@ enum ArrowFormatType {
     Unknown = 256
 };
 
+enum ParquetVersion
+{
+    GeoParquet10,
+    GeoParquet11,
+    GeoParquet20
+};
+
 Dimension::Type pdalType(arrow::Type::type t)
 {
     switch (t)
