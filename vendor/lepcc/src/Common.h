@@ -24,7 +24,7 @@ Contributors:  Lucian Plesea
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "lepcc_types.h"
+#include "include/lepcc_types.h"
 
 namespace lepcc
 {

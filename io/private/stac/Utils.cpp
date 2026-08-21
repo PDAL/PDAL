@@ -60,9 +60,18 @@ NL::json loadSchemaJson(const connector::Connector& connector,
 {
     // Avoid intermittent failures while resolving remote JSON Schema
     // metaschemas; STAC schemas are still fetched and used for validation.
-    if (!validateSchemaSchema &&
-        url.find("json-schema.org") != std::string::npos)
-        return true;
+    if (!validateSchemaSchema)
+    {
+        auto ignoredSchemaHosts =
+        {
+            "json-schema.org",
+            "geojson.org"
+        };
+
+        for (const std::string& host : ignoredSchemaHosts)
+            if (url.find(host) != std::string::npos)
+                return true;
+    }
 
     return connector.getJson(url);
 }

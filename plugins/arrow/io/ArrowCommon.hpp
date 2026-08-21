@@ -50,7 +50,7 @@ enum ArrowFormatType {
     Unknown = 256
 };
 
-Dimension::Type pdalType(arrow::Type::type t)
+inline Dimension::Type pdalType(arrow::Type::type t)
 {
     switch (t)
     {

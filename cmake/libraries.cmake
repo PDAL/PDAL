@@ -1,10 +1,13 @@
-# Build shared libraries by default.
-
-if (BUILD_SHARED_LIBS)
-  set(PDAL_LIB_TYPE "SHARED")
-else ()
-  set(PDAL_LIB_TYPE "STATIC")
+set(PDAL_LIB_TYPE "SHARED" CACHE STRING "PDAL library object output build type")
+if (NOT BUILD_SHARED_LIBS)
+    set(PDAL_LIB_TYPE "STATIC" CACHE STRING
+        "PDAL library object output build type" FORCE)
+else()
+    set(PDAL_LIB_TYPE "SHARED" CACHE STRING
+        "PDAL library object output build type" FORCE)
 endif ()
+set_property(CACHE PDAL_LIB_TYPE PROPERTY STRINGS "STATIC" "SHARED")
+
 if (WIN32)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_IMPORT_LIBRARY_SUFFIX})
 endif()

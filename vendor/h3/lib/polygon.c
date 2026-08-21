@@ -126,7 +126,7 @@ bool cellBoundaryInsidePolygon(const GeoPolygon *geoPolygon, const BBox *bboxes,
                                   // that using const LatLng[] here discards
                                   // qualifiers. But this should be safe in
                                   // context, all downstream usage expects const
-                                  .verts = (LatLng *)boundary->verts};
+                                  .verts = boundary->verts};
 
     // Check for line intersections with, or containment of, any hole
     for (int i = 0; i < geoPolygon->numHoles; i++) {

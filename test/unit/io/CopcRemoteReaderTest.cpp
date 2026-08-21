@@ -87,7 +87,6 @@ void testURLs(const std::string& url, const BOX2D& bounds)
 
 TEST(CopcRemoteReaderTest, vsi)
 {
-
     /*
           "maxx": 639003.73,
           "maxy": 853534.37,
@@ -103,8 +102,6 @@ TEST(CopcRemoteReaderTest, vsi)
 
     testURLs(url, bounds);
     testURLs(vsi, bounds);
-
-
 }
 
 } // namespace pdal

@@ -97,8 +97,8 @@ validate_schema_schema
 
 : Boolean value determining if schema documents referenced by STAC schemas
   should also be validated. Set this to false to avoid resolving remote JSON
-  Schema metaschemas such as `json-schema.org` while still validating STAC
-  objects.
+  Schema metaschemas such as `json-schema.org` or `geojson.org` while still
+  validating STAC objects.
 
 properties
 

@@ -55,10 +55,11 @@ macro(PDAL_ADD_LIBRARY _name)
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
     pdal_lib_compile_settings(${_name})
-    if (NOT ${_library_type} STREQUAL "STATIC")
+    if (PDAL_LIB_TYPE STREQUAL "SHARED")
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
     else ()
-       set_target_properties(${_name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        target_compile_definitions(${_name} PUBLIC PDAL_STATIC_BUILD)
+        set_target_properties(${_name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
     target_compile_features (${_name}
@@ -81,38 +82,12 @@ macro(PDAL_ADD_LIBRARY _name)
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
-# Add a free library target (one that doesn't depend on PDAL).
-# _name The library name.
-# _library_type Shared or static
-# ARGN The source files for the library.
-#
+# Deprecated compatibility stub for external consumers that still check for
+# this macro.
 macro(PDAL_ADD_FREE_LIBRARY _name _library_type _pdal_lib_type)
-    add_library(${_name} ${_library_type} ${ARGN})
-    set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
-    target_include_directories(${_name} PRIVATE
-        ${PDAL_INCLUDE_DIR})
-    pdal_lib_compile_settings(${_name})
-    set_property (TARGET ${_name}
-      PROPERTY
-        # Enable C++17 standard compliance
-        CXX_STANDARD 17
-    )
-
-    if (${_library_type} STREQUAL "STATIC")
-      set_target_properties(${_name} PROPERTIES
-        POSITION_INDEPENDENT_CODE TRUE)
-    endif ()
-
-    # Don't install static libraries - they're already built into libpdalXXX
-    # Unless pdal is built statically
-    if (NOT ${_library_type} STREQUAL "STATIC" OR ${_pdal_lib_type} STREQUAL "STATIC")
-        target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
-        install(TARGETS ${_name}
-            EXPORT PDALTargets
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    endif ()
+    message(DEPRECATION
+        "PDAL_ADD_FREE_LIBRARY is deprecated and no longer creates a target. "
+        "Use standard CMake target commands instead.")
 endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################
@@ -142,6 +117,11 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} ${PDAL_LIB_TYPE} ${PDAL_ADD_PLUGIN_FILES})
+    set_property(GLOBAL APPEND PROPERTY PDAL_PLUGIN_TARGETS ${${_name}})
+    if ("${_type}" STREQUAL "kernel")
+        set_property(GLOBAL APPEND PROPERTY PDAL_KERNEL_PLUGIN_TARGETS
+            ${${_name}})
+    endif()
     pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
@@ -153,11 +133,71 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         # Enable C++17 standard compliance
         CXX_STANDARD 17
     )
-    target_compile_definitions(${${_name}} PRIVATE PDAL_DLL_EXPORT)
+    if (PDAL_LIB_TYPE STREQUAL "SHARED")
+        target_compile_definitions(${${_name}} PRIVATE PDAL_DLL_EXPORT)
+    else()
+        target_compile_definitions(${${_name}} PRIVATE PDAL_STATIC_BUILD)
+        set_target_properties(${${_name}} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        set(_pdal_static_plugin_symbols)
+        foreach(_pdal_plugin_file IN LISTS PDAL_ADD_PLUGIN_FILES)
+            if (IS_ABSOLUTE "${_pdal_plugin_file}")
+                set(_pdal_plugin_path "${_pdal_plugin_file}")
+            else()
+                set(_pdal_plugin_path
+                    "${CMAKE_CURRENT_SOURCE_DIR}/${_pdal_plugin_file}")
+            endif()
+            if (EXISTS "${_pdal_plugin_path}")
+                file(READ "${_pdal_plugin_path}" _pdal_plugin_contents)
+                string(REGEX MATCHALL
+                    "CREATE_SHARED_(STAGE|KERNEL)\\([ \t\r\n]*[A-Za-z_][A-Za-z0-9_]*"
+                    _pdal_static_stage_matches
+                    "${_pdal_plugin_contents}")
+                foreach(_pdal_static_stage_match IN LISTS
+                    _pdal_static_stage_matches)
+                    string(REGEX REPLACE
+                        ".*\\([ \t\r\n]*([A-Za-z_][A-Za-z0-9_]*).*"
+                        "pdal_static_plugin_registration_\\1"
+                        _pdal_static_plugin_symbol
+                        "${_pdal_static_stage_match}")
+                    list(APPEND _pdal_static_plugin_symbols
+                        ${_pdal_static_plugin_symbol})
+                endforeach()
+                string(REGEX MATCHALL
+                    "CREATE_SHARED_PLUGIN\\([^,]+,[^,]+,[ \t\r\n]*[A-Za-z_][A-Za-z0-9_]*"
+                    _pdal_static_plugin_matches
+                    "${_pdal_plugin_contents}")
+                foreach(_pdal_static_plugin_match IN LISTS
+                    _pdal_static_plugin_matches)
+                    string(REGEX REPLACE
+                        ".*,[ \t\r\n]*([A-Za-z_][A-Za-z0-9_]*).*"
+                        "pdal_static_plugin_registration_\\1"
+                        _pdal_static_plugin_symbol
+                        "${_pdal_static_plugin_match}")
+                    list(APPEND _pdal_static_plugin_symbols
+                        ${_pdal_static_plugin_symbol})
+                endforeach()
+            endif()
+        endforeach()
+        if (_pdal_static_plugin_symbols)
+            list(REMOVE_DUPLICATES _pdal_static_plugin_symbols)
+            set_target_properties(${${_name}} PROPERTIES
+                PDAL_STATIC_PLUGIN_REGISTRATION_SYMBOLS
+                    "${_pdal_static_plugin_symbols}")
+        endif()
+    endif()
     if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
         target_include_directories(${${_name}} SYSTEM PRIVATE
             ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
     endif()
+    set(_pdal_plugin_link_libraries ${PDAL_ADD_PLUGIN_LINK_WITH}
+        ${WINSOCK_LIBRARY})
+    list(REMOVE_ITEM _pdal_plugin_link_libraries
+        ${PDAL_LIB_NAME}
+        PDAL::PDAL
+        ${PDAL_LIBRARIES})
+    set_target_properties(${${_name}} PROPERTIES
+        PDAL_STATIC_PLUGIN_LINK_LIBRARIES
+            "${_pdal_plugin_link_libraries}")
     target_link_libraries(${${_name}}
         PRIVATE
             ${PDAL_LIB_NAME}
@@ -183,6 +223,96 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endmacro(PDAL_ADD_PLUGIN)
+
+###############################################################################
+# Link the PDAL library into an executable.
+#
+# Static stage/kernel registration happens through static initializers in each
+# stage translation unit. Static archives only pull objects that satisfy a
+# referenced symbol, so static PDAL consumers must whole-archive pdalcpp to make
+# every built-in registration initializer available at runtime.
+function(PDAL_TARGET_LINK_PDAL _target _scope)
+    if (PDAL_LIB_TYPE STREQUAL "STATIC")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+            target_link_libraries(${_target}
+                ${_scope}
+                    "$<LINK_LIBRARY:WHOLE_ARCHIVE,${PDAL_LIB_NAME}>")
+        elseif(MSVC)
+            target_link_libraries(${_target}
+                ${_scope}
+                    ${PDAL_LIB_NAME})
+            target_link_options(${_target}
+                ${_scope}
+                    "LINKER:/WHOLEARCHIVE:$<TARGET_FILE:${PDAL_LIB_NAME}>")
+        elseif(APPLE)
+            target_link_libraries(${_target}
+                ${_scope}
+                    ${PDAL_LIB_NAME})
+            target_link_options(${_target}
+                ${_scope}
+                    "LINKER:-force_load,$<TARGET_FILE:${PDAL_LIB_NAME}>")
+        else()
+            target_link_libraries(${_target}
+                ${_scope}
+                    "-Wl,--whole-archive"
+                    ${PDAL_LIB_NAME}
+                    "-Wl,--no-whole-archive")
+        endif()
+    else()
+        target_link_libraries(${_target}
+            ${_scope}
+                ${PDAL_LIB_NAME})
+    endif()
+endfunction()
+
+###############################################################################
+# Link libraries into a target. Static plugin registration anchors are kept
+# undefined until link time so only the registration objects are pulled from
+# static plugin archives.
+function(PDAL_TARGET_LINK_STATIC_PLUGINS _target _scope)
+    foreach(_library IN LISTS ARGN)
+        set(_registration_symbols)
+        if (PDAL_LIB_TYPE STREQUAL "STATIC" AND TARGET ${_library})
+            add_dependencies(${_target} ${_library})
+            get_target_property(_registration_symbols ${_library}
+                PDAL_STATIC_PLUGIN_REGISTRATION_SYMBOLS)
+            if (NOT _registration_symbols)
+                set(_registration_symbols)
+            endif()
+            foreach(_registration_symbol IN LISTS _registration_symbols)
+                if (MSVC)
+                    target_link_options(${_target}
+                        ${_scope}
+                            "LINKER:/INCLUDE:${_registration_symbol}")
+                elseif(APPLE)
+                    target_link_options(${_target}
+                        ${_scope}
+                            "LINKER:-u,_${_registration_symbol}")
+                else()
+                    target_link_options(${_target}
+                        ${_scope}
+                            "LINKER:-u,${_registration_symbol}")
+                endif()
+            endforeach()
+
+            target_link_libraries(${_target}
+                ${_scope}
+                    "$<TARGET_FILE:${_library}>")
+
+            get_target_property(_plugin_link_libraries ${_library}
+                PDAL_STATIC_PLUGIN_LINK_LIBRARIES)
+            if (_plugin_link_libraries)
+                target_link_libraries(${_target}
+                    ${_scope}
+                        ${_plugin_link_libraries})
+            endif()
+        else()
+            target_link_libraries(${_target}
+                ${_scope}
+                    ${_library})
+        endif()
+    endforeach()
+endfunction()
 
 ###############################################################################
 # Add a test target.
@@ -231,11 +361,11 @@ macro(PDAL_ADD_TEST _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name}
         PRIVATE
-            ${PDAL_LIB_NAME}
             GTest::gtest
-            ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
+    PDAL_TARGET_LINK_STATIC_PLUGINS(${_name} PRIVATE ${PDAL_ADD_TEST_LINK_WITH})
+    PDAL_TARGET_LINK_PDAL(${_name} PRIVATE)
     foreach(_include IN LISTS PDAL_ADD_TEST_INCLUDES)
         if(TARGET ${_include})
             target_include_directories(${_name} PRIVATE $<TARGET_PROPERTY:${_include},INTERFACE_INCLUDE_DIRECTORIES>)
@@ -251,11 +381,18 @@ macro(PDAL_ADD_TEST _name)
             "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
     # Ensure plugins are loaded from build dir
     # https://github.com/PDAL/PDAL/issues/840
+    set(_pdal_test_environment)
     if (WIN32)
-        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        list(APPEND _pdal_test_environment
             "PDAL_DRIVER_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
     else()
-        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        list(APPEND _pdal_test_environment
             "PDAL_DRIVER_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+        if (APPLE AND PDAL_LIB_TYPE STREQUAL "SHARED")
+            list(APPEND _pdal_test_environment
+                "DYLD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}:$ENV{DYLD_LIBRARY_PATH}")
+        endif()
     endif()
+    set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        ${_pdal_test_environment})
 endmacro(PDAL_ADD_TEST)

@@ -37,13 +37,28 @@ if(NOT USE_EXTERNAL_GTEST)
 endif()
 PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 
+if (PDAL_LIB_TYPE STREQUAL "STATIC")
+    set(PDAL_TEST_FILESPEC_SRC)
+    set(PDAL_TEST_H3_SRCS)
+    set(PDAL_TEST_MATHUTILS_SRC)
+    set(PDAL_TEST_OBB_SRC)
+    set(PDAL_TEST_OGRSPEC_SRC)
+    set(PDAL_TEST_VSIIO_SRC)
+else()
+    set(PDAL_TEST_FILESPEC_SRC ${PDAL_SRC_DIR}/FileSpec.cpp)
+    set(PDAL_TEST_H3_SRCS ${H3_SRCS})
+    set(PDAL_TEST_MATHUTILS_SRC ${PDAL_SRC_DIR}/private/MathUtils.cpp)
+    set(PDAL_TEST_OBB_SRC ${PDAL_IO_DIR}/private/esri/Obb.cpp)
+    set(PDAL_TEST_OGRSPEC_SRC ${PDAL_SRC_DIR}/private/OGRSpec.cpp)
+    set(PDAL_TEST_VSIIO_SRC ${PDAL_SRC_DIR}/util/VSIIO.cpp)
+endif()
+
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
-        ${PDAL_SRC_DIR}/private/MathUtils.cpp
-
+        ${PDAL_TEST_MATHUTILS_SRC}
     INCLUDES
         ${PDAL_VENDOR_EIGEN_DIR}
 )
@@ -51,7 +66,7 @@ PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_io_vsi_test
     FILES
         VSITest.cpp
-        ${PDAL_SRC_DIR}/util/VSIIO.cpp
+        ${PDAL_TEST_VSIIO_SRC}
     LINK_WITH
         GDAL::GDAL
 )
@@ -68,7 +83,7 @@ PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_math_utils_test
     FILES
         MathUtilsTest.cpp
-        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+        ${PDAL_TEST_MATHUTILS_SRC}
     INCLUDES
         ${PDAL_VENDOR_EIGEN_DIR}
 )
@@ -93,7 +108,7 @@ PDAL_ADD_TEST(pdal_dimension_test
 PDAL_ADD_TEST(pdal_ogr_arg_test
     FILES
         OGRSpecTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_TEST_OGRSPEC_SRC}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
@@ -102,7 +117,7 @@ PDAL_ADD_TEST(pdal_ogr_arg_test
 PDAL_ADD_TEST(pdal_filespec_test
     FILES
         FileSpecTest.cpp
-        ${PDAL_SRC_DIR}/FileSpec.cpp
+        ${PDAL_TEST_FILESPEC_SRC}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
@@ -182,7 +197,7 @@ PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_stac_reader_test
     FILES
         io/StacReaderTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_TEST_OGRSPEC_SRC}
     INCLUDES
         ${PDAL_VENDOR_DIR}
         ${NLOHMANN_INCLUDE_DIR}
@@ -190,7 +205,7 @@ PDAL_ADD_TEST(pdal_io_stac_reader_test
 PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_TEST_OGRSPEC_SRC}
     INCLUDES
         GDAL::GDAL
         ${NLOHMANN_INCLUDE_DIR}
@@ -204,14 +219,14 @@ PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
 PDAL_ADD_TEST(pdal_io_copc_reader_test
     FILES
         io/CopcReaderTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_TEST_OGRSPEC_SRC}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
     FILES
         io/CopcRemoteReaderTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_TEST_OGRSPEC_SRC}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
@@ -315,8 +330,8 @@ PDAL_ADD_TEST(pdal_io_slpk_reader_test
 PDAL_ADD_TEST(pdal_i3s_obb_test
     FILES
         io/ObbTest.cpp
-        ${PDAL_IO_DIR}/private/esri/Obb.cpp
-        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+        ${PDAL_TEST_OBB_SRC}
+        ${PDAL_TEST_MATHUTILS_SRC}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_INCLUDE_DIR}
@@ -363,7 +378,7 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+        ${PDAL_TEST_OGRSPEC_SRC}
     INCLUDES
         GDAL::GDAL
         ${NLOHMANN_INCLUDE_DIR}
@@ -462,13 +477,12 @@ PDAL_ADD_TEST(pdal_filters_splitter_test
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
-    PDAL_ADD_TEST(pdal_filters_hexbin_test
+PDAL_ADD_TEST(pdal_filters_hexbin_test
     FILES
         filters/HexbinFilterTest.cpp
+        ${PDAL_TEST_H3_SRCS}
     INCLUDES
         ${PDAL_VENDOR_DIR}/h3/include
-    LINK_WITH
-        ${PDAL_H3_LIB_NAME}
 )
 target_compile_definitions(pdal_filters_hexbin_test
     PRIVATE
@@ -481,6 +495,12 @@ PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilter
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
+if (TARGET pdal)
+    add_dependencies(pdal_app_plugin_test pdal)
+endif()
+if (TARGET pdal_plugin_kernel_fauxplugin)
+    add_dependencies(pdal_app_plugin_test pdal_plugin_kernel_fauxplugin)
+endif()
 PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
 

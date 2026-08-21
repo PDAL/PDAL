@@ -43,6 +43,9 @@ namespace pdal
 
 class FileSpec;
 
+// This class provides access to FileSpec with JSON input -- it allows
+// NL::json to be used as an argument without including any reference
+// to it in FileSpec.
 class FileSpecHelper
 {
 public:

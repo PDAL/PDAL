@@ -33,7 +33,6 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
     LINK_WITH
         ${NITRO_LIBRARIES}
         GDAL::GDAL
-        ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_LIBRARIES}
 )
 if (WIN32)
@@ -54,7 +53,6 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${NITRO_LIBRARIES}
         GDAL::GDAL
         ${PDAL_LIBRARIES}
-        ${PDAL_ARBITER_LIB_NAME}
 )
 if (WIN32)
     target_compile_definitions(${writer_libname}

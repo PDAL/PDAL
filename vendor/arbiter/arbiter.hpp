@@ -3882,7 +3882,7 @@ public:
      * @param path Path with the type-specifying prefix information stripped.
      */
     virtual std::vector<char> put(
-        std::string path, 
+        std::string path,
         const std::vector<char>& data) const = 0;
 
     /** True for remote paths, otherwise false.  If `true`, a fs::LocalHandle
@@ -5397,7 +5397,7 @@ public:
 
     /** Write data to path. */
     std::vector<char> put(
-            std::string path, 
+            std::string path,
             const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if
