@@ -49,7 +49,7 @@ namespace
 {
 
 void compareArrowLasStreaming(const std::string& pcdFilename,
-                            const std::string& lasFilename)
+                            const std::string& lasFilename, bool compareSRS=false)
 {
     std::string tempname(Support::temppath("testlas.las"));
 
@@ -93,6 +93,8 @@ void compareArrowLasStreaming(const std::string& pcdFilename,
     PointViewPtr v2 = *s2.begin();
 
     EXPECT_EQ(v1->size(), v2->size());
+    if (compareSRS)
+        EXPECT_EQ(v1->spatialReference(), v2->spatialReference());
 
     // Validate some point data.
     for (PointId i = 0; i < v1->size(); ++i)
@@ -128,24 +130,22 @@ TEST(ArrowParquetReaderTest, ReadingPoints_GeoParquetPrimaryColumn)
                              Support::datapath("las/1.2-with-color.las"));
 }
 
-TEST(ArrowParquetReaderTest, SRS)
+TEST(ArrowParquetReaderTest, ReadingPoints_GeoParquetV2)
 {
-    ArrowReader m_reader;
-    Options options;
-    options.add("filename", Support::datapath("arrow/autzen-utm.parquet"));
-    m_reader.setOptions(options);
+    compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color_v2.parquet"),
+                             Support::datapath("las/1.2-with-color.las"));
+}
 
-    PointTable table;
-    m_reader.prepare(table);
-    PointViewSet viewSet = m_reader.execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
+TEST(ArrowParquetReaderTest, ReadingPoints_SRS)
+{
+    compareArrowLasStreaming(Support::datapath("arrow/autzen-utm.parquet"),
+                             Support::datapath("autzen/autzen-utm.las"), true);
+}
 
-    //number of points
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065u);
-
-    const SpatialReference utm10("EPSG:26910");
-    EXPECT_EQ(m_reader.getSpatialReference(), utm10);
+TEST(ArrowParquetReaderTest, ReadingPoints_SRS_GeoParquetV2)
+{
+    compareArrowLasStreaming(Support::datapath("arrow/autzen-utm_v2.parquet"),
+                             Support::datapath("autzen/autzen-utm.las"), true);
 }
 
 } // namespace pdal

@@ -131,6 +131,7 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
 
         log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
 
+        //!! the geoarrow_dimension_name arg doesn't override this, maybe it should (if set)
         m_geoArrowDimName = primary_column;
 
         if (!column.contains("crs"))
