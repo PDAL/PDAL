@@ -136,8 +136,8 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
 
         if (!column.contains("crs"))
         {
-            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to 4326" << std::endl;
-            setSpatialReference("EPSG:4326");
+            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to CRS84" << std::endl;
+            setSpatialReference("OGC:CRS84");
             return;
         }
 
@@ -149,7 +149,15 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
         }
         else if (crs.is_string())
         {
-            ref.set(column["crs"].get<std::string>());
+            std::string crsStr = column["crs"].get<std::string>();
+            if (Utils::tolower(crsStr) == "srid:0")
+                ref.set("OGC:CRS84");
+            else
+                ref.set(crsStr);
+        }
+        else if (crs.is_null())
+        {
+            ref.set("OGC:CRS84");
         }
 
         if (column.contains("epoch"))

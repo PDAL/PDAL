@@ -130,6 +130,13 @@ TEST(ArrowParquetReaderTest, ReadingPoints_GeoParquetPrimaryColumn)
                              Support::datapath("las/1.2-with-color.las"));
 }
 
+TEST(ArrowParquetReaderTest, ReadingPoints_GeoParquetV1x)
+{
+    compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color_v1.parquet"),
+                             Support::datapath("las/1.2-with-color.las"));
+ 
+}
+
 TEST(ArrowParquetReaderTest, ReadingPoints_GeoParquetV2)
 {
     compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color_v2.parquet"),

@@ -370,7 +370,19 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
         { "encoding", "WKB" },
         { "geometry_types", { "Point Z" } }
     };
-    column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
+
+    // GeoParquet 1.x: null SRS should be null
+    // GeoParquet 2.0: null SRS should be "srid:0"
+    NL::json crs;
+    if (ref.empty())
+    {
+        if (m_version == arrowsupport::GeoParquet20)
+            column.update({{ "crs", "srid:0" }});
+        else
+            column.update({{ "crs", nullptr }});
+    }
+    else
+        column.update(getPROJJSON(ref));
 
     NL::json wkb;
     wkb[m_geoDimensionName] = column;
@@ -402,7 +414,7 @@ arrowsupport::GroupNodePtr ArrowWriter::applyGeoType(
             continue;
         }
 
-        // Parquet standard for unknown geometries. Doesn't match with the geo metadata.
+        // Parquet standard for unknown geometries.
         std::string crs = ref.empty() ? "srid:0" : ref.getPROJJSON();
 
         std::shared_ptr<const parquet::LogicalType> logicalType = ref.isGeographic()
