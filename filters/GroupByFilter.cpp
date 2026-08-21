@@ -35,20 +35,20 @@
 #include "GroupByFilter.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
-{
+static StaticPluginInfo const s_info{
     "filters.groupby",
     "Split data categorically by dimension.",
-    "https://pdal.org/stages/filters.groupby.html"
+    "https://pdal.org/stages/filters.groupby.html",
 };
+
 CREATE_STATIC_STAGE(GroupByFilter, s_info)
 
-GroupByFilter::GroupByFilter() : m_viewMap()
-{}
+GroupByFilter::GroupByFilter() : m_viewMap() {}
 
 std::string GroupByFilter::getName() const
 {
@@ -57,36 +57,63 @@ std::string GroupByFilter::getName() const
 
 void GroupByFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension containing data to be grouped", m_dimName);
+    args.add("dimension", "1 or more dimensions by which to group data",
+             m_dimNames);
 }
 
 void GroupByFilter::prepared(PointTableRef table)
 {
+    StringList badNames;
     PointLayoutPtr layout(table.layout());
-    m_dimId = layout->findDim(m_dimName);
-    if (m_dimId == Dimension::Id::Unknown)
-        throwError("Invalid dimension name '" + m_dimName + "'.");
-    // also need to check that we have a dimension with discrete values
+
+    for (const auto& name : m_dimNames)
+    {
+        auto id = layout->findDim(name);
+        if (id == Dimension::Id::Unknown)
+            badNames.push_back(name);
+        else
+            m_dimIds.push_back(id);
+
+        // TODO also check that dimensions are discrete valued (ints?)
+    }
+
+    if (!badNames.empty())
+    {
+        std::stringstream showBad;
+        for (const auto& name : badNames)
+            showBad << name << " ";
+        throwError("Invalid dimension name(s): " + showBad.str());
+    }
 }
 
 PointViewSet GroupByFilter::run(PointViewPtr inView)
 {
-    PointViewSet viewSet;
+    // note that the order of output viewsets is determined by the sorted order
+    // of their m_id. this comes from a global counter. thus the first view
+    // created from the first-encountered group has the lowest m_id.
 
+    // create groups by hashing dimension values into a key
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        int64_t val = inView->getFieldAs<int64_t>(m_dimId, idx);
-        PointViewPtr& outView = m_viewMap[val];
-        if (!outView)
-            outView = inView->makeNew();
-        outView->appendPoint(*inView.get(), idx);
+        size_t key = 0;
+        for (const auto& dimId : m_dimIds)
+        {
+            int64_t val = inView->getFieldAs<int64_t>(dimId, idx);
+            Utils::hashCombine(key, val);
+        }
+
+        PointViewPtr& groupView = m_viewMap[key];
+        if (!groupView)
+            groupView = inView->makeNew();
+        groupView->appendPoint(*inView.get(), idx);
     }
 
-    // Pull the buffers out of the map and stick them in the standard
-    // output set.
-    for (auto bi = m_viewMap.begin(); bi != m_viewMap.end(); ++bi)
-        viewSet.insert(bi->second);
-    return viewSet;
+    // Transfer grouped pointviews to output set.
+    PointViewSet groupedViewSet;
+    for (const auto& groupKV : m_viewMap)
+        groupedViewSet.insert(groupKV.second);
+
+    return groupedViewSet;
 }
 
-} // pdal
+} // namespace pdal
