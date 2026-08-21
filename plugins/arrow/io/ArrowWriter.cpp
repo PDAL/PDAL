@@ -135,73 +135,21 @@ private:
     std::string m_name;
 };
 
-// Handler for packed XYZ data.
-class XyzHandler : public BaseDimHandler
-{
-public:
-    XyzHandler(arrow::MemoryPool *pool, const std::string& dimName,
-            const std::string& pipelineMetadata) :
-        m_dimName(dimName), m_pipelineMetadata(pipelineMetadata),
-        m_doubleBuilder(std::make_shared<arrow::DoubleBuilder>(pool)),
-        m_builder(pool, m_doubleBuilder, 3)
-    {
-    }
-
-    std::shared_ptr<arrow::Field> field() override
-    {
-        NL::json metadata {
-            { "name", m_dimName },
-            { "description", "Packed XYZ" },
-            { "interpretation", "double[3]" },
-            { "size", 24 }
-        };
-
-        auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
-        if (m_pipelineMetadata.size())
-            kvMetadata->Append("PDAL:pipeline:metadata", m_pipelineMetadata);
-        kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
-
-        return arrow::field("xyz", arrow::fixed_size_list(arrow::float64(), 3), kvMetadata);
-    }
-
-    Utils::StatusWithReason append(const PointRef& point) override
-    {
-        double x = point.getFieldAs<double>(Dimension::Id::X);
-        double y = point.getFieldAs<double>(Dimension::Id::Y);
-        double z = point.getFieldAs<double>(Dimension::Id::Z);
-
-        arrow::Status status = m_builder.Append() &
-            m_doubleBuilder->Append(x) &
-            m_doubleBuilder->Append(y) &
-            m_doubleBuilder->Append(z);
-        if (!status.ok())
-            return { -1, status.message() };
-        return true;
-    }
-
-private:
-    arrow::ArrayBuilder& builder() override
-    { return m_builder; }
-
-private:
-    std::string m_dimName;
-    std::string m_pipelineMetadata;
-    std::shared_ptr<arrow::DoubleBuilder> m_doubleBuilder;
-    arrow::FixedSizeListBuilder m_builder;
-};
 
 // Handler for WKB-encoded XYZ data per GeoParquet specification.
 class WkbHandler : public BaseDimHandler
 {
 public:
-    WkbHandler(arrow::MemoryPool *pool, const std::string& pipelineMetadata = std::string()) :
-        m_pipelineMetadata(pipelineMetadata), m_builder(arrow::fixed_size_binary(29), pool)
+    WkbHandler(arrow::MemoryPool *pool, const std::string& dimName, 
+        const std::string& pipelineMetadata = std::string()) :
+        m_pipelineMetadata(pipelineMetadata), m_dimName(dimName),
+        m_builder(arrow::fixed_size_binary(29), pool)
     {}
 
     FieldPtr field() override
     {
         NL::json metadata {
-            { "name", "wkb" },
+            { "name", m_dimName },
             { "description", "WKB points" },
             { "interpretation", "binary" },
             { "size", 29 }
@@ -209,12 +157,10 @@ public:
 
         auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
         kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");
-        if (m_pipelineMetadata.size())
-            kvMetadata->Append("PDAL:pipeline:metadata", m_pipelineMetadata);
         kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
 
         // Must be binary instead of fixed-length binary to conform to GeoParquet.
-        return arrow::field("wkb", arrow::binary(), kvMetadata);
+        return arrow::field(m_dimName, arrow::binary(), kvMetadata);
     }
 
     // Write XYZ as little-endian encoded well-known binary.
@@ -257,6 +203,7 @@ public:
 
 private:
     std::string m_pipelineMetadata;
+    std::string m_dimName;
     arrow::BinaryBuilder m_builder;
 };
 
@@ -265,7 +212,6 @@ std::string ArrowWriter::getName() const { return s_info.name; }
 
 
 ArrowWriter::ArrowWriter() :
-    m_formatType(arrowsupport::Unknown),
     m_pool(arrow::default_memory_pool()),
     m_batchIndex(0)
 {
@@ -276,14 +222,21 @@ ArrowWriter::~ArrowWriter()
 
 void ArrowWriter::initialize()
 {
-    std::string ext = Utils::tolower(FileUtils::extension(filename()));
-    if (Utils::iequals("feather", m_formatString) || ext == ".feather")
-        m_formatType = arrowsupport::Feather;
-    if (Utils::iequals("parquet", m_formatString) || ext == ".parquet")
-        m_formatType = arrowsupport::Parquet;
+    using namespace arrowsupport;
 
-    if (m_formatType == arrowsupport::Unknown)
-        throwError("Unknown format '" + m_formatString + "' provided. Unable to write array");
+    StringList versionNums = Utils::split(m_geoParquetVersionString, '.');
+    int majorVersion = std::stoi(versionNums[0]);
+    int minorVersion = std::stoi(versionNums[1]);
+
+    if (majorVersion == 1 && minorVersion == 0)
+        m_version = ParquetVersion::GeoParquet10;
+    else if (majorVersion == 1 && minorVersion == 1)
+        m_version = ParquetVersion::GeoParquet11;
+    else if (majorVersion == 2)
+        m_version = ParquetVersion::GeoParquet20;
+    else
+        throwError("Invalid GeoParquet version string: '" +
+            m_geoParquetVersionString + "'. Expected 1.0.0, 1.1.0 or 2.0.0");
 
     auto result = arrow::io::FileOutputStream::Open(filename(), /*append=*/false);
     if (result.ok())
@@ -325,14 +278,14 @@ NL::json getPROJJSON(const pdal::SpatialReference& ref)
 
 void ArrowWriter::addArgs(ProgramArgs& args)
 {
-    args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString,
-        "feather");
-    args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct "
-        "(Feather output only)", m_geoArrowDimensionName, "xyz");
+    //args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString,
+    //    "feather");
+    args.add("geo_dimension_name", "Dimension name for Parquet geometry column",
+        m_geoDimensionName, "geometry");
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 4);
-    args.add("write_pipeline_metadata", "Write PDAL metadata to schema",
+    args.add("write_pipeline_metadata", "Write PDAL metadata to file metadata",
         m_writePipelineMetadata, true);
-    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
+    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersionString, "1.0.0");
 }
 
 void ArrowWriter::prepared(PointTableRef table)
@@ -345,16 +298,10 @@ void ArrowWriter::prepared(PointTableRef table)
     std::string pipelineMetadata;
     if (m_writePipelineMetadata)
         pipelineMetadata = Utils::toJSON(table.metadata());
-
-    // For Parquet, the WKB column is the GeoParquet-spec geometry column and is
-    // sufficient on its own, so the packed GeoArrow xyz struct is redundant and
-    // not written. For Feather, there's no WKB column, so xyz is the only
-    // geometry representation.
-    if (m_formatType == arrowsupport::Parquet)
-        m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool, pipelineMetadata));
-    else
-        m_dimHandlers.push_back(std::make_unique<XyzHandler>(m_pool, m_geoArrowDimensionName,
-            pipelineMetadata));
+    // For Parquet, the WKB column is the GeoParquet-spec geometry column. The 
+    // packed GeoArrow xyz struct is no longer written
+    m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool, m_geoDimensionName,
+        pipelineMetadata));
     for (Id id : table.layout()->dims())
     {
         // Aready taken care of.
@@ -407,10 +354,7 @@ void ArrowWriter::ready(PointTableRef table)
 
     m_schema.reset(new arrow::Schema(fields));
 
-    if (m_formatType == arrowsupport::Parquet)
-        setupParquet(table);
-    else if (m_formatType == arrowsupport::Feather)
-        setupFeather(table);
+    setupParquet(table);
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -420,26 +364,69 @@ void ArrowWriter::write(const PointViewPtr view)
 }
 
 void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
-    const SpatialReference& ref)
+    const SpatialReference& ref, const std::string& pipelineMetadata)
 {
     NL::json column = {
         { "encoding", "WKB" },
-        { "geometry_types", { "Point" } }
+        { "geometry_types", { "Point Z" } }
     };
-    column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
+
+    // GeoParquet 1.x: null SRS should be null
+    // GeoParquet 2.0: null SRS should be "srid:0"
+    NL::json crs;
+    if (ref.empty())
+    {
+        if (m_version == arrowsupport::GeoParquet20)
+            column.update({{ "crs", "srid:0" }});
+        else
+            column.update({{ "crs", nullptr }});
+    }
+    else
+        column.update(getPROJJSON(ref));
 
     NL::json wkb;
-    wkb["wkb"] = column;
+    wkb[m_geoDimensionName] = column;
 
     NL::json geo {
-        { "version", m_geoParquetVersion },
-        { "primary_column", "wkb" },
+        { "version", m_geoParquetVersionString },
+        { "primary_column", m_geoDimensionName },
         { "columns", wkb }
     };
 
     input->Append("geo", geo.dump(-1));
+    //!! add to geo or stay separate?
+    if (pipelineMetadata.size())
+        input->Append("PDAL:pipeline:metadata", pipelineMetadata);
 }
 
+// Rebuilds the parquet schema, assigning the geometry/geography parquet logical
+// type to the geom field
+arrowsupport::GroupNodePtr ArrowWriter::applyGeoType(
+    const arrowsupport::GroupNodePtr& root, const SpatialReference& ref)
+{
+    parquet::schema::NodeVector fields;
+    for (int i = 0; i < root->field_count(); ++i)
+    {
+        auto child = root->field(i);
+        if (child->name() != m_geoDimensionName)
+        {
+            fields.push_back(child);
+            continue;
+        }
+
+        // Parquet standard for unknown geometries.
+        std::string crs = ref.empty() ? "srid:0" : ref.getPROJJSON();
+
+        std::shared_ptr<const parquet::LogicalType> logicalType = ref.isGeographic()
+            ? parquet::LogicalType::Geography(crs) : parquet::LogicalType::Geometry(crs);
+
+        fields.push_back(parquet::schema::PrimitiveNode::Make(
+            child->name(), child->repetition(), logicalType, parquet::Type::BYTE_ARRAY));
+    }
+
+    return std::static_pointer_cast<parquet::schema::GroupNode>(
+        parquet::schema::GroupNode::Make(root->name(), root->repetition(), fields));
+}
 
 void ArrowWriter::setupParquet(PointTableRef table)
 {
@@ -464,6 +451,10 @@ void ArrowWriter::setupParquet(PointTableRef table)
 
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
+    // If it's a geoparquet 2.0 file, we need to rebuild the schema node to mark
+    // the output as geometry type
+    if (m_version == arrowsupport::ParquetVersion::GeoParquet20)
+        schema_node = applyGeoType(schema_node, table.spatialReference());
 
     m_poKeyValueMetadata = m_schema->metadata()
                          ? m_schema->metadata()->Copy()
@@ -483,7 +474,12 @@ void ArrowWriter::setupParquet(PointTableRef table)
             ->Append(kArrowSchemaKey, schema_base64);
     }
 
-    gatherParquetGeoMetadata(m_poKeyValueMetadata, table.spatialReference());
+    std::string pipelineMetadata;
+    if (m_writePipelineMetadata)
+        pipelineMetadata = Utils::toJSON(table.metadata());
+
+    gatherParquetGeoMetadata(m_poKeyValueMetadata, table.spatialReference(),
+        pipelineMetadata);
     m_schema = m_schema->WithMetadata(m_poKeyValueMetadata);
     m_poKeyValueMetadata = m_schema->metadata()->Copy();
 
@@ -505,17 +501,6 @@ void ArrowWriter::setupParquet(PointTableRef table)
 }
 
 
-void ArrowWriter::setupFeather(PointTableRef table)
-{
-    auto result = arrow::ipc::MakeFileWriter(m_file.get(), m_schema);
-    if (result.ok())
-        m_arrowFileWriter = result.ValueOrDie();
-    else
-        throwError("Unable to open '" + filename() + "' for arrow output with error " +
-            result.status().ToString());
-}
-
-
 void ArrowWriter::flushBatch()
 {
     std::vector<std::shared_ptr<arrow::Array>> arrays;
@@ -530,29 +515,18 @@ void ArrowWriter::flushBatch()
         arrays.push_back(std::move(array));
     }
 
-    if (m_formatType == arrowsupport::Parquet)
+    auto result = m_parquetFileWriter->NewRowGroup();
+
+    if (!result.ok())
+        throwError("Unable to make NewRowGroup: " + result.ToString());
+
+    for (auto& array: arrays)
     {
-        auto result = m_parquetFileWriter->NewRowGroup();
-
+        result = m_parquetFileWriter->WriteColumnChunk(*array);
         if (!result.ok())
-            throwError("Unable to make NewRowGroup: " + result.ToString());
-
-        for (auto& array: arrays)
-        {
-            result = m_parquetFileWriter->WriteColumnChunk(*array);
-            if (!result.ok())
-                throwError("Unable to make WriteColumnChunk: " + result.ToString());
-        }
+            throwError("Unable to make WriteColumnChunk: " + result.ToString());
     }
-    else  // Feather
-    {
-        std::shared_ptr<arrow::RecordBatch> batch =
-            arrow::RecordBatch::Make(m_schema, m_batchIndex, arrays);
 
-        auto result = m_arrowFileWriter->WriteRecordBatch(*batch);
-        if (!result.ok())
-            throwError("Unable to write arrow batch" + result.ToString());
-    }
     m_batchIndex = 0;
 }
 
@@ -562,28 +536,13 @@ void ArrowWriter::done(PointTableRef table)
     // flush our final batch
     flushBatch();
 
-    if (m_formatType == arrowsupport::Feather)
-    {
-        auto result = m_arrowFileWriter->Close();
-        if (!result.ok())
-            throwError("Unable to open to close file writer for file '" + filename() +
-                "' for with error: " + result.ToString());
-        result = m_file->Close();
-        if (!result.ok())
-            throwError("Unable to open to write feather table for file '" + filename() +
-                "' with error: " + result.ToString());
-    }
+    auto result = m_parquetFileWriter->Close();
+    if (!result.ok())
+        throwError("Unable to close FileWriter: " + result.ToString());
 
-    if (m_formatType == arrowsupport::Parquet)
-    {
-        auto result = m_parquetFileWriter->Close();
-        if (!result.ok())
-            throwError("Unable to close FileWriter: " + result.ToString());
-
-        result = m_file->Close();
-        if (!result.ok())
-            throwError("Unable to close file: " + result.ToString());
-    }
+    result = m_file->Close();
+    if (!result.ok())
+        throwError("Unable to close file: " + result.ToString());
 
     log()->get(LogLevel::Debug) << "total memory allocated "
                                 << m_pool->bytes_allocated() << std::endl;
