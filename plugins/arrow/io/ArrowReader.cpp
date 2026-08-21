@@ -149,17 +149,13 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
         }
         else if (crs.is_string())
         {
+            // Setting an empty CRS if it's explicitly undefined
             std::string crsStr = column["crs"].get<std::string>();
-            if (Utils::tolower(crsStr) == "srid:0")
-                ref.set("OGC:CRS84");
-            else
+            if (Utils::tolower(crsStr) != "srid:0")
                 ref.set(crsStr);
         }
-        else if (crs.is_null())
-        {
-            ref.set("OGC:CRS84");
-        }
-
+        // SpatialRef also empty if crs == null
+    
         if (column.contains("epoch"))
         {
             ref.setEpoch(column["epoch"].get<double>());
