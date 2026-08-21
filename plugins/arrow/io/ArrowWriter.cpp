@@ -387,6 +387,33 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
         input->Append("PDAL:pipeline:metadata", pipelineMetadata);
 }
 
+// Rebuilds the parquet schema, assigning the geometry/geography parquet logical
+// type to the geom field
+arrowsupport::GroupNodePtr ArrowWriter::applyGeoType(
+    const arrowsupport::GroupNodePtr& root, const SpatialReference& ref)
+{
+    parquet::schema::NodeVector fields;
+    for (int i = 0; i < root->field_count(); ++i)
+    {
+        auto child = root->field(i);
+        if (child->name() != m_geoDimensionName)
+        {
+            fields.push_back(child);
+            continue;
+        }
+
+        std::string crs = ref.empty() ? std::string() : ref.getPROJJSON();
+
+        std::shared_ptr<const parquet::LogicalType> logicalType = ref.isGeographic()
+            ? parquet::LogicalType::Geography(crs) : parquet::LogicalType::Geometry(crs);
+
+        fields.push_back(parquet::schema::PrimitiveNode::Make(
+            child->name(), child->repetition(), logicalType, parquet::Type::BYTE_ARRAY));
+    }
+
+    return std::static_pointer_cast<parquet::schema::GroupNode>(
+        parquet::schema::GroupNode::Make(root->name(), root->repetition(), fields));
+}
 
 void ArrowWriter::setupParquet(PointTableRef table)
 {
@@ -411,6 +438,10 @@ void ArrowWriter::setupParquet(PointTableRef table)
 
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
+    // If it's a geoparquet 2.0 file, we need to rebuild the schema node to mark
+    // the output as geometry type
+    if (m_version == arrowsupport::ParquetVersion::GeoParquet20)
+        schema_node = applyGeoType(schema_node, table.spatialReference());
 
     m_poKeyValueMetadata = m_schema->metadata()
                          ? m_schema->metadata()->Copy()

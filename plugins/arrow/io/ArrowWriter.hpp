@@ -69,6 +69,8 @@ private:
     virtual void done(PointTableRef table);
     virtual void write(const PointViewPtr view);
 
+    arrowsupport::GroupNodePtr applyGeoType(const arrowsupport::GroupNodePtr& root, 
+        const SpatialReference& ref);
     void setupParquet(PointTableRef table);
     void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
         const SpatialReference& ref, const std::string& pipelineMetadata);
