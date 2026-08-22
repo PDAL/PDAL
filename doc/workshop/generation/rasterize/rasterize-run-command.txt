@@ -1,1 +1,6 @@
-pdal pipeline ./exercises/analysis/dtm/gdal.json
+gdaldem color-relief \
+   ./exercises/analysis/rasterize/local-classification.tif \
+   ./exercises/analysis/rasterize/ramp.txt \
+   ./exercises/analysis/rasterize/classified-color.png \
+   -exact_color_entry \
+   -of PNG

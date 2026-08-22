@@ -167,5 +167,19 @@ $ pdal info ./exercises/translation/csite-dd.laz --all \
 2. PDAL uses {{ PROJ }} library for reprojection. This library includes the
    capability to do both vertical and horizontal datum transformations.
 
+3. PDAL's writers (especially {ref}`writers.las`) use fixed-point arithmetic. If
+   reprojecting to geographic coordinates (Decimal Degrees), you must set
+   high precision scale values (e.g., `0.0000001`) and use `auto` offsets to
+   prevent coordinate truncation.
+
+```bash
+pdal translate input.laz output.laz reprojection \
+    --filters.reprojection.out_srs="EPSG:4326" \
+    --writers.las.scale_x=0.0000001 \
+    --writers.las.scale_y=0.0000001 \
+    --writers.las.offset_x="auto" \
+    --writers.las.offset_y="auto"
+```
+
 [asprs las]: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 [laszip]: http://laszip.org

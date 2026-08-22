@@ -32,7 +32,7 @@ def make_plot(ins, outs):
 
         # histogram the current dimension with 30 bins
         n, bins, patches = ax.hist( dimension, 30,
-                                    density=0,
+                                    
                                     facecolor='grey',
                                     alpha=0.75,
                                     align='mid',
@@ -60,14 +60,21 @@ def make_plot(ins, outs):
     # to filters.programmable and filters.predicate modules that contains
     # a dictionary of arguments that can be explicitly passed into
     # the module by the user. We passed in a filename arg in our `pdal pipeline` call
-    filename = pdalargs['filename'] if 'filename' in pdalargs else 'histogram.png'
-    
+    if 'filename' in pdalargs:
+        filename = pdalargs['filename']
+    else:
+        filename = 'histogram.png'
+
     # open up the filename and write out the
     # bytes of the PNG stored in the BytesIO instance
-    with open(filename, 'wb') as o:
-        o.write(output.getvalue()) 
+    o = open(filename, 'wb')
+    o.write(output.getvalue())
+    o.close()
 
 
     # filters.programmable scripts need to
     # return True to tell the filter it was successful.
     return True
+
+
+
