@@ -90,10 +90,10 @@ void ArrowReader::addArgs(ProgramArgs& args)
 }
 
 
-void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
+bool ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
 {
     if (!kv_metadata)
-        return;
+        return false;
     auto geo = kv_metadata->Get("geo");
     NL::json metadata;
 
@@ -108,21 +108,21 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
         {
             log()->get(LogLevel::Warning) << "unable to parse GeoParquet 'geo' metadata with error '"
                                         << e.what() << "'" << std::endl;
-            return;
+            return false;
         }
 
         if (!metadata.contains("primary_column"))
         {
             log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry"
                                             << std::endl;
-            return;
+            return false;
         }
 
         if (!metadata.contains("columns"))
         {
             log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry"
                                             << std::endl;
-            return;
+            return false;
         }
         NL::json columns = metadata["columns"];
 
@@ -134,39 +134,79 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
         //!! the geoarrow_dimension_name arg doesn't override this, maybe it should (if set)
         m_geoArrowDimName = primary_column;
 
+        SpatialReference ref;
         if (!column.contains("crs"))
         {
-            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to CRS84" << std::endl;
-            setSpatialReference("OGC:CRS84");
-            return;
+            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch "
+                "spatial reference information, setting to CRS84" << std::endl;
+            ref.set("OGC:CRS84");
         }
-
-        SpatialReference ref;
-        NL::json crs = column["crs"];
-        if (crs.is_object())
+        else
         {
-            ref.set(crs.dump());
+            NL::json crs = column["crs"];
+            if (crs.is_object())
+            {
+                ref.set(crs.dump());
+            }
+            else if (crs.is_string())
+            {
+                // Setting an empty CRS if it's explicitly undefined
+                std::string crsStr = column["crs"].get<std::string>();
+                if (Utils::tolower(crsStr) != "srid:0")
+                    ref.set(crsStr);
+            }
+            // SpatialRef also empty if crs == null
+        
+            if (column.contains("epoch"))
+            {
+                ref.setEpoch(column["epoch"].get<double>());
+            }
         }
-        else if (crs.is_string())
-        {
-            // Setting an empty CRS if it's explicitly undefined
-            std::string crsStr = column["crs"].get<std::string>();
-            if (Utils::tolower(crsStr) != "srid:0")
-                ref.set(crsStr);
-        }
-        // SpatialRef also empty if crs == null
-    
-        if (column.contains("epoch"))
-        {
-            ref.setEpoch(column["epoch"].get<double>());
-        }
-
         setSpatialReference(ref);
     } else
     {
         log()->get(LogLevel::Warning) << "unable to fetch GeoArrow metadata with error '"
                                       << geo.status().ToString() << "'" << std::endl;
+        return false;
     }
+    return true;
+}
+
+bool ArrowReader::loadParquetNativeGeom(const parquet::SchemaDescriptor* parquetSchema)
+{
+    int geomIdx = parquetSchema->ColumnIndex(m_geoArrowDimName);
+    if (geomIdx >= 0)
+    {
+        auto maybeGeom = parquetSchema->Column(geomIdx);
+        auto logicalType = maybeGeom->logical_type();
+        if (logicalType->is_geometry() || logicalType->is_geography())
+        {
+            auto geomType = 
+                std::dynamic_pointer_cast<const parquet::GeometryLogicalType>(logicalType);
+
+            std::string crs = geomType->crs();
+            SpatialReference ref;
+            if (!crs.size())
+                ref.set("OGC:CRS84");
+            else if (Utils::tolower(crs) != "srid:0")
+                ref.set(crs);
+
+            setSpatialReference(ref);
+        }
+        else
+        {
+            log()->get(LogLevel::Warning) << "Column '" << m_geoArrowDimName
+                << "' is not of Parquet logical type GEOMETRY or GEOGRAPHY" << std::endl;
+            return false;
+        }
+    }
+    else
+    {
+        log()->get(LogLevel::Warning) << "Could not find column '"
+            << m_geoArrowDimName << "' in Parquet schema" << std::endl;
+        return false;
+    }
+    return true;
 }
 
 void ArrowReader::initialize()
@@ -200,7 +240,13 @@ void ArrowReader::initialize()
     m_arrow_reader = std::move(reader_result).ValueOrDie();
 
     const auto metadata = m_arrow_reader->parquet_reader()->metadata();
-    loadParquetGeoMetadata(metadata->key_value_metadata());
+    // If there is no geoparquet metadata, try to get the geometry from the native
+    // parquet geometry column (specified with the geoArrowDimName arg)
+    if (!loadParquetGeoMetadata(metadata->key_value_metadata()))
+    {
+        if (!loadParquetNativeGeom(metadata->schema()))
+            throwError("Unable to load geometry for file '" + m_filename + "'.");
+    }
 
     // Get the indexes of all row groups
     std::vector<int> rowGroupIds(m_arrow_reader->num_row_groups());

@@ -37,6 +37,7 @@
 
 #include <pdal/StageFactory.hpp>
 #include <io/LasReader.hpp>
+#include <io/BufferReader.hpp>
 #include <io/LasWriter.hpp>
 #include "../io/ArrowReader.hpp"
 #include "Support.hpp"
@@ -153,6 +154,65 @@ TEST(ArrowParquetReaderTest, ReadingPoints_SRS_GeoParquetV2)
 {
     compareArrowLasStreaming(Support::datapath("arrow/autzen-utm_v2.parquet"),
                              Support::datapath("autzen/autzen-utm.las"), true);
+}
+
+// File with no geoparquet "geo" metadata, just native parquet geometry type
+TEST(ArrowParquetReaderTest, ReadingPoints_noMD)
+{
+    ArrowReader r;
+    Options opts;
+    opts.add("filename", Support::datapath("arrow/no-metadata.parquet"));
+    opts.add("geoarrow_dimension_name", "foo");
+    r.addOptions(opts);
+
+    PointTable t;
+    t.layout()->registerDim(Dimension::Id::X);
+    t.layout()->registerDim(Dimension::Id::Y);
+    t.layout()->registerDim(Dimension::Id::Z);
+
+    PointViewPtr v1(new PointView(t));
+    v1->setField(Dimension::Id::X, 0, 1);
+    v1->setField(Dimension::Id::Y, 0, 1);
+    v1->setField(Dimension::Id::Z, 0, 1);
+
+    v1->setField(Dimension::Id::X, 1, 1);
+    v1->setField(Dimension::Id::Y, 1, 2);
+    v1->setField(Dimension::Id::Z, 1, 1);
+
+    v1->setField(Dimension::Id::X, 2, 2);
+    v1->setField(Dimension::Id::Y, 2, 3);
+    v1->setField(Dimension::Id::Z, 2, 4);
+
+    PointTable t2;
+    r.prepare(t2);
+    PointViewSet viewSet = r.execute(t2);
+    PointViewPtr v2 = *viewSet.begin();
+    EXPECT_EQ(v1->size(), v2->size());
+
+    for (PointId i = 0; i < v1->size(); ++i)
+    {
+        EXPECT_DOUBLE_EQ(v1->getFieldAs<float>(Dimension::Id::X, i),
+                         v2->getFieldAs<float>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(v1->getFieldAs<float>(Dimension::Id::Y, i),
+                         v2->getFieldAs<float>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(v1->getFieldAs<float>(Dimension::Id::Z, i),
+                         v2->getFieldAs<float>(Dimension::Id::Z, i));
+    }
+}
+
+TEST(ArrowParquetReaderTest, SRS_noMD)
+{
+    ArrowReader r;
+    Options opts;
+    opts.add("filename", Support::datapath("arrow/no-metadata_utm.parquet"));
+    opts.add("geoarrow_dimension_name", "foo");
+    r.addOptions(opts);
+
+    PointTable table;
+    r.prepare(table);
+    PointViewSet viewSet = r.execute(table);
+    PointViewPtr v = *viewSet.begin();
+    EXPECT_EQ(v->spatialReference(), SpatialReference("EPSG:32610"));
 }
 
 } // namespace pdal

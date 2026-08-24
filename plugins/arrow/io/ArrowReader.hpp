@@ -74,7 +74,8 @@ private:
     bool readNextBatchData();
     bool fillPoint(PointRef& point);
 
-    void loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+    bool loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+    bool loadParquetNativeGeom(const parquet::SchemaDescriptor* parquetSchema);
 
     std::shared_ptr<arrow::io::ReadableFile> m_file;
     std::unique_ptr<::arrow::RecordBatchReader> m_parquetReader;
