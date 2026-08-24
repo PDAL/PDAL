@@ -85,8 +85,10 @@ ArrowReader::ArrowReader()
 void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
-    args.add("geoarrow_dimension_name", "Name of the packed XYZ struct dimension for "
-        "GeoArrow (Feather) input.", m_geoArrowDimName, "xyz");
+    m_geoDimArg = &args.add("geometry_column", "Name of the column from which to "
+        "read Parquet point geometry. Defaults to 'primary_column' from geo metadata "
+        "if not set", m_geoDimName, "xyz");
+    args.addSynonym("geometry_column", "geoarrow_dimension_name");
 }
 
 
@@ -117,6 +119,11 @@ bool ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
                                             << std::endl;
             return false;
         }
+    
+        std::string primary_column = metadata["primary_column"];
+        log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
+        if (!m_geoDimArg->set())
+            m_geoDimName = primary_column;
 
         if (!metadata.contains("columns"))
         {
@@ -125,14 +132,7 @@ bool ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
             return false;
         }
         NL::json columns = metadata["columns"];
-
-        std::string primary_column = metadata["primary_column"];
         NL::json column = metadata["columns"][primary_column];
-
-        log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
-
-        //!! the geoarrow_dimension_name arg doesn't override this, maybe it should (if set)
-        m_geoArrowDimName = primary_column;
 
         SpatialReference ref;
         if (!column.contains("crs"))
@@ -174,7 +174,7 @@ bool ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
 
 bool ArrowReader::loadParquetNativeGeom(const parquet::SchemaDescriptor* parquetSchema)
 {
-    int geomIdx = parquetSchema->ColumnIndex(m_geoArrowDimName);
+    int geomIdx = parquetSchema->ColumnIndex(m_geoDimName);
     if (geomIdx >= 0)
     {
         auto maybeGeom = parquetSchema->Column(geomIdx);
@@ -195,7 +195,7 @@ bool ArrowReader::loadParquetNativeGeom(const parquet::SchemaDescriptor* parquet
         }
         else
         {
-            log()->get(LogLevel::Warning) << "Column '" << m_geoArrowDimName
+            log()->get(LogLevel::Warning) << "Column '" << m_geoDimName
                 << "' is not of Parquet logical type GEOMETRY or GEOGRAPHY" << std::endl;
             return false;
         }
@@ -203,7 +203,7 @@ bool ArrowReader::loadParquetNativeGeom(const parquet::SchemaDescriptor* parquet
     else
     {
         log()->get(LogLevel::Warning) << "Could not find column '"
-            << m_geoArrowDimName << "' in Parquet schema" << std::endl;
+            << m_geoDimName << "' in Parquet schema" << std::endl;
         return false;
     }
     return true;
@@ -241,7 +241,7 @@ void ArrowReader::initialize()
 
     const auto metadata = m_arrow_reader->parquet_reader()->metadata();
     // If there is no geoparquet metadata, try to get the geometry from the native
-    // parquet geometry column (specified with the geoArrowDimName arg)
+    // parquet geometry column (specified with the geoDimName arg)
     if (!loadParquetGeoMetadata(metadata->key_value_metadata()))
     {
         if (!loadParquetNativeGeom(metadata->schema()))
@@ -316,7 +316,7 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
 
         if ((t == arrow::Type::FIXED_SIZE_LIST) || (t == arrow::Type::BINARY))
         {
-            if (Utils::iequals(name, m_geoArrowDimName))
+            if (Utils::iequals(name, m_geoDimName))
             {
                 layout->registerDim(pdal::Dimension::Id::X);
                 layout->registerDim(pdal::Dimension::Id::Y);
