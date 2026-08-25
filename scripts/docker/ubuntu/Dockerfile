@@ -25,10 +25,12 @@ RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
     cd pdal ; \
     git checkout ${GITHUB_SHA}
 
+
 RUN mkdir -p pdal/build && \
     cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_AR=${CONDA_PREFIX}/bin/gcc-ar \
     -DCMAKE_PREFIX_PATH:FILEPATH="$CONDA_PREFIX/lib" \
     -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
     -DBUILD_PLUGIN_CPD=ON \
