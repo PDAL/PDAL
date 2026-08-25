@@ -25,7 +25,6 @@ Contributors:  Thomas Maurer
 #define FLAGBYTES_H
 
 #include <vector>
-#include "lepcc_types.h"
 #include "Huffman.h"
 
 namespace lepcc

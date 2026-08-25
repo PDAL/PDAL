@@ -137,7 +137,7 @@ typedef struct {
  */
 typedef struct {
     int numVerts;
-    LatLng *verts;
+    LatLng const *verts;
 } GeoLoop;
 
 /** @struct GeoPolygon

@@ -69,6 +69,7 @@ endfunction()
 # Windows htonl and similar are in winsock :(
 #
 set(WINSOCK_LIBRARY ws2_32)
+set(SHLWAPI_LIBRARY shlwapi)
 
 function(pdal_lib_compile_settings target)
     pdal_target_compile_settings(${target})

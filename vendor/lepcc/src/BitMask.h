@@ -24,7 +24,7 @@ Contributors:  Thomas Maurer
 #ifndef BITMASK_H
 #define BITMASK_H
 
-#include "lepcc_types.h"
+#include "include/lepcc_types.h"
 
 namespace lepcc
 {

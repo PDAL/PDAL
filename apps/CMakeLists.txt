@@ -17,9 +17,18 @@ else (APPLE AND PDAL_BUNDLE)
     add_executable(${PDAL_APP} pdal.cpp)
 endif(APPLE AND PDAL_BUNDLE)
 pdal_target_compile_settings(${PDAL_APP})
+PDAL_TARGET_LINK_PDAL(${PDAL_APP} PRIVATE)
+if (PDAL_LIB_TYPE STREQUAL "STATIC")
+    get_property(PDAL_STATIC_PLUGIN_TARGETS GLOBAL PROPERTY
+        PDAL_KERNEL_PLUGIN_TARGETS)
+    if (PDAL_STATIC_PLUGIN_TARGETS)
+        PDAL_TARGET_LINK_STATIC_PLUGINS(${PDAL_APP}
+            PRIVATE
+                ${PDAL_STATIC_PLUGIN_TARGETS})
+    endif()
+endif()
 target_link_libraries(${PDAL_APP}
     PRIVATE
-        ${PDAL_LIB_NAME}
         GDAL::GDAL
         ${WINSOCK_LIBRARY}
 )

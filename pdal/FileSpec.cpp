@@ -36,6 +36,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/private/JsonSupport.hpp>
 #include <pdal/private/FileSpecHelper.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -164,14 +165,9 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
     return m_p->parse(json);
 }
 
-void FileSpec::Private::setFilePath(const std::string& u8path)
+void FileSpec::Private::setFilePath(const std::string& path)
 {
-#ifdef __cpp_lib_char8_t  // C++20
-    char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
-    m_path = std::filesystem::path(std::u8string_view(pU8path, u8path.size()));
-#else                     // C++17
-    m_path = std::filesystem::u8path(u8path);
-#endif
+    m_path = FileUtils::u8path(path);
 }
 
 Utils::StatusWithReason FileSpec::Private::parse(NL::json& node)
