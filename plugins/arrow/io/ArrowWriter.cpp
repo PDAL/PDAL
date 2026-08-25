@@ -415,7 +415,7 @@ arrowsupport::GroupNodePtr ArrowWriter::applyGeoType(
         }
 
         // Parquet standard for unknown geometries.
-        std::string crs = ref.empty() ? "srid:0" : ref.getPROJJSON();
+        std::string crs = ref.empty() ? "srid:0" : getPROJJSON(ref)["crs"].dump(-1);
 
         std::shared_ptr<const parquet::LogicalType> logicalType = ref.isGeographic()
             ? parquet::LogicalType::Geography(crs) : parquet::LogicalType::Geometry(crs);
