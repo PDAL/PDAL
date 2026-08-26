@@ -200,6 +200,7 @@ TEST(ArrowParquetReaderTest, ReadingPoints_noMD)
     }
 }
 
+// Testing parquet schema-encoded CRS
 TEST(ArrowParquetReaderTest, SRS_noMD)
 {
     ArrowReader r;

@@ -371,16 +371,10 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
         { "geometry_types", { "Point Z" } }
     };
 
-    // GeoParquet 1.x: null SRS should be null
-    // GeoParquet 2.0: null SRS should be "srid:0"
+    // null SRS should be null in metadata; srid:0 in schema
     NL::json crs;
     if (ref.empty())
-    {
-        if (m_version == arrowsupport::GeoParquet20)
-            column.update({{ "crs", "srid:0" }});
-        else
-            column.update({{ "crs", nullptr }});
-    }
+        column.update({{ "crs", nullptr }});
     else
         column.update(getPROJJSON(ref));
 
@@ -414,7 +408,8 @@ arrowsupport::GroupNodePtr ArrowWriter::applyGeoType(
             continue;
         }
 
-        // Parquet standard for unknown geometries.
+        // Parquet standard for unknown CRS. I don't think we have any reason to
+        // write the CRS84 default (crs=null).
         std::string crs = ref.empty() ? "srid:0" : getPROJJSON(ref)["crs"].dump(-1);
 
         std::shared_ptr<const parquet::LogicalType> logicalType = ref.isGeographic()
