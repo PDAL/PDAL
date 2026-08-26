@@ -181,9 +181,8 @@ public:
         // The first five bytes in the buffer is the magic code for a
         // little-endian encoded XYZ 2.5d point. The first byte is the little-endian
         // code (0x01). The remaining bytes specify the geometry type.
-        // Finding this in any document these days is nigh impossible. See the
-        // GDAL source code. :(
-        static uint8_t buf[5 + 3 * sizeof(double)] { 0x01, 0x01, 0x00, 0x00, 0x80 };
+        // This is from the GeoParquet spec, see https://docs.ogc.org/is/06-103r3/06-103r3.pdf
+        static uint8_t buf[5 + 3 * sizeof(double)] { 0x01, 0xE9, 0x03, 0x00, 0x00 };
         static uint8_t * const xpos = buf + 5;
         static uint8_t * const ypos = xpos + sizeof(x);
         static uint8_t * const zpos = ypos + sizeof(y);
