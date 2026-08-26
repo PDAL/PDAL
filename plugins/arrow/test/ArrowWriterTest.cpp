@@ -77,7 +77,7 @@ TEST(ArrowWriterTest, write_column_name)
     std::string outfile = Support::temppath("renamed.parquet");
     Options writerOpts;
     writerOpts.add("filename", outfile);
-    writerOpts.add("geo_dimension_name", "foo");
+    writerOpts.add("geometry_name", "foo");
     ArrowWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOpts);

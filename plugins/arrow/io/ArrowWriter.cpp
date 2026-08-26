@@ -228,11 +228,11 @@ void ArrowWriter::initialize()
     int majorVersion = std::stoi(versionNums[0]);
     int minorVersion = std::stoi(versionNums[1]);
 
-    if (majorVersion == 1 && minorVersion == 0)
+    if (m_geoParquetVersionString == "1.0.0")
         m_version = ParquetVersion::GeoParquet10;
-    else if (majorVersion == 1 && minorVersion == 1)
+    else if (m_geoParquetVersionString == "1.1.0")
         m_version = ParquetVersion::GeoParquet11;
-    else if (majorVersion == 2)
+    else if (m_geoParquetVersionString == "2.0.0")
         m_version = ParquetVersion::GeoParquet20;
     else
         throwError("Invalid GeoParquet version string: '" +
