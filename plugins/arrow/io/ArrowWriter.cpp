@@ -227,6 +227,8 @@ void ArrowWriter::initialize()
     int majorVersion = std::stoi(versionNums[0]);
     int minorVersion = std::stoi(versionNums[1]);
 
+    // Making a distinction between 1.0 and 1.1 in case we add back geoarrow
+    // encoded XYZ
     if (m_geoParquetVersionString == "1.0.0")
         m_version = ParquetVersion::GeoParquet10;
     else if (m_geoParquetVersionString == "1.1.0")
@@ -433,8 +435,14 @@ void ArrowWriter::setupParquet(PointTableRef table)
     m_oWriterPropertiesBuilder.data_page_version(parquet::ParquetDataPageVersion::V2);
     m_oWriterPropertiesBuilder.compression(parquet::Compression::SNAPPY);
 
-    std::shared_ptr<parquet::ArrowWriterProperties> arrowWriterProperties =
-        parquet::ArrowWriterProperties::Builder().store_schema()->build();
+    // We don't want to write the schema to metadata for 2.0, since we rebuild it 
+    // manually and it won't stay synced.
+    std::shared_ptr<parquet::ArrowWriterProperties> arrowWriterProperties;
+    if (m_version == arrowsupport::ParquetVersion::GeoParquet20)
+        arrowWriterProperties = parquet::ArrowWriterProperties::Builder().build();
+    else
+        arrowWriterProperties =
+            parquet::ArrowWriterProperties::Builder().store_schema()->build();
 
     std::shared_ptr<parquet::SchemaDescriptor> parquet_schema;
     auto result = parquet::arrow::ToParquetSchema(m_schema.get(),
