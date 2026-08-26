@@ -280,12 +280,13 @@ void ArrowWriter::addArgs(ProgramArgs& args)
 {
     //args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString,
     //    "feather");
-    args.add("geo_dimension_name", "Dimension name for Parquet geometry column",
+    args.add("geometry_name", "Dimension name for Parquet geometry column",
         m_geoDimensionName, "geometry");
+    args.addSynonym("geometry_name", "geoarrow_dimension_name");
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 4);
     args.add("write_pipeline_metadata", "Write PDAL metadata to file metadata",
         m_writePipelineMetadata, true);
-    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersionString, "1.0.0");
+    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersionString, "1.1.0");
 }
 
 void ArrowWriter::prepared(PointTableRef table)

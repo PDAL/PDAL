@@ -77,14 +77,11 @@ ArrowReader::ArrowReader()
     , m_batchCount(0)
     , m_currentBatchIndex(0)
     , m_currentBatchPointIndex(0)
-    , m_readMetadata(false)
-
 {}
 
 
 void ArrowReader::addArgs(ProgramArgs& args)
 {
-    args.add("metadata", "", m_readMetadata, false);
     m_geoDimArg = &args.add("geometry_column", "Name of the column from which to "
         "read Parquet point geometry. Defaults to 'primary_column' from geo metadata "
         "if not set", m_geoDimName, "xyz");

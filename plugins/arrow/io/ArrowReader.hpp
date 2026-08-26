@@ -90,7 +90,6 @@ private:
     int m_batchCount;
     int m_currentBatchIndex;
     int64_t m_currentBatchPointIndex;
-    bool m_readMetadata;
     std::string m_geoDimName;
     Arg* m_geoDimArg;
 };
