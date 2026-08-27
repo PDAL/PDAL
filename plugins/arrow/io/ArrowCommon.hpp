@@ -36,6 +36,7 @@
 
 #include <arrow/api.h>
 #include <arrow/type_fwd.h>
+#include <parquet/arrow/schema.h>
 
 #include <pdal/Dimension.hpp>
 
@@ -48,6 +49,13 @@ enum ArrowFormatType {
     Feather = 0,
     Parquet,
     Unknown = 256
+};
+
+enum ParquetVersion
+{
+    GeoParquet10,
+    GeoParquet11,
+    GeoParquet20
 };
 
 Dimension::Type pdalType(arrow::Type::type t)
@@ -86,6 +94,7 @@ using DataTypePtr = std::shared_ptr<arrow::DataType>;
 using FieldPtr = std::shared_ptr<arrow::Field>;
 using SchemaPtr = std::shared_ptr<arrow::Schema>;
 using BufferPtr = std::shared_ptr<arrow::Buffer>;
+using GroupNodePtr = std::shared_ptr<parquet::schema::GroupNode>;
 
 template<>
 struct TypeTraits<uint8_t>

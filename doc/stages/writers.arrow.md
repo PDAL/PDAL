@@ -2,8 +2,12 @@
 
 # writers.arrow
 
-The **Arrow Writer** supports writing to [Apache Arrow] [Feather]
-and [Parquet] file types.
+The **Arrow Writer** supports writing to [Apache Arrow] [GeoParquet] files.
+
+Points are always written as WKB. The `geoparquet_version` option controls which
+[GeoParquet version] the file is written as; version `2.0.0` allows the geometry
+field to be created as a Parquet Geometry or Geography [logical type]. 
+GeoParquet's `geo` metadata is always written, regardless of version.
 
 ```{eval-rst}
 .. plugin::
@@ -25,22 +29,8 @@ and [Parquet] file types.
     },
     {
         "type":"writers.arrow",
-        "format":"feather",
-        "filename":"outputfile.feather"
-    }
-]
-```
-
-```json
-[
-    {
-        "type":"readers.las",
-        "filename":"inputfile.las"
-    },
-    {
-        "type":"writers.arrow",
-        "format":"parquet",
-        "geoparquet":"true",
+        "geometry_name":"wkb",
+        "geoparquet_version":"1.1.0",
         "filename":"outputfile.parquet"
     }
 ]
@@ -50,36 +40,33 @@ and [Parquet] file types.
 
 batch_size
 
-: Number of rows to write as a batch \[Default: 65536\*4 \]
+: Number of rows to write as a batch. Also sets the Parquet row group size. 
+\[Default: 65536\*4 \]
 
 filename
 
 : Output file to write \[Required\]
 
-format
+geometry_name
 
-: File type to write (feather, parquet) \[Default: "feather"\]
+: Column name in which WKB points will be written \[Default: geometry\]. Always
+  written as WKB, rather than GeoArrow XYZ structs (supported in GeoParquet 1.1.0).
 
-geoarrow_dimension_name
+geoparquet_version
 
-: Dimension name to write GeoArrow struct \[Default: xyz\]. Only
-  applies to Feather output. Parquet output always uses a `wkb`
-  column (WKB point geometry) to satisfy the GeoParquet geometry
-  requirement; the packed GeoArrow struct is not written since it
-  would be redundant.
-
-geoparquet
-
-: Write WKB column and GeoParquet metadata when writing parquet output
+: GeoParquet version to write; supports '1.0.0', '1.1.0' and '2.0.0'. 
+  \[Default: 1.1.0\]
 
 write_pipeline_metadata
 
-: Write PDAL pipeline metadata into `PDAL:pipeline:metadata` of
-  `geoarrow_dimension_name`
+: Write PDAL pipeline metadata into a `PDAL:pipeline:metadata` key in file-level
+  key-value metadata. \[Default: true\]
 
 ```{include} writer_opts.md
 ```
 
 [apache arrow]: https://arrow.apache.org/
-[feather]: https://arrow.apache.org/docs/python/feather.html
 [parquet]: https://arrow.apache.org/docs/cpp/parquet.html
+[geoparquet]: https://geoparquet.org/
+[geoparquet version]: https://geoparquet.org/releases/
+[logical type]: https://parquet.apache.org/docs/file-format/types/geospatial/
