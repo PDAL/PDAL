@@ -149,6 +149,13 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
 )
 
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
+PDAL_ADD_TEST(pdal_stac_utils_test
+    FILES 
+        StacUtilsTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)

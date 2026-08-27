@@ -565,6 +565,7 @@ TEST(StacReaderTest, wrench_test)
     EXPECT_EQ(view->size(), 111065u);
 }
 
+
 #ifndef _WIN32
 
 TEST(StacReaderTest, schema_validate_test)
