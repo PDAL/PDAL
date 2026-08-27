@@ -74,19 +74,14 @@ private:
     bool readNextBatchData();
     bool fillPoint(PointRef& point);
 
-    void loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
-    void loadArrowGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+    bool loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+    bool loadParquetNativeGeom(const parquet::SchemaDescriptor* parquetSchema);
 
     std::shared_ptr<arrow::io::ReadableFile> m_file;
-    std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_ipcReader;
     std::unique_ptr<::arrow::RecordBatchReader> m_parquetReader;
     std::unique_ptr<parquet::arrow::FileReader> m_arrow_reader;
 
     std::shared_ptr<arrow::RecordBatch> m_currentBatch;
-
-    arrowsupport::ArrowFormatType m_formatType;
-    std::string m_formatTypeString;
-
 
     std::map<int, pdal::Dimension::Id> m_arrayIds;
     std::map<pdal::Dimension::Id, std::shared_ptr<arrow::Array> > m_arrays;
@@ -95,9 +90,8 @@ private:
     int m_batchCount;
     int m_currentBatchIndex;
     int64_t m_currentBatchPointIndex;
-    bool m_readMetadata;
-    std::string m_geoArrowDimName;
-
+    std::string m_geoDimName;
+    Arg* m_geoDimArg;
 };
 
 

@@ -71,80 +71,28 @@ ArrowReader::ArrowReader()
     : pdal::Reader()
     , pdal::Streamable()
     , m_file(nullptr)
-    , m_ipcReader(nullptr)
     , m_parquetReader(nullptr)
     , m_currentBatch(nullptr)
-    , m_formatType(arrowsupport::Unknown)
     , m_pool(arrow::default_memory_pool())
     , m_batchCount(0)
     , m_currentBatchIndex(0)
     , m_currentBatchPointIndex(0)
-    , m_readMetadata(false)
-
 {}
 
 
 void ArrowReader::addArgs(ProgramArgs& args)
 {
-    args.add("metadata", "", m_readMetadata, false);
-    args.add("geoarrow_dimension_name", "Name of the packed XYZ struct dimension for "
-        "GeoArrow (Feather) input.", m_geoArrowDimName, "xyz");
-    args.add("format", "", m_formatTypeString, "");
+    m_geoDimArg = &args.add("geometry_column", "Name of the column from which to "
+        "read Parquet point geometry. Defaults to 'primary_column' from geo metadata "
+        "if not set", m_geoDimName, "xyz");
+    args.addSynonym("geometry_column", "geoarrow_dimension_name");
 }
 
 
-void ArrowReader::loadArrowGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
+bool ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
 {
     if (!kv_metadata)
-        return;
-    auto geo = kv_metadata->Get("ARROW:extension:metadata");
-    NL::json metadata;
-
-    if (geo.ok())
-    {
-        // load up the JSON and set our stuff
-        try
-        {
-            metadata = NL::json::parse(*geo);
-        } 
-        catch (NL::json::parse_error& e)
-        {
-            log()->get(LogLevel::Warning) << "unable to parse GeoArrow metadata with error '"
-                                            << e.what() << "'" << std::endl;
-            return;
-        }
-
-        if (!metadata.contains("crs"))
-        {
-            log()->get(LogLevel::Warning) << "GeoArrow metadata does not contain 'crs' entry"
-                                            << std::endl;
-            return;
-        }
-        NL::json crs = metadata["crs"];
-
-        SpatialReference ref;
-        if (crs.is_object())
-        {
-            ref.set(crs.dump());
-        }
-        else if (crs.is_string())
-        {
-            ref.set(crs.get<std::string>());
-        }
-
-        setSpatialReference(ref);
-    }
-    else
-    {
-        log()->get(LogLevel::Warning) << "No GeoArrow metadata available for this column" <<std::endl;
-    }
-
-}
-
-void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
-{
-    if (!kv_metadata)
-        return;
+        return false;
     auto geo = kv_metadata->Get("geo");
     NL::json metadata;
 
@@ -159,84 +107,107 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
         {
             log()->get(LogLevel::Warning) << "unable to parse GeoParquet 'geo' metadata with error '"
                                         << e.what() << "'" << std::endl;
-            return;
+            return false;
         }
 
         if (!metadata.contains("primary_column"))
         {
             log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry"
                                             << std::endl;
-            return;
+            return false;
         }
+    
+        std::string primary_column = metadata["primary_column"];
+        log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
+        if (!m_geoDimArg->set())
+            m_geoDimName = primary_column;
 
         if (!metadata.contains("columns"))
         {
             log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry"
                                             << std::endl;
-            return;
+            return false;
         }
         NL::json columns = metadata["columns"];
-
-        std::string primary_column = metadata["primary_column"];
         NL::json column = metadata["columns"][primary_column];
 
-        log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
-
-        m_geoArrowDimName = primary_column;
-
+        SpatialReference ref;
         if (!column.contains("crs"))
         {
-            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to 4326" << std::endl;
-            setSpatialReference("EPSG:4326");
-            return;
+            log()->get(LogLevel::Warning) << "no 'crs' key available to fetch "
+                "spatial reference information, setting to CRS84" << std::endl;
+            ref.set("OGC:CRS84");
         }
-
-        SpatialReference ref;
-        NL::json crs = column["crs"];
-        if (crs.is_object())
+        else
         {
-            ref.set(crs.dump());
+            NL::json crs = column["crs"];
+            if (crs.is_object())
+            {
+                ref.set(crs.dump());
+            }
+            else if (crs.is_string())
+            {
+                // Setting an empty CRS if it's explicitly undefined
+                std::string crsStr = column["crs"].get<std::string>();
+                if (Utils::tolower(crsStr) != "srid:0")
+                    ref.set(crsStr);
+            }
+            // SpatialRef also empty if crs == null
+        
+            if (column.contains("epoch"))
+            {
+                ref.setEpoch(column["epoch"].get<double>());
+            }
         }
-        else if (crs.is_string())
-        {
-            ref.set(column["crs"].get<std::string>());
-        }
-
-        if (column.contains("epoch"))
-        {
-            ref.setEpoch(column["epoch"].get<double>());
-        }
-
         setSpatialReference(ref);
     } else
     {
         log()->get(LogLevel::Warning) << "unable to fetch GeoArrow metadata with error '"
                                       << geo.status().ToString() << "'" << std::endl;
+        return false;
     }
+    return true;
+}
+
+bool ArrowReader::loadParquetNativeGeom(const parquet::SchemaDescriptor* parquetSchema)
+{
+    int geomIdx = parquetSchema->ColumnIndex(m_geoDimName);
+    if (geomIdx >= 0)
+    {
+        auto maybeGeom = parquetSchema->Column(geomIdx);
+        auto logicalType = maybeGeom->logical_type();
+        if (logicalType->is_geometry() || logicalType->is_geography())
+        {
+            auto geomType = 
+                std::dynamic_pointer_cast<const parquet::GeometryLogicalType>(logicalType);
+
+            std::string crs = geomType->crs();
+            SpatialReference ref;
+            if (!crs.size())
+                ref.set("OGC:CRS84");
+            else if (Utils::tolower(crs) != "srid:0")
+                ref.set(crs);
+
+            setSpatialReference(ref);
+        }
+        else
+        {
+            log()->get(LogLevel::Warning) << "Column '" << m_geoDimName
+                << "' is not of Parquet logical type GEOMETRY or GEOGRAPHY" << std::endl;
+            return false;
+        }
+    }
+    else
+    {
+        log()->get(LogLevel::Warning) << "Could not find column '"
+            << m_geoDimName << "' in Parquet schema" << std::endl;
+        return false;
+    }
+    return true;
 }
 
 void ArrowReader::initialize()
 {
-    if (Utils::iequals(FileUtils::extension(m_filename), ".feather"))
-    {
-        m_formatType = arrowsupport::Feather;
-    }
-    else if (Utils::iequals(FileUtils::extension(m_filename), ".parquet"))
-    {
-        m_formatType = arrowsupport::Parquet;
-    }
-    if (m_formatTypeString.size())
-    {
-
-        if (Utils::iequals(m_formatTypeString, "geoarrow"))
-            m_formatType = arrowsupport::Feather;
-        else if (Utils::iequals(m_formatTypeString, "geoparquet"))
-            m_formatType = arrowsupport::Parquet;
-        else
-            throwError("Unknown format type " + m_formatTypeString);
-
-    }
-
     auto result = arrow::io::ReadableFile::Open(m_filename);
     if (result.ok())
         m_file = result.ValueOrDie();
@@ -248,116 +219,78 @@ void ArrowReader::initialize()
         throwError(msg.str());
     }
 
-    if (m_formatType == arrowsupport::Feather)
+    auto arrow_reader_props = parquet::ArrowReaderProperties();
+    arrow_reader_props.set_batch_size(128 * 1024);  // default 64 * 1024
+    auto reader_properties = parquet::ReaderProperties(m_pool);
+    parquet::arrow::FileReaderBuilder reader_builder;
+    reader_builder.memory_pool(m_pool);
+    reader_builder.properties(arrow_reader_props);
+
+    auto reader_result = parquet::arrow::OpenFile(m_file, m_pool);
+    if (!reader_result.ok())
     {
-        auto status = arrow::ipc::RecordBatchFileReader::Open(m_file);
-        if (!status.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to create RecordBatchFileReader for file  '" << m_filename << "' with message '"
-                << result.status().ToString() <<"'";
-            throwError(msg.str());
-        }
-
-        m_ipcReader = status.ValueOrDie();
-        m_batchCount = m_ipcReader->num_record_batches();
-
-        const auto fields = m_ipcReader->schema()->fields();
-
-        for (const auto& field: fields)
-        {
-            auto metadata = field->metadata();
-            if (metadata)
-                if (metadata->Contains("ARROW:extension:metadata"))
-                    loadArrowGeoMetadata(metadata);
-        }
-
-        m_currentBatchIndex = 0;
-
-        // Gather up a point count
-        while (readNextBatchHeaders())
-        {
-            m_count = m_count + m_currentBatch->num_rows();
-            m_currentBatchIndex++;
-        }
-
-        // add 1 to count
-        m_count++;
-
-        m_currentBatchIndex = 0;
-
-        // Read our first batch
-        readNextBatchHeaders();
-
+        std::stringstream msg;
+        msg << "Unable to open file '" << m_filename << "' with message '"
+            << reader_result.status().ToString() << "'";
+        throwError(msg.str());
     }
-    if (m_formatType == arrowsupport::Parquet)
+    m_arrow_reader = std::move(reader_result).ValueOrDie();
+
+    const auto metadata = m_arrow_reader->parquet_reader()->metadata();
+    // If there is no geoparquet metadata, try to get the geometry from the native
+    // parquet geometry column (specified with the geoDimName arg)
+    if (!loadParquetGeoMetadata(metadata->key_value_metadata()))
     {
-        auto arrow_reader_props = parquet::ArrowReaderProperties();
-        arrow_reader_props.set_batch_size(128 * 1024);  // default 64 * 1024
-        parquet::arrow::FileReaderBuilder reader_builder;
-        reader_builder.memory_pool(m_pool);
-        reader_builder.properties(arrow_reader_props);
+        if (!loadParquetNativeGeom(metadata->schema()))
+            throwError("Unable to load geometry for file '" + m_filename + "'.");
+    }
 
-        auto reader_result = parquet::arrow::OpenFile(m_file, m_pool);
-        if (!reader_result.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to open file '" << m_filename << "' with message '"
-                << reader_result.status().ToString() << "'";
-            throwError(msg.str());
-        }
-        m_arrow_reader = std::move(reader_result).ValueOrDie();
+    // Get the indexes of all row groups
+    std::vector<int> rowGroupIds(m_arrow_reader->num_row_groups());
+    std::iota(rowGroupIds.begin(), rowGroupIds.end(), 0);
 
-        const auto metadata = m_arrow_reader->parquet_reader()->metadata();
-        loadParquetGeoMetadata(metadata->key_value_metadata());
+    auto batchOpenResult = m_arrow_reader->GetRecordBatchReader();
+    if (!batchOpenResult.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
+            << result.status().ToString() <<"'";
+        throwError(msg.str());
+    }
+    m_parquetReader = std::move(batchOpenResult).ValueOrDie();
 
-        // Get the indexes of all row groups
-        std::vector<int> rowGroupIds(m_arrow_reader->num_row_groups());
-        std::iota(rowGroupIds.begin(), rowGroupIds.end(), 0);
+    for (arrow::Result<std::shared_ptr<arrow::RecordBatch>> maybe_batch : *m_parquetReader) {
 
-        auto batchOpenResult = m_arrow_reader->GetRecordBatchReader();
-        if (!batchOpenResult.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
-                << result.status().ToString() <<"'";
-            throwError(msg.str());
-        }
-        m_parquetReader = std::move(batchOpenResult).ValueOrDie();
+        m_batchCount++;
+    }
+    auto closeStatus = m_parquetReader->Close();
 
-        for (arrow::Result<std::shared_ptr<arrow::RecordBatch>> maybe_batch : *m_parquetReader) {
+    batchOpenResult = m_arrow_reader->GetRecordBatchReader();
+    if (!batchOpenResult.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
+            << result.status().ToString() <<"'";
+        throwError(msg.str());
+    }
+    m_parquetReader = std::move(batchOpenResult).ValueOrDie();
 
-            m_batchCount++;
-        }
-        auto closeStatus = m_parquetReader->Close();
-
-        batchOpenResult = m_arrow_reader->GetRecordBatchReader();
-        if (!batchOpenResult.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
-                << result.status().ToString() <<"'";
-            throwError(msg.str());
-        }
-        m_parquetReader = std::move(batchOpenResult).ValueOrDie();
-
-        auto batchIterator = m_parquetReader->begin();
-        auto result = *batchIterator;
-        if (!result.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to read first batch for file '" << m_filename << "' with message '"
-                << result.status().ToString() <<"'";
-            throwError(msg.str());
-        }
-        m_currentBatch = result.ValueOrDie();
-        if (!m_currentBatch)
-        {
-            std::stringstream msg;
-            msg << "Batch was null for file '" << m_filename << "' with message '"
-                << result.status().ToString() <<"'";
-            throwError(msg.str());
-        }
+    auto batchIterator = m_parquetReader->begin();
+    auto batchResult = *batchIterator;
+    if (!batchResult.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to read first batch for file '" << m_filename << "' with message '"
+            << result.status().ToString() <<"'";
+        throwError(msg.str());
+    }
+    m_currentBatch = batchResult.ValueOrDie();
+    if (!m_currentBatch)
+    {
+        std::stringstream msg;
+        msg << "Batch was null for file '" << m_filename << "' with message '"
+            << result.status().ToString() <<"'";
+        throwError(msg.str());
     }
 }
 
@@ -380,7 +313,7 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
 
         if ((t == arrow::Type::FIXED_SIZE_LIST) || (t == arrow::Type::BINARY))
         {
-            if (Utils::iequals(name, m_geoArrowDimName))
+            if (Utils::iequals(name, m_geoDimName))
             {
                 layout->registerDim(pdal::Dimension::Id::X);
                 layout->registerDim(pdal::Dimension::Id::Y);
@@ -421,37 +354,22 @@ bool ArrowReader::readNextBatchHeaders()
     if (m_currentBatchIndex == m_batchCount)
         return false;
 
-    if (m_formatType == arrowsupport::Feather){
-
-        auto readResult = m_ipcReader->ReadRecordBatch(m_currentBatchIndex);
-        if (!readResult.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to read RecordBatch " << m_currentBatchIndex << " for file '" << m_filename << "' with message '"
-                    << readResult.status().ToString() <<"'";
-            throwError(msg.str());
-        }
-        m_currentBatch = readResult.ValueOrDie();
-
-    } else if (m_formatType == arrowsupport::Parquet)
+    if (!(m_parquetReader.get()))
     {
-        if (!(m_parquetReader.get()))
-        {
-            std::stringstream msg;
-            msg << "Reader is null!" << std::endl;
-            throwError(msg.str());
-        }
-
-        auto result = m_parquetReader->Next();
-        if (!result.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to read next batch for file '" << m_filename << "' with message '"
-                << result.status().ToString() <<"'";
-            throwError(msg.str());
-        }
-        m_currentBatch = result.ValueOrDie();
+        std::stringstream msg;
+        msg << "Reader is null!" << std::endl;
+        throwError(msg.str());
     }
+
+    auto result = m_parquetReader->Next();
+    if (!result.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to read next batch for file '" << m_filename << "' with message '"
+            << result.status().ToString() <<"'";
+        throwError(msg.str());
+    }
+    m_currentBatch = result.ValueOrDie();
 
     return true;
 }
@@ -612,20 +530,16 @@ bool ArrowReader::processOne(PointRef& point)
 
 void ArrowReader::done(PointTableRef table)
 {
-    if (m_formatType == arrowsupport::Feather)
-    {}
-    else if (m_formatType == arrowsupport::Parquet)
+    auto result = m_parquetReader->Close();
+    if (!result.ok())
     {
-        auto result = m_parquetReader->Close();
-        if (!result.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to read next batch for file '" << m_filename << "' with message '"
-                << result.ToString() <<"'";
-            throwError(msg.str());
-        }
+        std::stringstream msg;
+        msg << "Unable to read next batch for file '" << m_filename << "' with message '"
+            << result.ToString() <<"'";
+        throwError(msg.str());
     }
-    auto result = m_file->Close();
+
+    result = m_file->Close();
 }
 
 } // namespace pdal
