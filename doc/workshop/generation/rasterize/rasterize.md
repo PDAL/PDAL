@@ -11,9 +11,10 @@ point cloud with PDAL's {ref}`writers.gdal`.
 ## Exercise
 
 ```{note}
-The exercise fetches its data from a [Entwine] service that organizes the
-point cloud collection for the entire country of Denmark. You can view the
-data online at <http://potree.entwine.io/data/denmark.html>.
+The exercise fetches a classified point cloud of Copenhagen's Kastellet from
+a COPC file served by [pointcloud.org]. It contains data from Danmarks
+Højdemodel (DHM/Punktsky), © Klimadatastyrelsen, under [CC BY 4.0]. The
+[dataset catalog] includes an interactive preview and full attribution.
 ```
 
 ### Command
@@ -39,9 +40,9 @@ edit the filenames to match your paths.
 :lines: 3-8
 ```
 
-The data is read from a EPT resource that contains the Denmark data.
-We're going to download a small patch of data by the Copenhagen airport area
-that is the limited to a spatial resolution of 5m.
+The data is read from a {ref}`COPC <readers.copc>` resource containing Danish
+elevation data. The bounds limit the read to a small patch around Kastellet,
+and the reader resolution limits point selection to 5m.
 
 #### 2. {ref}`writers.gdal`
 
@@ -59,13 +60,9 @@ Issue the {ref}`pipeline <pipeline>` operation to execute the interpolation:
 ```console
 $ pdal pipeline ./exercises/analysis/rasterize/classification.json -v 3
 (PDAL Debug) Debugging...
-(pdal pipeline readers.ept Debug) Root resolution: 3108.53
-Query resolution:  5
-Actual resolution: 3.03568
-Depth end: 11
-Query bounds: ([1402800, 1408800], [7478000, 7483000], [-1.797693134862316e+308, 1.797693134862316e+308])
-Threads: 15
+(pdal pipeline readers.copc Debug) Maximum depth: 4
 (pdal pipeline Debug) Executing pipeline in stream mode.
+(pdal pipeline readers.copc Debug) 19 overlapping nodes
 ```
 
 ### Visualization
@@ -122,15 +119,11 @@ $ pdal pipeline ./exercises/analysis/rasterize/classification.json \
 --writers.gdal.filename="intensity.tif" \
 -v 3
 (PDAL Debug) Debugging...
-(pdal pipeline readers.ept Debug) Root resolution: 3108.53
-Query resolution:  5
-Actual resolution: 3.03568
-Depth end: 11
-Query bounds: ([1402800, 1408800], [7478000, 7483000], [-1.797693134862316e+308, 1.797693134862316e+308])
-Threads: 15
+(pdal pipeline readers.copc Debug) Maximum depth: 4
 (pdal pipeline Debug) Executing pipeline in stream mode.
+(pdal pipeline readers.copc Debug) 19 overlapping nodes
 $ gdal_translate intensity.tif intensity.png -of PNG
-Input file size is 1201, 1001
+Input file size is 321, 301
 Warning 6: PNG driver doesn't support data type Float32. Only eight bit (Byte) and sixteen bit (UInt16) bands supported. Defaulting to Byte
 
 0...10...20...30...40...50...60...70...80...90...100 - done.
@@ -143,15 +136,11 @@ Warning 6: PNG driver doesn't support data type Float32. Only eight bit (Byte) a
 --writers.gdal.filename="intensity.tif" ^
 -v 3
 (PDAL Debug) Debugging...
-(pdal pipeline readers.ept Debug) Root resolution: 3108.53
-Query resolution:  5
-Actual resolution: 3.03568
-Depth end: 11
-Query bounds: ([1402800, 1408800], [7478000, 7483000], [-1.797693134862316e+308, 1.797693134862316e+308])
-Threads: 15
+(pdal pipeline readers.copc Debug) Maximum depth: 4
 (pdal pipeline Debug) Executing pipeline in stream mode.
+(pdal pipeline readers.copc Debug) 19 overlapping nodes
 > gdal_translate intensity.tif intensity.png -of PNG
-Input file size is 1201, 1001
+Input file size is 321, 301
 Warning 6: PNG driver doesn't support data type Float32. Only eight bit (Byte) and sixteen bit (UInt16) bands supported. Defaulting to Byte
 
 0...10...20...30...40...50...60...70...80...90...100 - done.
@@ -173,6 +162,8 @@ channel of the data by overriding pipeline arguments at the command line:
    complex pipelines.
 
 [digital terrain model]: https://en.wikipedia.org/wiki/Digital_elevation_model
-[entwine]: https://entwine.io
+[CC BY 4.0]: https://creativecommons.org/licenses/by/4.0/
+[dataset catalog]: https://pointcloud.org/datasets/copenhagen-kastellet/
 [gdaldem]: http://www.gdal.org/gdaldem.html
+[pointcloud.org]: https://pointcloud.org
 [tin]: https://en.wikipedia.org/wiki/Triangulated_irregular_network
