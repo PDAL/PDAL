@@ -259,6 +259,37 @@ TEST(CopcWriterTest, scaling)
     FileUtils::deleteFile(filename);
 }
 
+TEST(CopcWriterTest, unicodeFilename)
+{
+#ifndef _WIN32
+    GTEST_SKIP() << "This regression covers Windows native-path conversion.";
+#endif
+
+    // Use escaped UTF-8 bytes so this source stays independent of the compiler
+    // source-file encoding.
+    const std::string filename = Support::temppath(
+        "copc-\xE8\xB7\xAF\xE5\xBE\x84.laz");
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader input;
+    input.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", filename);
+    CopcWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(input);
+
+    PointTable table;
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_TRUE(FileUtils::fileExists(filename));
+    EXPECT_GT(FileUtils::fileSize(filename), 0u);
+    FileUtils::deleteFile(filename);
+}
+
 TEST(CopcWriterTest, extradim)
 {
     std::string filename(Support::datapath("las/1.2-with-color.las"));

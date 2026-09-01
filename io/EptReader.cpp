@@ -298,6 +298,46 @@ void EptReader::initialize()
         throwError(e.what());
     }
 
+    // Adding info from ept.json to metadata
+    // Not added: hierarchyType
+    MetadataNode m = getMetadata();
+    MetadataNode eptMeta = m.add("ept_info");
+
+    eptMeta.add("bounds", m_p->info->bounds(),
+        "The cubic bounds of the octree indexing structure");
+    eptMeta.add("boundsConforming", m_p->info->boundsConforming(),
+        "The narrowest bounds conforming to the maximal extents of the data");
+
+    std::string dataType;
+    if (m_p->info->dataType() == ept::EptInfo::DataType::Binary)
+        dataType = "binary";
+    else if (m_p->info->dataType() == ept::EptInfo::DataType::Zstandard)
+        dataType = "zstandard";
+    else if (m_p->info->dataType() == ept::EptInfo::DataType::Laszip)
+        dataType = "laszip";
+    eptMeta.add("dataType", dataType,
+        "The binary encoding of the tiled point cloud data");
+    eptMeta.add<point_count_t>("points", m_p->info->points(),
+        "The total number of points indexed into this EPT dataset");
+    for (auto& [name, type] : m_p->info->dims())
+    {
+        MetadataNode schema("schema");
+        schema.add("name", name);
+        schema.add("type", Dimension::toName(Dimension::base(type.m_type)));
+        schema.add("size", Dimension::size(type.m_type));
+        if (name == "X" || name == "Y" || name == "Z")
+        {
+            schema.add<double>("scale", type.m_xform.m_scale.m_val);
+            schema.add<double>("offset", type.m_xform.m_offset.m_val);
+        }
+        eptMeta.addList(schema);
+    }
+    eptMeta.add<uint64_t>("span", m_p->info->span(),
+        "The span of voxels in each spatial dimension defining the "
+        "grid size used for the octree");
+    eptMeta.add("version", m_p->info->version(),
+        "The version number of the EPT file");
+
     // Figure out our max depth.
     const double queryResolution(m_args->m_resolution);
     //reseting depthEnd if initialize() has been called before

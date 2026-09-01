@@ -96,8 +96,8 @@ void MbReader::ready(PointTableRef table)
     int pings = 0;  // Perhaps an argument for this?
     int lonflip = 0; // Longitude -180 -> 180
     double bounds[4] { -180, 180, -90, 90 };
-    int btime_i[7] { 0, 0, 0, 0, 0, 0, 0 };
-    int etime_i[7] { (std::numeric_limits<int>::max)(), 0, 0, 0, 0, 0 };
+    int btime_i[7] { 1962, 2, 21, 10, 30, 0, 0 };
+    int etime_i[7] { 2062, 2, 21, 10, 30, 0, 0 };
     char *mbio_ptr;
     double btime_d;
     double etime_d;
@@ -132,94 +132,6 @@ void MbReader::ready(PointTableRef table)
         (void **)&m_sslat, &error);
 }
 
-namespace
-{
-
-int leapSeconds(int y, int m)
-{
-    struct leap
-    {
-        int year;
-        int month;
-    };
-
-    const std::vector<leap> leaps
-    {
-        {1981, 7}, {1982, 7}, {1983, 7}, {1985, 7}, {1988, 1}, {1990, 1},
-        {1991, 1}, {1992, 7}, {1993, 7}, {1994, 7}, {1996, 1}, {1997, 1},
-        {1999, 1}, {2006, 1}, {2009, 1}, {2012, 7}, {2015, 7}, {2017, 1}
-    };
-
-    int secs = 0;
-    for (size_t i = 0; i < leaps.size(); ++i)
-    {
-        if (y > leaps[i].year)
-            secs++;
-        else if (y == leaps[i].year && m >= leaps[i].month)
-        {
-            secs++;
-            break;
-        }
-        else
-            break;
-    }
-    return secs;
-}
-
-// This is an attempt to convert mb_system's poorly defined time_i to
-// adjusted GPS standard time (GPS standard time offset by 1.0E9)
-// Most of this is from converting struct tm (assuming UTC) to time_t
-// from Eric Raymond.
-double timeconvert(int time_i[7])
-{
-    const uint8_t yearIdx = 0;
-    const uint8_t monthIdx = 1;
-    const uint8_t dayIdx = 2;
-    const uint8_t hourIdx = 3;
-    const uint8_t minuteIdx = 4;
-    const uint8_t secondIdx = 5;
-    const uint8_t microsecIdx = 6;
-    const uint8_t monthsPerYear = 12;
-    const int cumdays[monthsPerYear] =
-        { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
-
-    long year;
-    time_t result;
-
-    year = 1900 + time_i[yearIdx] + time_i[monthIdx] / monthsPerYear;
-    result = (year - 1970) * 365 + cumdays[time_i[monthIdx] % monthsPerYear];
-    result += (year - 1968) / 4;
-    result -= (year - 1900) / 100;
-    result += (year - 1600) / 400;
-    if ((year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0) &&
-        (time_i[monthIdx] % monthsPerYear) < 2)
-        result--;
-    result += time_i[dayIdx] - 1;
-    result *= 24;
-    result += time_i[hourIdx];
-    result *= 60;
-    result += time_i[minuteIdx];
-    result *= 60;
-    result += time_i[secondIdx];
-    /**
-    if (t->tm_isdst == 1)
-        result -= 3600;
-    **/
-    // We should now have time_t in result.  Adjust offset to GPS standard
-    // 1/1/1970 to 6/1/1980 in seconds.  Perhaps cleaner than messing with
-    // the calculations above which are known to work.
-    result -= 315964800;
-    // Now subtract seconds for each leap second that has happened between
-    // the GPS time root.  These are "announced", so we can't really plan here.
-    result -= leapSeconds(time_i[yearIdx], (time_i[monthIdx] / 12) + 1);
-    // Now subtract for "adjusted" GPS standard time.
-    result -= 1000000000UL;
-    // Add back the microseconds as a fraction of a second and convert
-    // to double.
-    return result + (time_i[microsecIdx] / 1000000.0);
-}
-
-} // namespace
 
 bool MbReader::loadData()
 {
@@ -249,16 +161,21 @@ bool MbReader::loadData()
             m_amp, m_bathlon, m_bathlat, m_ss, m_sslon, m_sslat, comment,
             &error);
 
-        double gpsTime = timeconvert(pingTime);
+        // mb_read() already returns the ping time as a Unix epoch (UTC) in
+        // pingTimeT; use it directly. The previous hand-rolled timeconvert()
+        // added 1900 to MB-System's already-4-digit year and indexed the
+        // cumulative-days table with a 1-based month, skewing GpsTime by ~1900
+        // years and one month.
+        double gpsTime = pingTimeT;
 
-        if (status == 0)
+        if (error > 0)
         {
-            if (error > 0 && error != MB_ERROR_EOF)
+            if (error != MB_ERROR_EOF)
                 throwError("Error reading data: " + MbError::text(error));
             return false;
         }
 
-        if (kind == 1)
+        if (status == MB_SUCCESS && kind == 1)
         {
             bool ok(false);
             if (m_dataType == DataType::Multibeam)
@@ -293,7 +210,13 @@ bool MbReader::extractMultibeam(int numBath, int numAmp, double gpsTime)
 bool MbReader::extractSidescan(int numSs, double gpsTime)
 {
     for (size_t i = 0; i < (size_t)numSs; ++i)
+    {
+        // skip the null-fill pixels (MB_SIDESCAN_NULL == -1e9) so they are not
+        // emitted as spurious points
+        if (m_ss[i] == MB_SIDESCAN_NULL)
+            continue;
         m_ssQueue.emplace(m_sslon[i], m_sslat[i], m_ss[i], gpsTime);
+    }
     return m_ssQueue.size();
 }
 
@@ -354,7 +277,7 @@ point_count_t MbReader::read(PointViewPtr view, point_count_t count)
 {
     using namespace pdal::Dimension;
 
-    PointRef point = view->point(0);
+    PointRef point(*view);
     PointId id;
     for (id = 0; id < count; ++id)
     {

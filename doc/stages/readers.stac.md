@@ -93,6 +93,13 @@ validate_schema
   it's being read using JSON schema and the publicly available STAC schemas and
   list of STAC extension schemas.
 
+validate_schema_schema
+
+: Boolean value determining if schema documents referenced by STAC schemas
+  should also be validated. Set this to false to avoid resolving remote JSON
+  Schema metaschemas such as `json-schema.org` while still validating STAC
+  objects.
+
 properties
 
 : A key value mapping (JSON) of properties and the desired values to prune

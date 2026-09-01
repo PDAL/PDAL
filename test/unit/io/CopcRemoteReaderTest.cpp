@@ -98,7 +98,7 @@ TEST(CopcRemoteReaderTest, vsi)
     */
 
     BOX2D bounds(635700,848900, 637000, 853300);
-    std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
+    std::string url("https://media.githubusercontent.com/media/PDAL/data/refs/heads/main/autzen/autzen-classified.copc.laz");
     std::string vsi ("/vsicurl/"+url);
 
     testURLs(url, bounds);

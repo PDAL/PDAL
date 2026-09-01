@@ -4,15 +4,18 @@
 
 The **M3C2 filter** uses the Multiscale Model to Model Cloud Comparison (M3C2)
 algorithm, introduced in {cite:p}`lague2013`, to find the 3D distance between two 
-point clouds. The filter takes three inputs; the first is the 'reference' cloud,
-and the second is the 'compared' cloud whose change is being calculated. The third input
-is a set of "core points", generally a subset of the reference cloud, for which distance 
-metrics are calculated. For example, these could be spaced in a regular grid created by 
-{ref}`filters.voxelcenternearestneighbor` to allow for easier rasterization.
+point clouds. The filter takes three inputs in the following order:
+
+- Input 1: the reference point cloud
+- Input 2: the comparison cloud whose change is being calculated
+- Input 3: a set of "core points", generally a subset of the reference cloud, for which distance 
+  metrics and statistics are calculated. For example, these could be spaced in
+  a regular grid created by {ref}`filters.voxelcenternearestneighbor` to allow
+  for easier rasterization.
 
 M3C2 creates seven new dimensions: `m3c2_distance`, `m3c2_uncertainty`, `m3c2_significant`, 
 `m3c2_std_dev1`, `m3c2_std_dev2`, `m3c2_count1` & `m3c2_count2`. The filter always returns 
-a single PointView containg core points.
+a single PointView containing only the core points.
 
 ```{note}
 For best results, the input point sets can be aligned using a registration algorithm like 
@@ -62,7 +65,7 @@ For best results, the input point sets can be aligned using a registration algor
             "Sampled"
         ]
     },
-        "output.las"
+    "output.las"
 ]
 ```
 

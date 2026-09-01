@@ -43,6 +43,11 @@
 namespace pdal
 {
 
+namespace connector
+{
+    class Connector;
+}
+
 namespace stac
 {
     class Item;
@@ -64,12 +69,16 @@ namespace stac
 
     pdal_error stac_error(std::string id, std::string stacType, std::string const& msg);
     pdal_error stac_error(std::string const& msg);
+    NL::json loadSchemaJson(const connector::Connector& connector,
+        const std::string& url, bool validateSchemaSchema);
 
 
 namespace StacUtils
 {
 
-    std::string handleRelativePath(std::string srcPath, std::string linkPath);
+    // Exported so it can be unit tested.
+    PDAL_EXPORT std::string handleRelativePath(std::string srcPath,
+        std::string linkPath);
     std::time_t getStacTime(std::string in);
     std::string stacId(const NL::json& stac);
     std::string stacType(const NL::json& stac);

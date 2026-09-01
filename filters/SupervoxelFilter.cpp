@@ -102,7 +102,7 @@ size_t SupervoxelFilter::estimateClusterCount(PointView &view)
     std::set<Voxel> populatedVoxels;
     PointRef point(view);
     double x,y,z;
-    double originX, originY, originZ;
+    double originX{0.0}, originY{0.0}, originZ{0.0};
 
     for (PointId id = 0; id < view.size(); ++id)
     {

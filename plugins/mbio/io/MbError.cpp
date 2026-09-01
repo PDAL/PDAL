@@ -66,6 +66,7 @@ std::map<int, std::string> errors =
     { 14, "Bad system." },
     { 15, "Bad data." },
     { 16, "Missing data." },
+    { 17, "Bad time value." },
     { -1, "Time gap." },
     { -2, "Position out of bounds." },
     { -3, "Time out of bounds." },

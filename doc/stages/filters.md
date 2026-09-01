@@ -235,7 +235,7 @@ filters.griddecimation
 
 {ref}`filters.m3c2`
 
-; Compute the 3D distance between two sets of points based on the M3C2 algorithm.
+: Compute the 3D distance between two sets of points based on the M3C2 algorithm.
 
 {ref}`filters.miniball`
 

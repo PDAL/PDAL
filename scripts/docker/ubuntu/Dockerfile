@@ -17,7 +17,7 @@ SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 RUN mamba install -y \
     git compilers cmake ninja make \
     conda-pack \
-    python=${PYTHON_VERSION} pip numpy scikit-build-core pybind11 \
+    python=${PYTHON_VERSION} pip numpy scikit-build-core uv pybind11 \
     && \
     mamba install -y libpdal --only-deps
 
@@ -25,10 +25,12 @@ RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
     cd pdal ; \
     git checkout ${GITHUB_SHA}
 
+
 RUN mkdir -p pdal/build && \
     cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_AR=${CONDA_PREFIX}/bin/gcc-ar \
     -DCMAKE_PREFIX_PATH:FILEPATH="$CONDA_PREFIX/lib" \
     -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
     -DBUILD_PLUGIN_CPD=ON \
@@ -55,8 +57,8 @@ RUN cd pdal/build  && \
     ninja install
 
 RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && \
-    cd pdal-python-plugins && git checkout 1.6.6  && \
-    python -m pip install \
+    cd pdal-python-plugins && git checkout 1.6.7  && \
+    uv pip install \
     -Cbuild-dir=build \
     . \
     --config-settings=cmake.build-type="Release" \
@@ -65,8 +67,8 @@ RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && 
     --no-build-isolation
 
 RUN git clone https://github.com/PDAL/python.git pdal-python && \
-    cd pdal-python && git checkout 3.5.3  && \
-    python -m pip install \
+    cd pdal-python && git checkout 3.5.4  && \
+    uv pip install \
     -Cbuild-dir=build \
     . \
     --config-settings=cmake.build-type="Release" \

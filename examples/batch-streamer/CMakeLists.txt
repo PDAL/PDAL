@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.13)
 project(BatchStreamer)
 
 find_package(PDAL 2.0.0 REQUIRED CONFIG)

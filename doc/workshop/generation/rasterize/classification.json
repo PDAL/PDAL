@@ -1,9 +1,9 @@
 {
   "pipeline":[
     {
-        "type":"readers.ept",
-        "filename":"https://na-c.entwine.io/dk/ept.json",
-        "bounds":"([1401016, 1410670], [7476527, 7484590])",
+        "type":"readers.copc",
+        "filename":"https://data.pointcloud.org/denmark/copenhagen-kastellet.copc.laz",
+        "bounds":"([1401200, 1402800], [7496400, 7497900])",
         "resolution": 5 
     },
     {
@@ -16,4 +16,3 @@
     }
   ]
 }
-

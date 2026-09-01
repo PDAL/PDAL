@@ -159,13 +159,15 @@ void Item::validate()
 
     nlohmann::json_schema::json_validator val(
         [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
-            json = m_connector.getJson(json_uri.url());
+            json = loadSchemaJson(m_connector, json_uri.url(),
+                m_schemaUrls.validateSchemaSchema);
         },
         [](const std::string &, const std::string &) {}
     );
 
     // Validate against base Item schema first
-    NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
+    NL::json schemaJson = loadSchemaJson(m_connector, m_schemaUrls.item,
+        m_schemaUrls.validateSchemaSchema);
     val.set_root_schema(schemaJson);
     try {
         val.validate(m_json);
@@ -186,7 +188,8 @@ void Item::validate()
             std::string url = stacValue<std::string>(extSchemaUrl, "", m_json);
 
             try {
-                NL::json schemaJson = m_connector.getJson(url);
+                NL::json schemaJson = loadSchemaJson(m_connector, url,
+                    m_schemaUrls.validateSchemaSchema);
                 val.set_root_schema(schemaJson);
                 val.validate(m_json);
             }

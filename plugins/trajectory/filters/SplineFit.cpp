@@ -78,8 +78,8 @@ bool SplineFit<N>::fillmissing(bool linearfit)
         if (!missing[i])
             continue;
 
-        int ia;
-        int ib;
+        int ia(0);
+        int ib(0);
         int k = 0;
         if (i == num)
         {
