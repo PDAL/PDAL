@@ -14,7 +14,7 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 WORKSHOPOPTS    = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) -E -c . ./workshop
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest jupyterbook
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest jupyterbook logo-assets
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -49,4 +49,12 @@ jupyterbook: ./doxygen/xml/index.xml _config.yml
 	cd .. && doxygen ./doc/doxygen/doxygen.conf 1> /dev/null && cd doc
 	@echo
 	@echo "Built doxygen"
+
+# Regenerates the checked-in PNG logo assets from the master SVGs
+# (_static/logo). Optional and maintainer-only -- not a prerequisite of
+# any target above -- since the PNGs the docs reference are committed to
+# the repo like any other doc asset. Requires rsvg-convert; run by hand
+# after editing a master SVG.
+logo-assets:
+	./generate_logo_assets.sh
 

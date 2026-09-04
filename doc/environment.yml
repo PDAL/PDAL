@@ -8,3 +8,4 @@ dependencies:
   - sphinx-notfound-page
   - sphinx-inline-tabs
   - cmake
+  - doxygen
