@@ -55,6 +55,24 @@ if (DOXYGEN_FOUND)
 endif()
 
 ###
+### Logo assets (optional, maintainer-only)
+###
+### The PDAL logos are maintained as SVG (doc/_static/logo); the PNG
+### derivatives the docs reference (e.g. latex_logo, since pdflatex has no
+### native SVG support) are committed to the repo like any other doc
+### asset, so building the docs never needs an SVG rasterizer. This
+### target is only a convenience for regenerating those PNGs by hand
+### after editing a master SVG -- it is not a dependency of any build
+### target below, and doc/generate_logo_assets.sh no-ops cleanly if
+### rsvg-convert isn't installed.
+if (RSVG_CONVERT_EXECUTABLE)
+    add_custom_target(logo_assets
+        COMMAND ${PDAL_DOC_DIR}/generate_logo_assets.sh
+        WORKING_DIRECTORY ${PDAL_DOC_DIR}
+        COMMENT "Regenerating PNG logo assets from the master SVGs (optional, maintainer-only)")
+endif()
+
+###
 ### Jupyterbook config
 ###
 

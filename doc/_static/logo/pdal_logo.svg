@@ -13,9 +13,9 @@
    inkscape:version="0.48.1 r9760"
    version="1.1"
    id="svg2"
-   height="1052.3622047"
-   width="744.09448819"
-   inkscape:export-filename="/Users/hobu/Desktop/pdal_logo.png"
+   height="204.441"
+   viewBox="94.000 54.246 152.657 204.441"
+   width="152.657"
    inkscape:export-xdpi="250"
    inkscape:export-ydpi="250">
   <defs
@@ -87,7 +87,7 @@
        id="text3857"
        y="244.32472"
        x="103.92929"
-       style="font-size:57.53865814px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:120.00000477%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#434343;fill-opacity:1;stroke:none;font-family:Bauhaus 93;-inkscape-font-specification:Bauhaus 93 Bold"
+       style="font-size:57.53865814px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:120.00000477%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#434343;fill-opacity:1;stroke:none;font-family:'Bauhaus 93';-inkscape-font-specification:'Bauhaus 93'"
        xml:space="preserve"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        inkscape:export-xdpi="90"
