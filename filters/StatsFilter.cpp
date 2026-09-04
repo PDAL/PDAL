@@ -34,6 +34,7 @@
 
 #include "StatsFilter.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <unordered_map>
 
@@ -93,12 +94,6 @@ void Summary::extractMetadata(MetadataNode &m)
         for (auto& v : m_values)
             m.addList("values", v.first);
     }
-    else if (m_enumerate == Global)
-    {
-        computeGlobalStats();
-        m.add("median", m_median);
-        m.add("mad", m_mad);
-    }
     else if (m_enumerate == Count)
     {
         // For some reason we first started adding 'counts' items that look like this:
@@ -131,6 +126,17 @@ void Summary::extractMetadata(MetadataNode &m)
             m.addList("counts", std::to_string(v.first) + "/" + std::to_string(v.second));
         }
     }
+
+    if (m_globalStats != GlobalNone)
+    {
+        computeGlobalStats();
+        if (m_globalStats & GlobalMedian)
+            m.add("median", m_median);
+        if (m_globalStats & GlobalMad)
+            m.add("mad", m_mad);
+        if (m_globalStats & GlobalMode)
+            m.add("mode", m_mode);
+    }
 }
 
 void Summary::computeGlobalStats()
@@ -142,17 +148,35 @@ void Summary::computeGlobalStats()
     };
 
     // TODO add quantiles
-    m_median = compute_median(m_data);
-    std::transform(m_data.begin(), m_data.end(), m_data.begin(),
-       [this](double v) { return std::fabs(v - this->m_median); });
-    m_mad = compute_median(m_data);
+    if ((m_globalStats & (GlobalMedian | GlobalMad)) && !m_data.empty())
+    {
+        m_median = compute_median(m_data);
+        if (m_globalStats & GlobalMad)
+        {
+            DataVector deviations(m_data.size());
+            std::transform(m_data.begin(), m_data.end(), deviations.begin(),
+               [this](double v) { return std::fabs(v - this->m_median); });
+            m_mad = compute_median(deviations);
+        }
+    }
+
+    if ((m_globalStats & GlobalMode) && !m_values.empty())
+    {
+        auto mode = std::max_element(m_values.begin(), m_values.end(),
+            [](const auto& a, const auto& b)
+            {
+                return a.second < b.second;
+            });
+        m_mode = mode->first;
+    }
 }
 
 // Math comes from https://prod.sandia.gov/techlib-noauth/access-control.cgi/2008/086212.pdf
 // (Pebay paper from Sandia labs, 2008)
 bool Summary::merge(const Summary& s)
 {
-    if ((m_name != s.m_name) || (m_enumerate != s.m_enumerate) || (m_advanced != s.m_advanced))
+    if ((m_name != s.m_name) || (m_enumerate != s.m_enumerate) ||
+        (m_advanced != s.m_advanced) || (m_globalStats != s.m_globalStats))
         return false;
 
     double n1 = (double)m_cnt;
@@ -230,7 +254,7 @@ void StatsFilter::addArgs(ProgramArgs& args)
         m_dimNames);
     args.add("enumerate", "Dimensions whose values should be enumerated",
         m_enums);
-    args.add("global", "Dimensions to compute global stats (median, mad, mode)",
+    args.add("global", "Global stats to compute (median, mad, mode, all)",
         m_global);
     args.add("count", "Dimensions whose values should be counted", m_counts);
     args.add("advanced", "Calculate skewness and kurtosis", m_advanced);
@@ -286,19 +310,30 @@ void StatsFilter::prepared(PointTableRef table)
             dims[s] = Summary::Count;
     }
 
-    // Set the global flag for those dimensions specified.
+    // Set the global statistics flags.
+    m_globalStats = Summary::GlobalNone;
     for (auto& s : m_global)
     {
-        if (dims.find(s) == dims.end())
-            getWarn() << "Dimension '" << s << "' listed in --global option "
-                "does not exist.  Ignoring." << std::endl;
+        std::string stat = Utils::tolower(s);
+        Utils::trim(stat);
+
+        if (stat == "all")
+            m_globalStats |= Summary::GlobalAll;
+        else if (stat == "median")
+            m_globalStats |= Summary::GlobalMedian;
+        else if (stat == "mad")
+            m_globalStats |= Summary::GlobalMad;
+        else if (stat == "mode")
+            m_globalStats |= Summary::GlobalMode;
         else
-            dims[s] = Summary::Global;
+            getWarn() << "Global statistic '" << s << "' listed in --global "
+                "option is invalid.  Ignoring." << std::endl;
     }
+
     // Create the summary objects.
     for (auto& dv : dims)
         m_stats.insert(std::make_pair(layout->findDim(dv.first),
-            Summary(dv.first, dv.second, m_advanced)));
+            Summary(dv.first, dv.second, m_advanced, m_globalStats)));
 }
 
 
