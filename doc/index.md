@@ -2,7 +2,7 @@
 
 # PDAL - Point Data Abstraction Library
 
-```{image} ./_static/logo/pdal_logo-horizontal-outlined.svg
+```{image} ./_static/pdal-logo-horizontal.png
 :align: right
 :alt: PDAL logo
 :width: 320px
