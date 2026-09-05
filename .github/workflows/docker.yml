@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - 'doc/**'
     branches-ignore: ["dependabot/**"]
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
   pull_request:
     paths-ignore:
       - 'doc/**'
@@ -116,9 +118,9 @@ jobs:
             GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name != '' && github.event.pull_request.head.repo.full_name || github.repository }}
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}-${{ steps.prep.outputs.ARCH }}
-            docker.io/pdal/pdal:latest-${{ steps.prep.outputs.ARCH }}
             ghcr.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}-${{ steps.prep.outputs.ARCH }}
-            ghcr.io/pdal/pdal:latest-${{ steps.prep.outputs.ARCH }}
+            ${{ github.ref == 'refs/heads/master' && format('docker.io/pdal/pdal:latest-{0}', steps.prep.outputs.ARCH) || '' }}
+            ${{ github.ref == 'refs/heads/master' && format('ghcr.io/pdal/pdal:latest-{0}', steps.prep.outputs.ARCH) || '' }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
@@ -165,13 +167,29 @@ jobs:
 
       - name: Create and push multi-platform manifest
         if: env.PUSH_PACKAGES == 'true'
+        env:
+          VERSION: ${{ github.ref_name }}
         run: |
-          docker buildx imagetools create \
-          -t ghcr.io/pdal/pdal:latest \
-          ghcr.io/pdal/pdal:latest-amd64 \
-          ghcr.io/pdal/pdal:latest-arm64
+          if [[ $GITHUB_REF == refs/heads/master ]]; then
+            docker buildx imagetools create \
+            -t ghcr.io/pdal/pdal:latest \
+            ghcr.io/pdal/pdal:latest-amd64 \
+            ghcr.io/pdal/pdal:latest-arm64
 
-          docker buildx imagetools create \
-          -t pdal/pdal:latest \
-          pdal/pdal:latest-amd64 \
-          pdal/pdal:latest-arm64
+            docker buildx imagetools create \
+            -t pdal/pdal:latest \
+            pdal/pdal:latest-amd64 \
+            pdal/pdal:latest-arm64
+          fi
+
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            docker buildx imagetools create \
+            -t "ghcr.io/pdal/pdal:${VERSION}" \
+            "ghcr.io/pdal/pdal:${VERSION}-amd64" \
+            "ghcr.io/pdal/pdal:${VERSION}-arm64"
+
+            docker buildx imagetools create \
+            -t "pdal/pdal:${VERSION}" \
+            "pdal/pdal:${VERSION}-amd64" \
+            "pdal/pdal:${VERSION}-arm64"
+          fi
