@@ -20,3 +20,10 @@ if (NOT DOXYGEN_FOUND)
     message("Could not find Doxygen. API documentation will not be built.")
 endif()
 find_package(Python COMPONENTS Interpreter REQUIRED)
+
+# Optional: only used by the "logo_assets" target (see doc/CMakeLists.txt)
+# to regenerate the checked-in PNG logo assets from the master SVGs under
+# doc/_static/logo after a maintainer edits one. Not required to build
+# the docs -- the PNGs the docs actually reference are committed to the
+# repo like any other doc asset.
+find_program(RSVG_CONVERT_EXECUTABLE rsvg-convert)
