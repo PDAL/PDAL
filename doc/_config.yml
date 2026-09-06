@@ -4,7 +4,7 @@
 title: Point Data Abstraction Library (PDAL)
 author: ""
 copyright: "2026"
-logo: "_static/pdal-logo-600.png"
+logo: "_static/logo/pdal_logo-outlined.svg"
 
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
@@ -38,7 +38,7 @@ html:
   use_repository_button: true
   extra_navbar: ""
   use_edit_page_button: true
-  favicon: "./_static/logo/favicon.ico"
+  favicon: "./_static/logo/pdal_favicon.svg"
   short_title: "Documentation"
   baseurl: "https://pdal.org"
   html_show_copyright: false
@@ -51,6 +51,10 @@ html:
 sphinx:
   project: "Point cloud Data Abstraction Library"
   copyright: "%Y, PDAL Authors"
+  # Needed so the html_theme_options.logo override below (light/dark navbar
+  # logo) merges into the theme options jupyter-book already builds from the
+  # `html:` section above, instead of replacing that dict outright.
+  recursive_update: true
   local_extensions:
     embed: ./_ext
     rtd_deploy: ./_ext
@@ -62,6 +66,11 @@ sphinx:
     - sphinxcontrib.bibtex
     - notfound.extension
     - sphinxcontrib.jquery
+    # Rasterizes SVG content images (e.g. the index.md banner) to PDF via
+    # rsvg-convert for the LaTeX/PDF build; pdflatex has no native SVG
+    # support. Requires librsvg + sphinxcontrib-svg2pdfconverter in the
+    # doc build environment (see environment.yml).
+    - sphinxcontrib.rsvgconverter
   config:
     suppress_warnings: ["etoc.toctree"]
     html_show_copyright: false
@@ -83,7 +92,18 @@ sphinx:
       hpp: "cpp"
       h: "cpp"
     breathe_default_project: api
-    latex_logo: "./_static/pdal-logo-600.png"
+    # Light/dark navbar logo (sphinx-book-theme inherits this from
+    # pydata-sphinx-theme). Both are the outline-path SVGs -- the "pdal"
+    # wordmark is baked in as vector paths (see generate_outlined_svgs
+    # commentary in the master SVGs), not <text>, so neither needs the
+    # Bauhaus 93 font installed to render correctly. The dark variant adds
+    # a white halo (an SVG filter, not a font or raster effect) so the mark
+    # stays visible against a dark background.
+    html_theme_options:
+      logo:
+        image_light: "_static/logo/pdal_logo-outlined.svg"
+        image_dark: "_static/logo/pdal_logo-outlined-dark.svg"
+    latex_logo: "./_static/pdal-logo.png"
     latex_use_parts: false
     latex_show_urls: "inline"
 

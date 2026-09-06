@@ -2,9 +2,18 @@
 
 # PDAL - Point Data Abstraction Library
 
-```{image} ./_static/pdal_logo.png
+```{image} ./_static/logo/pdal_logo-horizontal-outlined.svg
 :align: right
 :alt: PDAL logo
+:width: 320px
+:class: only-light
+```
+
+```{image} ./_static/logo/pdal_logo-horizontal-outlined-dark.svg
+:align: right
+:alt: PDAL logo
+:width: 320px
+:class: only-dark
 ```
 
 PDAL is a C++ library for translating and manipulating [point cloud

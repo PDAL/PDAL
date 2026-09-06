@@ -9,7 +9,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   sodipodi:docname="pdal_logo.svg"
+   sodipodi:docname="pdal_logo-outlined-dark.svg"
    inkscape:version="0.48.1 r9760"
    version="1.1"
    id="svg2"
@@ -18,8 +18,22 @@
    width="152.657"
    inkscape:export-xdpi="250"
    inkscape:export-ydpi="250">
-  <defs
-     id="defs4" />
+    <defs
+     id="defs4">
+    <filter
+       id="pdal-logo-halo"
+       x="-30%" y="-30%" width="160%" height="160%"
+       color-interpolation-filters="sRGB">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="8" result="dilated" />
+      <feGaussianBlur in="dilated" stdDeviation="2" result="blurred" />
+      <feFlood flood-color="#ffffff" flood-opacity="1" result="white" />
+      <feComposite in="white" in2="blurred" operator="in" result="halo" />
+      <feMerge>
+        <feMergeNode in="halo" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -76,27 +90,18 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
+  <g filter="url(#pdal-logo-halo)">
   <g
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="PDAL text"
      style="display:inline">
-    <text
-       inkscape:transform-center-x="15.014187"
-       sodipodi:linespacing="120%"
-       id="text3857"
-       y="244.32472"
-       x="103.92929"
-       style="font-size:57.53865814px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:120.00000477%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#434343;fill-opacity:1;stroke:none;font-family:'Bauhaus 93';-inkscape-font-specification:'Bauhaus 93'"
-       xml:space="preserve"
-       inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90"
-       transform="scale(1.0324093,0.96860809)"><tspan
-         y="244.32472"
-         x="103.92929"
-         id="tspan3859"
-         sodipodi:role="line">pdal</tspan></text>
+    <g id="text3857-outline" transform="scale(1.0324093,0.96860809)" style="fill:#434343;fill-opacity:1;stroke:none">
+       <path d="M461 -369H87V463Q87 692 207 836Q276 919 382.5 968.0Q489 1017 601 1017Q824 1017 977.0 867.0Q1130 717 1130 499Q1130 287 978.0 133.0Q826 -21 618 -21Q584 -21 518 -14V398Q564 361 610 361Q668 361 709.5 404.0Q751 447 751 506Q751 565 708.0 606.5Q665 648 605 648Q461 648 461 449Z" transform="translate(103.929290,244.324720) scale(0.02809505,-0.02809505)" />
+       <path d="M723 1365H1097V534Q1097 305 977 161Q908 78 801.5 29.0Q695 -20 583 -20Q360 -20 207.0 130.0Q54 280 54 498Q54 709 206.0 863.0Q358 1017 566 1017Q599 1017 666 1011V599Q620 635 574 635Q516 635 474.5 592.5Q433 550 433 490Q433 432 476.0 390.5Q519 349 579 349Q723 349 723 548Z" transform="translate(137.221922,244.324720) scale(0.02809505,-0.02809505)" />
+       <path d="M663 374V-13Q617 -21 579 -21Q354 -21 204.0 127.0Q54 275 54 498Q54 715 205.5 866.0Q357 1017 574 1017Q816 1017 955.5 875.5Q1095 734 1095 489V0H721V462Q721 541 682.5 588.0Q644 635 579 635Q520 635 477.0 592.0Q434 549 434 490Q434 428 473.0 388.0Q512 348 572 348Q621 348 663 374Z" transform="translate(170.514554,244.324720) scale(0.02809505,-0.02809505)" />
+       <path d="M483 1365V0H109V1365Z" transform="translate(204.340991,244.324720) scale(0.02809505,-0.02809505)" />
+    </g>
   </g>
   <g
      inkscape:groupmode="layer"
@@ -317,5 +322,6 @@
        id="path3963"
        style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        sodipodi:type="arc" />
+  </g>
   </g>
 </svg>

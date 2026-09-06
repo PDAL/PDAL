@@ -81,22 +81,12 @@
      id="layer4"
      inkscape:label="PDAL text"
      style="display:inline">
-    <text
-       inkscape:transform-center-x="19.150543"
-       sodipodi:linespacing="120%"
-       id="text3857"
-       y="190.19733"
-       x="239.82965"
-       style="font-size:73.3903656px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:120.00000477%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#434343;fill-opacity:1;stroke:none;font-family:'Bauhaus 93';-inkscape-font-specification:'Bauhaus 93'"
-       xml:space="preserve"
-       inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90"
-       transform="scale(1.0324093,0.96860809)"><tspan
-         y="190.19733"
-         x="239.82965"
-         id="tspan3859"
-         sodipodi:role="line">pdal</tspan></text>
+    <g id="text3857-outline" transform="scale(1.0324093,0.96860809)" style="fill:#434343;fill-opacity:1;stroke:none">
+       <path d="M461 -369H87V463Q87 692 207 836Q276 919 382.5 968.0Q489 1017 601 1017Q824 1017 977.0 867.0Q1130 717 1130 499Q1130 287 978.0 133.0Q826 -21 618 -21Q584 -21 518 -14V398Q564 361 610 361Q668 361 709.5 404.0Q751 447 751 506Q751 565 708.0 606.5Q665 648 605 648Q461 648 461 449Z" transform="translate(239.829650,190.197330) scale(0.03583514,-0.03583514)" />
+       <path d="M723 1365H1097V534Q1097 305 977 161Q908 78 801.5 29.0Q695 -20 583 -20Q360 -20 207.0 130.0Q54 280 54 498Q54 709 206.0 863.0Q358 1017 566 1017Q599 1017 666 1011V599Q620 635 574 635Q516 635 474.5 592.5Q433 550 433 490Q433 432 476.0 390.5Q519 349 579 349Q723 349 723 548Z" transform="translate(282.294290,190.197330) scale(0.03583514,-0.03583514)" />
+       <path d="M663 374V-13Q617 -21 579 -21Q354 -21 204.0 127.0Q54 275 54 498Q54 715 205.5 866.0Q357 1017 574 1017Q816 1017 955.5 875.5Q1095 734 1095 489V0H721V462Q721 541 682.5 588.0Q644 635 579 635Q520 635 477.0 592.0Q434 549 434 490Q434 428 473.0 388.0Q512 348 572 348Q621 348 663 374Z" transform="translate(324.758931,190.197330) scale(0.03583514,-0.03583514)" />
+       <path d="M483 1365V0H109V1365Z" transform="translate(367.904438,190.197330) scale(0.03583514,-0.03583514)" />
+    </g>
   </g>
   <g
      inkscape:groupmode="layer"
