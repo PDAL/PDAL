@@ -55,14 +55,31 @@ public:
 
 typedef std::map<double, point_count_t> EnumMap;
 typedef std::vector<double> DataVector;
+typedef uint32_t GlobalStats;
+
+    enum GlobalStat
+    {
+        GlobalNone = 0,
+        GlobalMedian = 1,
+        GlobalMad = 2,
+        GlobalMode = 4,
+        GlobalAll = GlobalMedian | GlobalMad | GlobalMode
+    };
 
 public:
-    Summary(std::string name, EnumType enumerate, bool advanced = true) :
-        m_name(name), m_enumerate(enumerate), m_advanced(advanced)
-    { reset(); }
+    Summary(std::string name, EnumType enumerate, bool advanced = true,
+            GlobalStats globalStats = GlobalNone) :
+        m_name(name), m_enumerate(enumerate), m_advanced(advanced),
+        m_globalStats(globalStats)
+    {
+        if (m_enumerate == Global && m_globalStats == GlobalNone)
+            m_globalStats = GlobalAll;
+        reset();
+    }
 
-    // Merge another summary with this one. 'name', 'enumerate' and 'advanced' must match
-    // or false is returned and no merge occurs.
+    // Merge another summary with this one. 'name', 'enumerate',
+    // 'advanced' and 'globalStats' must match or false is returned and no
+    // merge occurs.
     bool merge(const Summary& s);
     double minimum() const
         { return m_min; }
@@ -133,6 +150,8 @@ public:
         { return m_median; }
     double mad() const
         { return m_mad; }
+    double mode() const
+        { return m_mode; }
     point_count_t count() const
         { return m_cnt; }
     std::string name() const
@@ -150,6 +169,9 @@ public:
         m_cnt = 0;
         m_median = 0.0;
         m_mad = 0.0;
+        m_mode = 0.0;
+        m_values.clear();
+        m_data.clear();
         M1 = M2 = M3 = M4 = 0.0;
     }
 
@@ -159,9 +181,9 @@ public:
         m_min = (std::min)(m_min, value);
         m_max = (std::max)(m_max, value);
 
-        if (m_enumerate != NoEnum)
+        if (m_enumerate != NoEnum || (m_globalStats & GlobalMode))
             m_values[value]++;
-        if (m_enumerate == Global)
+        if (m_globalStats & (GlobalMedian | GlobalMad))
         {
             if (m_data.capacity() - m_data.size() < 10000)
                 m_data.reserve(m_data.capacity() + m_cnt);
@@ -199,10 +221,12 @@ private:
     std::string m_name;
     EnumType m_enumerate;
     bool m_advanced;
+    GlobalStats m_globalStats;
     double m_max;
     double m_min;
     double m_mad;
     double m_median;
+    double m_mode;
     EnumMap m_values;
     DataVector m_data;
     point_count_t m_cnt;
@@ -216,7 +240,7 @@ private:
 class PDAL_EXPORT StatsFilter : public Filter, public Streamable
 {
 public:
-    StatsFilter()
+    StatsFilter() : m_globalStats(stats::Summary::GlobalNone)
         {}
 
     std::string getName() const;
@@ -239,6 +263,7 @@ private:
     StringList m_counts;
     StringList m_global;
     std::string m_commonSrs;
+    stats::Summary::GlobalStats m_globalStats;
     bool m_advanced;
     std::map<Dimension::Id, stats::Summary> m_stats;
 };

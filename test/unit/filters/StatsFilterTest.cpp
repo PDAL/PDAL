@@ -407,35 +407,151 @@ TEST(Stats, enum)
 
 TEST(Stats, global)
 {
-    BOX3D bounds(1.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
-    Options ops;
-    ops.add("bounds", bounds);
-    ops.add("count", 10);
-    ops.add("mode", "ramp");
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    table.layout()->registerDim(Dimension::Id::Z);
 
-    FauxReader reader;
-    reader.setOptions(ops);
+    PointViewPtr view(new PointView(table));
+    std::vector<int> values { 0, 10, 10, 20, 30, 40, 50 };
+    for (PointId i = 0; i < values.size(); ++i)
+    {
+        view->setField(Dimension::Id::X, i, values[i]);
+        view->setField(Dimension::Id::Y, i, values[i]);
+        view->setField(Dimension::Id::Z, i, values[i]);
+    }
+
+    BufferReader reader;
+    reader.addView(view);
 
     Options filterOps;
     filterOps.add("dimensions", "X, Y, Z");
-    filterOps.add("global", "Z, Y, X");
+    filterOps.add("global", "all");
     filterOps.add("count", "Y");
 
     StatsFilter filter;
     filter.setInput(reader);
     filter.setOptions(filterOps);
 
-    PointTable table;
     filter.prepare(table);
     filter.execute(table);
 
     const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-    EXPECT_DOUBLE_EQ(statsZ.median(), 555.55555555555554);
-	EXPECT_DOUBLE_EQ(statsZ.mad(), 333.33333333333331);
-	EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
-	EXPECT_DOUBLE_EQ(statsZ.maximum(), 1000.0);
+    EXPECT_DOUBLE_EQ(statsZ.median(), 20.0);
+    EXPECT_DOUBLE_EQ(statsZ.mad(), 10.0);
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 50.0);
+    EXPECT_DOUBLE_EQ(statsZ.mode(), 10.0);
+}
 
+TEST(Stats, globalMode)
+{
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::Classification);
+
+    PointViewPtr view(new PointView(table));
+
+    std::vector<int> values { 2, 2, 7, 3, 2, 7, 3, 3, 3, 7 };
+    for (PointId i = 0; i < values.size(); ++i)
+        view->setField(Dimension::Id::Classification, i, values[i]);
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options o;
+    o.add("dimensions", "Classification");
+    o.add("global", "mode");
+
+    StatsFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(o);
+
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& stats =
+        filter.getStats(Dimension::Id::Classification);
+    EXPECT_DOUBLE_EQ(stats.mode(), 3.0);
+
+    MetadataNode m = filter.getMetadata();
+    std::vector<MetadataNode> children = m.children("statistic");
+
+    auto findNode = [](MetadataNode m,
+        const std::string name, const std::string val)
+    {
+        auto findNameVal = [name, val](MetadataNode m)
+            { return (m.name() == name && m.value() == val); };
+
+        return m.find(findNameVal);
+    };
+
+    bool found = false;
+    for (auto mi = children.begin(); mi != children.end(); ++mi)
+    {
+        if (findNode(*mi, "name", "Classification").valid())
+        {
+            found = true;
+            EXPECT_FALSE(mi->findChild("median").valid());
+            EXPECT_FALSE(mi->findChild("mad").valid());
+            EXPECT_DOUBLE_EQ(mi->findChild("mode").value<double>(), 3.0);
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+TEST(Stats, globalMedianOnly)
+{
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+
+    PointViewPtr view(new PointView(table));
+
+    std::vector<int> values { 1, 5, 8, 25, 20 };
+    for (PointId i = 0; i < values.size(); ++i)
+        view->setField(Dimension::Id::X, i, values[i]);
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options o;
+    o.add("dimensions", "X");
+    o.add("global", "median");
+
+    StatsFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(o);
+
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& stats = filter.getStats(Dimension::Id::X);
+    EXPECT_DOUBLE_EQ(stats.median(), 8.0);
+
+    MetadataNode m = filter.getMetadata();
+    std::vector<MetadataNode> children = m.children("statistic");
+
+    auto findNode = [](MetadataNode m,
+        const std::string name, const std::string val)
+    {
+        auto findNameVal = [name, val](MetadataNode m)
+            { return (m.name() == name && m.value() == val); };
+
+        return m.find(findNameVal);
+    };
+
+    bool found = false;
+    for (auto mi = children.begin(); mi != children.end(); ++mi)
+    {
+        if (findNode(*mi, "name", "X").valid())
+        {
+            found = true;
+            EXPECT_DOUBLE_EQ(mi->findChild("median").value<double>(), 8.0);
+            EXPECT_FALSE(mi->findChild("mad").valid());
+            EXPECT_FALSE(mi->findChild("mode").valid());
+        }
+    }
+    EXPECT_TRUE(found);
 }
 
 TEST(Stats, merge)
