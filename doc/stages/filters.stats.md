@@ -63,7 +63,9 @@ global
   values are `median`, `mad`, `mode`, and `all`. The value `all` enables
   `median`, `mad`, and `mode`. These statistics require keeping additional
   point data or value counts while the filter runs, so none are calculated
-  unless explicitly requested. \[Default: none\]
+  unless explicitly requested. `mode` counts exact values. If multiple
+  values are tied for the highest count, the smallest tied value is reported.
+  \[Default: none\]
 
 advanced
 
