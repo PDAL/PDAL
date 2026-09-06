@@ -57,14 +57,17 @@ endif()
 ###
 ### Logo assets (optional, maintainer-only)
 ###
-### The PDAL logos are maintained as SVG (doc/_static/logo); the PNG
-### derivatives the docs reference (e.g. latex_logo, since pdflatex has no
-### native SVG support) are committed to the repo like any other doc
-### asset, so building the docs never needs an SVG rasterizer. This
-### target is only a convenience for regenerating those PNGs by hand
-### after editing a master SVG -- it is not a dependency of any build
-### target below, and doc/generate_logo_assets.sh no-ops cleanly if
-### rsvg-convert isn't installed.
+### The PDAL logos are maintained as SVG (doc/_static/logo); most of the
+### PNG derivatives the docs reference (e.g. latex_logo) are committed to
+### the repo like any other doc asset, so this target is only a
+### convenience for regenerating those PNGs by hand after editing a
+### master SVG -- it is not a dependency of any build target below, and
+### doc/generate_logo_assets.sh no-ops cleanly if rsvg-convert isn't
+### installed. This is separate from the doc build's own dependency on
+### rsvg-convert (via librsvg + sphinxcontrib-svg2pdfconverter in
+### doc/environment.yml), which sphinxcontrib.rsvgconverter uses to
+### rasterize SVG content images -- e.g. the index.md banner -- for the
+### LaTeX/PDF build, since pdflatex has no native SVG support.
 if (RSVG_CONVERT_EXECUTABLE)
     add_custom_target(logo_assets
         COMMAND ${PDAL_DOC_DIR}/generate_logo_assets.sh

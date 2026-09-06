@@ -14,9 +14,12 @@ dependencies:
   - sphinx-jupyterbook-latex
   - imagemagick
   - compilers
-  # librsvg is optional: only needed to run
+  # Needed so sphinxcontrib.rsvgconverter (enabled in _config.yml) can
+  # rasterize SVG content images to PDF-embeddable format for the LaTeX/PDF
+  # build -- pdflatex has no native SVG support. Also used by
   # doc/generate_logo_assets.sh to regenerate the checked-in PNG logo
-  # assets after editing a master SVG in _static/logo. Not required to
-  # build the docs. (e.g. `conda install -n <env> librsvg`)
+  # assets after editing a master SVG in _static/logo.
+  - librsvg
+  - sphinxcontrib-svg2pdfconverter
 
 

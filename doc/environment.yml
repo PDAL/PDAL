@@ -9,3 +9,8 @@ dependencies:
   - sphinx-inline-tabs
   - cmake
   - doxygen
+  # Needed so sphinxcontrib.rsvgconverter (enabled in _config.yml) can
+  # rasterize SVG content images to PDF-embeddable format for the LaTeX/PDF
+  # build -- pdflatex has no native SVG support.
+  - librsvg
+  - sphinxcontrib-svg2pdfconverter

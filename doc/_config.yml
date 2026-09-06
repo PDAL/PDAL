@@ -66,6 +66,11 @@ sphinx:
     - sphinxcontrib.bibtex
     - notfound.extension
     - sphinxcontrib.jquery
+    # Rasterizes SVG content images (e.g. the index.md banner) to PDF via
+    # rsvg-convert for the LaTeX/PDF build; pdflatex has no native SVG
+    # support. Requires librsvg + sphinxcontrib-svg2pdfconverter in the
+    # doc build environment (see environment.yml).
+    - sphinxcontrib.rsvgconverter
   config:
     suppress_warnings: ["etoc.toctree"]
     html_show_copyright: false
