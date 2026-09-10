@@ -355,14 +355,24 @@ std::string getcwd()
 
 std::string toCanonicalPath(std::string filename)
 {
-    return fs::weakly_canonical(toNative(filename)).u8string();
+    auto u8Str = fs::weakly_canonical(toNative(filename)).u8string();
+#ifdef __cpp_lib_char8_t  // C++20
+    return std::string(u8Str.begin(), u8Str.end());
+#else                     // C++17
+    return u8Str;
+#endif
 }
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return fs::absolute(toNative(filename)).u8string();
+    auto u8Str = fs::absolute(toNative(filename)).u8string();
+#ifdef __cpp_lib_char8_t  // C++20
+    return std::string(u8Str.begin(), u8Str.end());
+#else                     // C++17
+    return u8Str;
+#endif
 }
 
 
