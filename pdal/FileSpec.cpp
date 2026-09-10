@@ -120,7 +120,12 @@ bool FileSpec::onlyFilename() const
 
 std::string FileSpec::u8string() const
 {
+#ifdef __cpp_lib_char8_t  // C++20
+    auto u8 = m_p->m_path.u8string();
+    return std::string(u8.begin(), u8.end());
+#else                     // C++17
     return m_p->m_path.u8string();
+#endif
 }
 
 std::filesystem::path FileSpec::filePath() const
@@ -167,7 +172,7 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 void FileSpec::Private::setFilePath(const std::string& u8path)
 {
 #ifdef __cpp_lib_char8_t  // C++20
-    char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
+    const char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
     m_path = std::filesystem::path(std::u8string_view(pU8path, u8path.size()));
 #else                     // C++17
     m_path = std::filesystem::u8path(u8path);
