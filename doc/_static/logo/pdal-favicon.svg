@@ -2,6 +2,7 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+     class="pdal-logo pdal-logo--favicon"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -50,10 +51,12 @@
     </rdf:RDF>
   </metadata>
   <g
+     class="pdal-logo__image"
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
     <image
+       class="pdal-logo__image-bitmap"
        y="504.36218"
        x="347"
        id="image3059"

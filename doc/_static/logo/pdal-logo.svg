@@ -2,6 +2,7 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+     class="pdal-logo pdal-logo--vertical pdal-logo--text"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -9,7 +10,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   sodipodi:docname="pdal_logo.svg"
+   sodipodi:docname="pdal-logo.svg"
    inkscape:version="0.48.1 r9760"
    version="1.1"
    id="svg2"
@@ -77,11 +78,13 @@
     </rdf:RDF>
   </metadata>
   <g
+     class="pdal-logo__wordmark"
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="PDAL text"
      style="display:inline">
     <text
+     class="pdal-logo__wordmark-text"
        inkscape:transform-center-x="15.014187"
        sodipodi:linespacing="120%"
        id="text3857"
@@ -99,13 +102,16 @@
          sodipodi:role="line">pdal</tspan></text>
   </g>
   <g
+     class="pdal-logo__bubbles"
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Color Dots"
      style="display:inline">
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--cyan"
+     fill="#b6f2fb"
        sodipodi:type="arc"
-       style="fill:#b6f2fb;fill-opacity:1;fill-rule:evenodd;stroke:#323232;stroke-width:0.9627037;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#323232;stroke-width:0.9627037;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3003"
        sodipodi:cx="181.81787"
        sodipodi:cy="141.33174"
@@ -117,8 +123,10 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--blue"
+     fill="#55a9f6"
        sodipodi:type="arc"
-       style="fill:#55a9f6;fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.85488135;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.85488135;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3073"
        sodipodi:cx="181.81787"
        sodipodi:cy="141.33174"
@@ -130,8 +138,10 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--cyan"
+     fill="#b6f2fb"
        sodipodi:type="arc"
-       style="fill:#b6f2fb;fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3075"
        sodipodi:cx="154.31873"
        sodipodi:cy="148.77269"
@@ -143,21 +153,25 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--cyan"
+     fill="#b6f2fb"
        d="m 205.11125,243.88737 a 8.0879831,8.0879831 0 1 1 -16.17596,0 8.0879831,8.0879831 0 1 1 16.17596,0 z"
        sodipodi:ry="8.0879831"
        sodipodi:rx="8.0879831"
        sodipodi:cy="243.88737"
        sodipodi:cx="197.02327"
        id="path3079"
-       style="fill:#b6f2fb;fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.92738152;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.92738152;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        sodipodi:type="arc"
        transform="matrix(-1.0783049,0,0,1.0783049,327.70526,-161.79578)"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--navy"
+     fill="#2c7fb8"
        sodipodi:type="arc"
-       style="fill:#2c7fb8;fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.90598297;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.90598297;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3081"
        sodipodi:cx="257.19788"
        sodipodi:cy="188.88908"
@@ -169,8 +183,10 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--blue"
+     fill="#55a9f6"
        sodipodi:type="arc"
-       style="fill:#55a9f6;fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.91817224;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.91817224;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3083"
        sodipodi:cx="218.37555"
        sodipodi:cy="212.18248"
@@ -182,6 +198,8 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--navy"
+     fill="#2c7fb8"
        transform="matrix(-1.1037735,0,0,1.1037735,405.30333,-25.168442)"
        d="m 269.16809,188.88908 a 11.970215,11.970215 0 1 1 -23.94043,0 11.970215,11.970215 0 1 1 23.94043,0 z"
        sodipodi:ry="11.970215"
@@ -189,18 +207,21 @@
        sodipodi:cy="188.88908"
        sodipodi:cx="257.19788"
        id="path3111"
-       style="fill:#2c7fb8;fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.90598297;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#232323;stroke-width:0.90598297;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        sodipodi:type="arc"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
   </g>
   <g
+     class="pdal-logo__bubbles"
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Gray Dots"
      style="display:inline">
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        inkscape:export-ydpi="90"
        inkscape:export-xdpi="90"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
@@ -211,11 +232,13 @@
        sodipodi:cy="148.77269"
        sodipodi:cx="154.31873"
        id="path3838"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        sodipodi:type="arc" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        sodipodi:type="arc"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        id="path3840"
        sodipodi:cx="154.31873"
        sodipodi:cy="148.77269"
@@ -227,25 +250,29 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        d="m 205.11125,243.88737 a 8.0879831,8.0879831 0 1 1 -16.17596,0 8.0879831,8.0879831 0 1 1 16.17596,0 z"
        sodipodi:ry="8.0879831"
        sodipodi:rx="8.0879831"
        sodipodi:cy="243.88737"
        sodipodi:cx="197.02327"
        id="path3844"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.85024101;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.85024101;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        sodipodi:type="arc"
        transform="matrix(-0.94090967,0,0,0.94090967,342.27869,-120.03231)"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        inkscape:export-ydpi="90"
        inkscape:export-xdpi="90"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        transform="matrix(-1.0783049,0,0,1.0783049,433.52077,-103.18489)"
        sodipodi:type="arc"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.74190521;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.74190521;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        id="path3846"
        sodipodi:cx="197.02327"
        sodipodi:cy="243.88737"
@@ -253,6 +280,8 @@
        sodipodi:ry="8.0879831"
        d="m 205.11125,243.88737 a 8.0879831,8.0879831 0 1 1 -16.17596,0 8.0879831,8.0879831 0 1 1 16.17596,0 z" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        inkscape:export-ydpi="90"
        inkscape:export-xdpi="90"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
@@ -263,11 +292,13 @@
        sodipodi:cy="141.33174"
        sodipodi:cx="181.81787"
        id="path3850"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.75432527;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.75432527;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        sodipodi:type="arc" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        sodipodi:type="arc"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        id="path3828"
        sodipodi:cx="154.31873"
        sodipodi:cy="148.77269"
@@ -279,12 +310,14 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        inkscape:export-ydpi="90"
        inkscape:export-xdpi="90"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        transform="matrix(-1.2827378,0,0,1.2827378,395.72688,-226.15381)"
        sodipodi:type="arc"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.62366605;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.62366605;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        id="path3830"
        sodipodi:cx="197.02327"
        sodipodi:cy="243.88737"
@@ -292,19 +325,23 @@
        sodipodi:ry="8.0879831"
        d="m 205.11125,243.88737 a 8.0879831,8.0879831 0 1 1 -16.17596,0 8.0879831,8.0879831 0 1 1 16.17596,0 z" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        d="m 205.11125,243.88737 a 8.0879831,8.0879831 0 1 1 -16.17596,0 8.0879831,8.0879831 0 1 1 16.17596,0 z"
        sodipodi:ry="8.0879831"
        sodipodi:rx="8.0879831"
        sodipodi:cy="243.88737"
        sodipodi:cx="197.02327"
        id="path3961"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:1.05001616;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:1.05001616;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        sodipodi:type="arc"
        transform="matrix(-0.76189307,0,0,0.76189307,266.73335,-110.25136)"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
+     class="pdal-logo__bubble pdal-logo__bubble--gray"
+     fill="#d6d6d6"
        inkscape:export-ydpi="90"
        inkscape:export-xdpi="90"
        inkscape:export-filename="/Users/patrick/Documents/Consulting/Hobu/pdal/pdal_v2b.png"
@@ -315,7 +352,7 @@
        sodipodi:cy="148.77269"
        sodipodi:cx="154.31873"
        id="path3963"
-       style="fill:#d6d6d6;fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="fill-opacity:1;fill-rule:evenodd;stroke:#5a5a5a;stroke-width:0.80000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        sodipodi:type="arc" />
   </g>
 </svg>
