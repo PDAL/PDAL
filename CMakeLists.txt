@@ -119,6 +119,7 @@ include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/gcs.cmake) # Optional
 include(${PDAL_CMAKE_DIR}/utfcpp.cmake)
+include(${PDAL_CMAKE_DIR}/arrow.cmake) # Optional
 
 #------------------------------------------------------------------------------
 # generate the pdal_features.hpp header
@@ -296,6 +297,12 @@ if (LibXml2_FOUND)
         LibXml2::LibXml2)
 endif()
 
+if (Arrow_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        Arrow::arrow_shared
+        Parquet::parquet_shared)
+endif()
 
 
 #
