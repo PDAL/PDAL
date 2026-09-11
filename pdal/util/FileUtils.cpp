@@ -368,9 +368,9 @@ std::string toAbsolutePath(const std::string& filename)
 std::string toU8String(const fs::path& path)
 {
     auto u8Str = path.u8string();
-#ifdef __cpp_lib_char8_t  // C++20
+#ifdef PDAL_CPP20  // C++20
     return std::string(u8Str.begin(), u8Str.end());
-#else                     // C++17
+#else              // C++17
     return u8Str;
 #endif
 }
