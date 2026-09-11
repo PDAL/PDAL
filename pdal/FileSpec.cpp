@@ -167,10 +167,10 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 
 void FileSpec::Private::setFilePath(const std::string& u8path)
 {
-#ifdef __cpp_lib_char8_t  // C++20
+#ifdef PDAL_CPP20  // C++20
     const char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
     m_path = std::filesystem::path(std::u8string_view(pU8path, u8path.size()));
-#else                     // C++17
+#else              // C++17
     m_path = std::filesystem::u8path(u8path);
 #endif
 }
