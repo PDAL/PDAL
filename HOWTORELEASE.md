@@ -61,7 +61,12 @@ This document describes the process for releasing a new version of PDAL.
     and a starting point. If you find issues after making the release branch,
     add them to the release notes.
 
-7) Update Conda package
+7) Confirm the Docker workflow published `pdal/pdal:x.x.x` and
+   `ghcr.io/pdal/pdal:x.x.x` for both amd64 and arm64.
+
+   >     docker buildx imagetools inspect pdal/pdal:2.9.0
+
+8) Update Conda package
 
    - For PDAL releases that bump minor version number, but do not change
      dependencies or build configurations, the
@@ -81,7 +86,7 @@ This document describes the process for releasing a new version of PDAL.
      <https://github.com/conda-forge/libpdal-feedstock> repository. In
      these cases, the build number should be incremented.
 
-8) \[Optional\] Update Alpine package
+9) \[Optional\] Update Alpine package
 
    - The PDAL Alpine package lives at
      <https://github.com/alpinelinux/aports/blob/master/testing/pdal/APKBUILD>.
