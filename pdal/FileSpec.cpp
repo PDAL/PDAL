@@ -39,6 +39,7 @@
 #include <pdal/util/private/JsonSupport.hpp>
 #include <pdal/private/FileSpecHelper.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
@@ -120,7 +121,7 @@ bool FileSpec::onlyFilename() const
 
 std::string FileSpec::u8string() const
 {
-    return m_p->m_path.u8string();
+    return FileUtils::toU8String(m_p->m_path);
 }
 
 std::filesystem::path FileSpec::filePath() const
@@ -166,10 +167,10 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 
 void FileSpec::Private::setFilePath(const std::string& u8path)
 {
-#ifdef __cpp_lib_char8_t  // C++20
-    char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
+#ifdef PDAL_CPP20  // C++20
+    const char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
     m_path = std::filesystem::path(std::u8string_view(pU8path, u8path.size()));
-#else                     // C++17
+#else              // C++17
     m_path = std::filesystem::u8path(u8path);
 #endif
 }
