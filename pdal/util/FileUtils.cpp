@@ -46,10 +46,6 @@
 #include <codecvt>
 #endif
 
-#include <filesystem>
-namespace fs = std::filesystem;
-
-
 #include <cpl_string.h>
 #include <cpl_vsi.h>
 
@@ -59,6 +55,8 @@ namespace fs = std::filesystem;
 #include <pdal/util/VSIIO.hpp>
 
 #include "pdal_util_internal.hpp"
+
+namespace fs = std::filesystem;
 
 namespace pdal
 {
@@ -355,14 +353,26 @@ std::string getcwd()
 
 std::string toCanonicalPath(std::string filename)
 {
-    return fs::weakly_canonical(toNative(filename)).u8string();
+    return toU8String(fs::weakly_canonical(toNative(filename)));
 }
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return fs::absolute(toNative(filename)).u8string();
+    return toU8String(fs::absolute(toNative(filename)));
+}
+
+
+// Converts a fs::path to a u8 std::string, C++20 & C++17 compatible
+std::string toU8String(const fs::path& path)
+{
+    auto u8Str = path.u8string();
+#ifdef PDAL_CPP20  // C++20
+    return std::string(u8Str.begin(), u8Str.end());
+#else              // C++17
+    return u8Str;
+#endif
 }
 
 
