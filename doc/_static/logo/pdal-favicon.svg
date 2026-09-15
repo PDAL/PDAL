@@ -2,6 +2,7 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+     class="pdal-logo pdal-logo--favicon"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -10,8 +11,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="80.020"
+   height="80.020"
+   viewBox="335.000 492.359 80.020 80.020"
    id="svg3043"
    version="1.1"
    inkscape:version="0.48.1 r9760"
@@ -49,10 +51,12 @@
     </rdf:RDF>
   </metadata>
   <g
+     class="pdal-logo__image"
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
     <image
+       class="pdal-logo__image-bitmap"
        y="504.36218"
        x="347"
        id="image3059"
