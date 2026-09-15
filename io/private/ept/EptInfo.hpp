@@ -38,6 +38,8 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 
+#include <nlohmann/json.hpp>
+
 #include "FixedPointLayout.hpp"
 
 namespace pdal
