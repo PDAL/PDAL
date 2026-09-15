@@ -34,6 +34,8 @@
 
 #include "SortFilter.hpp"
 
+#include <algorithm>
+
 namespace pdal
 {
 
@@ -64,6 +66,10 @@ void SortFilter::addArgs(ProgramArgs& args)
 
 void SortFilter::prepared(PointTableRef table)
 {
+    // reversing input names so user-listed dimensions are treated in most-to-least
+    // significant order when sorting (ie sort least significant first...)
+    std::reverse(m_dimNames.begin(), m_dimNames.end());
+    
     PointLayoutPtr layout(table.layout());
     for (auto& s : m_dimNames)
     {
