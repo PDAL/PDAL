@@ -53,16 +53,16 @@ public:
     std::string getName() const;
 
 private:
-    std::map<uint64_t, PointViewPtr> m_viewMap;
-    std::string m_dimName;
-    Dimension::Id m_dimId;
+    std::map<size_t, PointViewPtr> m_viewMap;
+    StringList m_dimNames;
+    Dimension::IdList m_dimIds;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 
     GroupByFilter& operator=(const GroupByFilter&); // not implemented
-    GroupByFilter(const GroupByFilter&); // not implemented
+    GroupByFilter(const GroupByFilter&);            // not implemented
 };
 
 } // namespace pdal
