@@ -34,7 +34,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7
-    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: TheMrMilchmann/setup-msvc-dev@v4
+      with:
+        arch: x64
     - uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
