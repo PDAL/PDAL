@@ -126,6 +126,7 @@ private:
     bool fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo) override;
     void createExtraFields(const FileInfoPtr& fileInfo,
         Feature& feature) override;
+    void finalize(const std::string& filename) override;
 
     StringList m_extensions;
     StringList m_assetTypes;

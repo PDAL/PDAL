@@ -95,6 +95,7 @@ private:
         Feature& feature) {}
     virtual bool fastBoundary(PipelineManager& manager, FileInfoPtr& fileInfo) 
         { return false; }
+    virtual void finalize(const std::string& filename) {}
 
     bool createFeature(const FileInfoPtr& fileInfo);
     bool isFileIndexed(const FileInfoPtr& fileInfo);

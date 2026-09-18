@@ -1,6 +1,6 @@
 #include "StacIndex.hpp"
 #include "Dataset.hpp"
-
+#include "ArrowRebuild.hpp"
 #include <pdal/util/private/JsonSupport.hpp>
 
 namespace pdal
@@ -161,6 +161,11 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
         feature.setField(m_pcStatsField, stacFileInfo.statistics());
         feature.setField(m_projBboxField, stacFileInfo.bbox());
     }
+}
+
+void StacIndexBuilder::finalize(const std::string& filename)
+{
+    nestFieldsToStruct(filename);
 }
 
 #endif // PDAL_HAVE_OGR_PARQUET

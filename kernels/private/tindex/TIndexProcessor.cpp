@@ -108,6 +108,9 @@ void TIndexProcessor::create(const StringList& files, PipelineManager& mgr)
     }
     if (!indexedFile)
         throw TIndexError("Couldn't index any files.");
+
+    m_dataset.reset();
+    finalize(FileUtils::toAbsolutePath(m_args.idxFilename));
 }
 
 std::vector<FileInfo> TIndexProcessor::readIndex()
