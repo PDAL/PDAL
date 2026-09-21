@@ -272,7 +272,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${WINSOCK_LIBRARY}
 )
 
-if (ZSTD_FOUND)
+if (PDAL_HAVE_ZSTD)
     target_link_libraries(${PDAL_LIB_NAME}
         PRIVATE
         zstd::libzstd)
