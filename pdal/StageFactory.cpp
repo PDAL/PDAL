@@ -51,16 +51,16 @@ namespace pdal
 */
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
-    std::string ext;
+    std::string lFilename = Utils::tolower(filename);
 
-    if (Utils::endsWith(filename, "ept.json") || Utils::startsWith(filename, "ept://"))
+    if (Utils::endsWith(lFilename, "ept.json") || Utils::startsWith(lFilename, "ept://"))
         return "readers.ept";
-    if (Utils::startsWith(filename, "i3s://"))
+    if (Utils::startsWith(lFilename, "i3s://"))
         return "readers.i3s";
-    if (Utils::endsWith(filename, ".copc.laz"))
+    if (Utils::endsWith(lFilename, ".copc.laz"))
         return "readers.copc";
 
-    ext = FileUtils::extension(filename);
+    std::string ext = FileUtils::extension(lFilename);
     // Strip off '.' and make lowercase.
     if (ext.length() > 1)
         ext = Utils::tolower(ext.substr(1));
@@ -80,7 +80,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     std::string lFilename = Utils::tolower(filename);
     if (lFilename == "devnull" || lFilename == "/dev/null")
         return "writers.null";
-    if (Utils::endsWith(filename, ".copc.laz"))
+    if (Utils::endsWith(lFilename, ".copc.laz"))
         return "writers.copc";
 
     std::string ext;
