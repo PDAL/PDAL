@@ -63,10 +63,16 @@ TEST(StageFactoryTest, extensionTest)
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.tif"), "writers.gdal");
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.tiff"), "writers.gdal");
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.vrt"), "writers.gdal");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.COPC.LAZ"), "writers.copc");
 
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.laz"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.laz"), "readers.las");
+    EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.COPC.LAZ"),
+        "readers.copc");
+    EXPECT_EQ(StageFactory::inferReaderDriver("http://foo/EPT.JSON"),
+        "readers.ept");
+    EXPECT_EQ(StageFactory::inferReaderDriver("I3S://foo"), "readers.i3s");
 
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.ntf"), "readers.nitf");
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.ntf"), "writers.nitf");
@@ -74,4 +80,3 @@ TEST(StageFactoryTest, extensionTest)
 }
 
 } // namespace pdal
-
