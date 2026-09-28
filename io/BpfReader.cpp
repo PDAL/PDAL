@@ -684,6 +684,9 @@ size_t BpfReader::readBlock(std::vector<char>& outBuf, size_t index)
     m_stream >> finalBytes;
     m_stream >> compressBytes;
 
+    if (finalBytes > outBuf.size() - index)
+        return 0;
+
     std::vector<char> in(compressBytes);
 
     // Fill the input bytes from the stream.

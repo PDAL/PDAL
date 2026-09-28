@@ -172,6 +172,81 @@ TEST(SortFilterTest, pipelineJSON)
     }
 }
 
+TEST(SortFilterTest, multidims_in_order_of_significance)
+{
+    // tests that when the user lists >1 dimension by which to sort, the
+    // dimensions are treated such that the first is "most significant".
+    // this means that points are sorted first by the first listed, then when
+    // there are "ties" _within_ equal values of first dimension the next
+    // dimension is used.
+    // this test requires that both dimensions being tested have >1 unique value.
+    // 1.2-with-color.las has classes 1-2 and returns 1-4 and satisfies this
+    // requirement.
+
+    auto mostSignificantDim = Dimension::Id::Classification;
+    auto leastSignificantDim = Dimension::Id::NumberOfReturns;
+    
+    LasReader r;
+    Options ro;
+    ro.add("filename", Support::datapath("las/1.2-with-color.las"));
+    r.setOptions(ro);
+
+    SortFilter f;
+    Options fo;
+
+    fo.add("dimension", Dimension::name(mostSignificantDim) + "," +
+                        Dimension::name(leastSignificantDim));
+    f.setOptions(fo);
+    f.setInput(r);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet viewSet = f.execute(t);
+
+    // expect a single pointset
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    // expect that the primary most significant dimension is completely sorted.
+    // assignment in loop will falsify IF an undersireably condition is encountered.
+    bool mostSignificantDimIsOrdered = true;
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        int64_t v1 = view->getFieldAs<int64_t>(mostSignificantDim, i - 1);
+        int64_t v2 = view->getFieldAs<int64_t>(mostSignificantDim, i);
+        mostSignificantDimIsOrdered &= v1 <= v2;
+    }
+    EXPECT_TRUE(mostSignificantDimIsOrdered);
+
+    // expect that the least-significant dimension is NOT completely
+    // sorted when there are more than 1 unique values in the dimension.
+    bool leastSignificantDimIsOrdered = true;
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        int64_t v1 = view->getFieldAs<int64_t>(leastSignificantDim, i - 1);
+        int64_t v2 = view->getFieldAs<int64_t>(leastSignificantDim, i);
+        leastSignificantDimIsOrdered &= v1 <= v2;
+    }
+    EXPECT_FALSE(leastSignificantDimIsOrdered);
+
+    // expect that points are totally ordered by the tuples formed of the
+    // most and least significant dimension.
+    bool totalOrdering = true;
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        std::pair p1{
+            view->getFieldAs<int64_t>(mostSignificantDim, i - 1),
+            view->getFieldAs<int64_t>(leastSignificantDim, i - 1),
+        };
+        std::pair p2{
+            view->getFieldAs<int64_t>(mostSignificantDim, i),
+            view->getFieldAs<int64_t>(leastSignificantDim, i),
+        };
+        totalOrdering &= p1 <= p2;
+    }
+    EXPECT_TRUE(totalOrdering);
+}
+
 TEST(SortFilterTest, issue1382)
 {
 

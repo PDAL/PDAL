@@ -50,3 +50,6 @@
 #endif // _MSC_VER
 #endif // _WIN32
 
+#ifdef __cpp_lib_char8_t
+#define PDAL_CPP20
+#endif // __cpp_lib_char8_t

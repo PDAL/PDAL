@@ -43,6 +43,8 @@
 #include <string>
 #include <vector>
 
+#include <filesystem>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -249,6 +251,14 @@ namespace FileUtils
     */
     PDAL_EXPORT std::string toAbsolutePath(const std::string& filename,
         const std::string base);
+
+    /**
+      Converts a path to a u8 std::string. C++20 & C++17 compatible
+
+      \param path std::filesystem::path to be converted to string.
+      \return U8-encoded string.
+    */
+    PDAL_EXPORT std::string toU8String(const std::filesystem::path& path);
 
     /**
       Get the file creation and modification times.
