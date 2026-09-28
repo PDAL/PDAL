@@ -105,6 +105,12 @@ public:
             m_chunks[i].offset += m_chunks[i - 1].offset;
             m_chunks[i].count += m_chunks[i - 1].count;
         }
+
+        // The chunks can't contain more points than the header says the file holds.
+        if (m_chunks.back().count > m_numPoints)
+            throw pdal_error("Invalid LAZ chunk table: chunk point counts total " +
+                std::to_string(m_chunks.back().count) + " but the header specifies " +
+                std::to_string(m_numPoints) + " points.");
     }
 
     // Find the # of the chunk containing a point. -1 if no such chunk exists.

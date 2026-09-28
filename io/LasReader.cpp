@@ -522,9 +522,21 @@ void LasReader::queueNextCompressedChunk()
     uint32_t chunk = d->nextFetchChunk;
     uint32_t start = (uint32_t)d->nextFetchPoint;
 
-    d->pool.add([this, chunk, start]()
+    // Validate the chunk here, on the calling thread, so that errors are reported
+    // rather than occurring inside a worker.
+    const uint32_t chunkpoints = d->chunkInfo.chunkPoints(chunk);
+    if (chunkpoints > d->header.pointCount())
+        throwError("Invalid LAZ chunk " + std::to_string(chunk) + ": chunk point count " +
+            std::to_string(chunkpoints) + " exceeds the file's point count.");
+    if (chunkpoints && start >= chunkpoints)
+        throwError("Invalid LAZ chunk " + std::to_string(chunk) + ": start point " +
+            std::to_string(start) + " is outside the chunk.");
+    const uint64_t tileBytes = uint64_t(chunkpoints - start) * d->header.pointSize;
+    if (tileBytes > (std::numeric_limits<size_t>::max)())
+        throwError("Invalid LAZ chunk " + std::to_string(chunk) + ": chunk is too large.");
+
+    d->pool.add([this, chunk, start, chunkpoints, tileBytes]()
     {
-        uint32_t chunkpoints = d->chunkInfo.chunkPoints(chunk);
         uint64_t chunkoffset = d->chunkInfo.chunkOffset(chunk);
         uint32_t chunksize = d->chunkInfo.chunkSize(chunk);
 
@@ -535,8 +547,7 @@ void LasReader::queueNextCompressedChunk()
         in.seekg(chunkoffset);
         in.read(buf.data(), buf.size());
 
-        int32_t tilepoints = chunkpoints - start;
-        las::TilePtr tile = std::make_unique<las::Tile>(chunk, tilepoints * d->header.pointSize);
+        las::TilePtr tile = std::make_unique<las::Tile>(chunk, (size_t)tileBytes);
 
         lazperf::reader::chunk_decompressor decomp(d->header.pointFormat(), d->header.ebCount(),
             buf.data());
@@ -545,8 +556,12 @@ void LasReader::queueNextCompressedChunk()
         // the front because nextFetchPoint isn't 0. Just reuse the front of the tile
         // buffer for discarded points.
         char *pos = tile->data();
+        const char *end = tile->data() + tile->size();
         for (uint32_t i = 0; i < chunkpoints; ++i)
         {
+            // Never write past the end of the tile buffer.
+            if (end - pos < d->header.pointSize)
+                break;
             decomp.decompress(pos);
 
             // Advance the point location in the tile if we're keeping the point.

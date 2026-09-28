@@ -42,7 +42,7 @@ namespace las
 class Tile
 {
 public:
-    Tile(uint32_t chunk, uint32_t size) : m_chunk(chunk), m_data(size), m_pos(m_data.data())
+    Tile(uint32_t chunk, size_t size) : m_chunk(chunk), m_data(size), m_pos(m_data.data())
     {}
 
     const char *data() const
