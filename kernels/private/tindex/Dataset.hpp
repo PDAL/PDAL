@@ -91,7 +91,7 @@ class Dataset
 public:
     Dataset(const std::string& idxFilename, const std::string& driverName);
     Dataset() {}
-    ~Dataset() {}
+    ~Dataset();
 
     bool openDataset();
     bool createDataset();

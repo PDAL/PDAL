@@ -133,6 +133,12 @@ Dataset::Dataset(const std::string& idxFilename, const std::string& driverName)
         m_maxFieldSize = 254;
 }
 
+Dataset::~Dataset()
+{
+    if (m_dataset)
+        OGR_DS_Destroy(m_dataset);
+}
+
 Field *Dataset::defineField(const std::string& name, const OGRFieldType fieldType,
         const OGRFieldSubType subtype)
 {
