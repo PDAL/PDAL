@@ -47,7 +47,7 @@ $ pdal tindex create <tindex> <glob>
 --statistics           Write detailed statistics on all points
 --pc_type              Pointcloud type for STAC generation (lidar, eopc, radar, 
                        sonar, other)
---static-fields        JSON array of field names and values to include "
+--static_fields        JSON array of field names and values to include "
                        in tile index; specified as { \"fieldName\": value, ...}
 ```
 
