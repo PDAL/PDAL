@@ -20,8 +20,6 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
     // Add STAC-specific fields
     m_srsField = m_dataset->defineField("proj:projjson", OFTString, OFSTJSON);
     m_datetimeField = m_dataset->defineField("datetime", OFTDateTime);
-    // Empty field, so that it stays in the schema.
-    m_linksField = m_dataset->defineField("links", OFTString, OFSTJSON);
     m_idField = m_dataset->defineField("id", OFTString);
     m_pcCountField = m_dataset->defineField("pc:count", OFTInteger64);
     m_pcEncodingField = m_dataset->defineField("pc:encoding", OFTString);
@@ -163,6 +161,8 @@ void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     }
 }
 
+// Final step - reinterprets fields that are supposed to be struct type using
+// libarrow, then overwrites the OGR-created file
 void StacIndexBuilder::finalize(const std::string& filename)
 {
     nestFieldsToStruct(filename);

@@ -147,23 +147,6 @@ void nestFieldsToStruct(const std::string& filename)
     }
     std::shared_ptr<arrow::Table> nested = nestTable(flatTable);
 
-    /*
-    auto schema_result = arrow_reader->GetSchema(&m_schema);
-    if (!schema_result.ok())
-    {
-        std::stringstream msg;
-        msg << "Unable to open schema for file '" << filename << "' with message '"
-            << reader_result.status().ToString() << "'";
-        throw TIndexError(msg.str());
-    }
-    StringList field_names;
-    field_names.reserve(m_schema->num_fields());
-    for (int i = 0; i < m_schema->num_fields(); ++i)
-    {
-        std::string fieldName = m_schema->field(i)->name();
-        field_names.push_back(m_schema->field(i)->name());
-    }
-    */
     // write to a tempfile instead?
     arrow::Result<std::shared_ptr<arrow::io::FileOutputStream>> createResult =
         arrow::io::FileOutputStream::Open(filename);

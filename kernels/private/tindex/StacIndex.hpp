@@ -134,7 +134,6 @@ private:
 
     Field *m_srsField;
     Field *m_datetimeField;
-    Field *m_linksField;
     Field *m_idField;
     Field *m_pcCountField;
     Field *m_pcEncodingField;
