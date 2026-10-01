@@ -6,6 +6,7 @@ version = "2.8.2"
 
 [feature.dev.dependencies]
 libgdal-core = "*"
+libgdal-arrow-parquet = "*"
 cmake = "*"
 compilers = "*"
 ninja = "*"
