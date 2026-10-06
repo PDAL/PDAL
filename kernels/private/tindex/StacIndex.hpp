@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <pdal/pdal_features.hpp>
 #include <kernels/private/stac/StacInfo.hpp>
 #include <nlohmann/json.hpp>

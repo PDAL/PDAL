@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 

@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "TIndexProcessor.hpp"
 
 namespace pdal
