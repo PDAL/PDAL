@@ -216,9 +216,9 @@ if (NOT PDAL_HAVE_LZMA)
         ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
-if (NOT PDAL_HAVE_OGR_PARQUET AND PDAL_HAVE_ARROW)
+if (NOT (PDAL_HAVE_OGR_PARQUET AND PDAL_HAVE_ARROW))
     file(GLOB ARROW_SRCS
-        ${PDAL_SRC_DIR}/kernels/private/tindex/ArrowRebuild.cpp)
+        kernels/private/tindex/ArrowRebuild.cpp)
     list(REMOVE_ITEM SRCS ${ARROW_SRCS})
 endif()
 
