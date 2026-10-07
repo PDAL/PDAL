@@ -326,6 +326,7 @@ TEST(TIndex, test8)
 }
 
 #ifdef PDAL_HAVE_OGR_PARQUET
+#ifdef PDAL_HAVE_ARROW
 // Testing stac-geoparquet
 TEST(TIndex, test9)
 {
@@ -357,6 +358,7 @@ TEST(TIndex, test9)
         std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
         return;
     }
+    std::cout << info <<std::endl;
 
     // Not checking full filename (assets.data.href) since it depends on relative path
     pos = info.find("pc:encoding (String) = .txt");
@@ -448,3 +450,4 @@ TEST(TIndex, test10)
     EXPECT_NE(pos, std::string::npos);
 }
 #endif // PDAL_HAVE_OGR_PARQUET
+#endif // PDAL_HAVE_ARROW
