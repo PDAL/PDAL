@@ -126,18 +126,26 @@ void nestFieldsToStruct(const std::string& filename)
         throw TIndexError(msg.str());
     }
 
-    auto reader_result = parquet::arrow::OpenFile(file, arrow::default_memory_pool());
-    if (!reader_result.ok())
+    parquet::ArrowReaderProperties reader_props;
+    reader_props.set_arrow_extensions_enabled(true);
+
+    parquet::arrow::FileReaderBuilder builder;
+    auto status = builder.Open(file);
+    if (!status.ok())
     {
-        std::stringstream msg;
-        msg << "Unable to open file '" << filename << "' with message '"
-            << reader_result.status().ToString() << "'";
-        throw TIndexError(msg.str());
+        throw TIndexError("Unable to open file with builder: " + status.ToString());
     }
-    auto arrow_reader = std::move(reader_result).ValueOrDie();
+    builder.properties(reader_props);
+
+    std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
+    auto build_result = builder.Build(&arrow_reader);
+    if (!build_result.ok())
+    {
+        throw TIndexError("Unable to build FileReader: " + build_result.ToString());
+    }
 
     std::shared_ptr<arrow::Table> flatTable;
-    auto status = arrow_reader->ReadTable(&flatTable);
+    status = arrow_reader->ReadTable(&flatTable);
     if (!status.ok())
     {
         std::stringstream msg;
@@ -155,8 +163,13 @@ void nestFieldsToStruct(const std::string& filename)
             "': " + createResult.status().ToString());
     std::shared_ptr<arrow::io::FileOutputStream> outfile = *createResult;
 
+    std::shared_ptr<parquet::ArrowWriterProperties> writer_props =
+        parquet::ArrowWriterProperties::Builder().store_schema()->build();
+
+    int64_t chunk_size = nested->num_rows() > 0 ? nested->num_rows() : 1;
     status = parquet::arrow::WriteTable(*nested, arrow::default_memory_pool(), outfile,
-        nested->num_rows() > 0 ? nested->num_rows() : 1);
+                                        chunk_size, parquet::default_writer_properties(),
+                                        writer_props);
     if (!status.ok())
         throw TIndexError("Unable to write nested Parquet file '" + filename +
             "': " + status.ToString());

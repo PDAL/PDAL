@@ -358,7 +358,6 @@ TEST(TIndex, test9)
         std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
         return;
     }
-    std::cout << info <<std::endl;
 
     // Not checking full filename (assets.data.href) since it depends on relative path
     pos = info.find("pc:encoding (String) = .txt");
