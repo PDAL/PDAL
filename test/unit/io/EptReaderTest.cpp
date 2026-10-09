@@ -1118,6 +1118,120 @@ TEST(EptReaderTest, badTilePointCountBinary)
     EXPECT_THROW(reader.execute(eptTable), pdal_error);
 }
 
+TEST(EptReaderTest, polygonAutoBounds)
+{
+    // Test that a polygon without explicit bounds automatically derives
+    // an AABB to prune the octree and preview bounds, producing exact crop results.
+    std::string wkt = "POLYGON ((515370 4918345, 515380 4918345, 515380 4918355, 515370 4918355, 515370 4918345))";
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptLaszipPath);
+        options.add("polygon", wkt);
+        reader.setOptions(options);
+    }
+
+    const QuickInfo qi(reader.preview());
+    EXPECT_TRUE(qi.valid());
+    EXPECT_GE(qi.m_bounds.minx, 515370.0 - 0.01);
+    EXPECT_LE(qi.m_bounds.maxx, 515380.0 + 0.01);
+    EXPECT_GE(qi.m_bounds.miny, 4918345.0 - 0.01);
+    EXPECT_LE(qi.m_bounds.maxy, 4918355.0 + 0.01);
+    EXPECT_GT(qi.m_pointCount, 0u);
+    EXPECT_LT(qi.m_pointCount, 518862u);
+
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    uint64_t eptNp = 0;
+    for (const PointViewPtr& view : reader.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", sourceFilePath);
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        Options options;
+        options.add("polygon", wkt);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp = 0;
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_GT(eptNp, 0u);
+    EXPECT_EQ(eptNp, sourceNp);
+}
+
+
+TEST(EptReaderTest, disjointPolygonsCrop)
+{
+    // Test multi-polygon with disjoint components: verifies that automatic
+    // bounding box union does not cause false exclusions and spatial filtering works.
+    std::string multipoly =
+        "MULTIPOLYGON (((515368 4918342, 515373 4918342, 515373 4918347, 515368 4918347, 515368 4918342)), "
+        "((515395 4918370, 515400 4918370, 515400 4918375, 515395 4918375, 515395 4918370)))";
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptLaszipPath);
+        options.add("polygon", multipoly);
+        reader.setOptions(options);
+    }
+
+    const QuickInfo qi(reader.preview());
+    EXPECT_TRUE(qi.valid());
+    EXPECT_GE(qi.m_bounds.minx, 515368.0 - 0.01);
+    EXPECT_LE(qi.m_bounds.maxx, 515400.0 + 0.01);
+    EXPECT_GE(qi.m_bounds.miny, 4918342.0 - 0.01);
+    EXPECT_LE(qi.m_bounds.maxy, 4918375.0 + 0.01);
+
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    uint64_t eptNp = 0;
+    for (const PointViewPtr& view : reader.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", sourceFilePath);
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        Options options;
+        options.add("polygon", multipoly);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp = 0;
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_GT(eptNp, 0u);
+    EXPECT_EQ(eptNp, sourceNp);
+}
+
+
 TEST(CopcReaderTest, duplicateInputs)
 {
     EptReader reader;

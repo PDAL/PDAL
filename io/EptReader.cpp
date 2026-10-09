@@ -142,6 +142,18 @@ struct PolyXform
 {
     Polygon poly;
     SrsTransform xform;
+    BOX2D box2d;
+    BOX3D box3d;
+
+    PolyXform(Polygon&& p, const SrsTransform& xf) :
+        poly(std::move(p)),
+        xform(xf),
+        box2d(poly.bounds().to2d()),
+        box3d(box2d)
+    {
+        box3d.minz = (std::numeric_limits<double>::lowest)();
+        box3d.maxz = (std::numeric_limits<double>::max)();
+    }
 };
 
 struct BoxXform
@@ -270,6 +282,53 @@ void EptReader::initialize()
             m_p->llToBcbfTransform.set(llsrs, getSpatialReference());
         }
     }
+    else if (!m_args->m_polys.empty())
+    {
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        if (!sourceIsBcbf)
+        {
+            BOX2D autoBounds2d;
+            for (const Polygon& poly : m_args->m_polys)
+            {
+                if (!poly.valid())
+                    throwError("Geometrically invalid polygon in option 'polygon'.");
+
+                if (poly.srsValid() && poly.getSpatialReference().valid() &&
+                    m_p->info->srs().valid() &&
+                    poly.getSpatialReference() != m_p->info->srs())
+                {
+                    Polygon polyCopy(poly);
+                    auto status = polyCopy.transform(m_p->info->srs());
+                    if (status)
+                    {
+                        BOX3D pb = polyCopy.bounds();
+                        autoBounds2d.grow(pb.minx, pb.miny);
+                        autoBounds2d.grow(pb.maxx, pb.maxy);
+                    }
+                    SrsTransform xform(poly.getSpatialReference(), m_p->info->srs());
+                    if (xform.valid())
+                    {
+                        BOX3D pb = reprojectBoundsViaCorner(poly.bounds(), xform);
+                        autoBounds2d.grow(pb.minx, pb.miny);
+                        autoBounds2d.grow(pb.maxx, pb.maxy);
+                    }
+                }
+                else
+                {
+                    BOX3D pb = poly.bounds();
+                    autoBounds2d.grow(pb.minx, pb.miny);
+                    autoBounds2d.grow(pb.maxx, pb.maxy);
+                }
+            }
+
+            if (autoBounds2d.valid())
+            {
+                m_p->bounds.box = BOX3D(autoBounds2d);
+                m_p->bounds.box.minz = (std::numeric_limits<double>::lowest)();
+                m_p->bounds.box.maxz = (std::numeric_limits<double>::max)();
+            }
+        }
+    }
 
     // Create transform from the point source SRS to the poly SRS.
     for (Polygon& poly : m_args->m_polys)
@@ -284,8 +343,7 @@ void EptReader::initialize()
             xform.set(m_p->info->srs(), poly.getSpatialReference());
         for (Polygon& p : exploded)
         {
-            PolyXform ps { std::move(p), xform };
-            m_p->polys.push_back(ps);
+            m_p->polys.emplace_back(std::move(p), xform);
         }
     }
 
@@ -725,6 +783,14 @@ void EptReader::overlaps()
 // Determine if an EPT tile overlaps our query boundary
 bool EptReader::Private::passesSpatialFilter(const BOX3D& tileBounds) const
 {
+    // Fast path: if bounds.box is valid and in native SRS (no xform, not BCBF),
+    // perform a lock-free box overlap check first.
+    if (bounds.box.valid() && !bounds.xform.valid() && !llToBcbfTransform.valid())
+    {
+        if (!bounds.box.overlaps(tileBounds))
+            return false;
+    }
+
     auto boxOverlaps = [this, &tileBounds]() -> bool
     {
         if (!bounds.box.valid())
@@ -747,8 +813,13 @@ bool EptReader::Private::passesSpatialFilter(const BOX3D& tileBounds) const
             return true;
 
         for (auto& ps : polys)
-            if (!ps.poly.disjoint(reprojectBoundsViaCorner(tileBounds, ps.xform)))
+        {
+            BOX3D xTileBounds = reprojectBoundsViaCorner(tileBounds, ps.xform);
+            if (ps.box3d.valid() && !ps.box3d.overlaps(xTileBounds))
+                continue;
+            if (!ps.poly.disjoint(xTileBounds))
                 return true;
+        }
         return false;
     };
 
@@ -882,6 +953,8 @@ bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
             double z = zo;
 
             ps.xform.transform(x, y, z);
+            if (ps.box2d.valid() && !ps.box2d.contains(x, y))
+                continue;
             if (ps.poly.contains(x, y))
                 return true;
         }
