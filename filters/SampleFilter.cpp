@@ -104,10 +104,7 @@ PointViewSet SampleFilter::run(PointViewPtr view)
     for (PointRef point : *view)
     {
         if (keepPoint(point))
-        {
-            bool kept = voxelize(point);
             output->appendPoint(*view, point.pointId());
-        }
     }
 
     PointViewSet viewSet;
