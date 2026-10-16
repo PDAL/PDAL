@@ -311,4 +311,60 @@ TEST(NormalFilterTest, RadiusSearch)
     }
 }
 
+TEST(NormalFilterTest, Refine)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader;
+    NormalFilter filter;
+    Options filterOps;
+    filterOps.add("viewpoint", "POINT (0 0.1 2)");
+    filterOps.add("refine", true);
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+    filter.prepare(table);
+
+    // Half cylinder of radius 1. Orienting toward the viewpoint points the
+    // normals inward near the ends of the arc and outward near the middle.
+    // Refinement should make them consistent. Use two views to make sure
+    // each one is refined.
+    for (int v = 0; v < 2; ++v)
+    {
+        PointViewPtr view(new PointView(table));
+        PointId id = 0;
+        for (int i = 0; i < 36; ++i)
+        {
+            double t = (i + 0.5) * M_PI / 36;
+            for (int j = 0; j < 3; ++j)
+            {
+                view->setField(Id::X, id, std::cos(t));
+                view->setField(Id::Y, id, j * 0.1);
+                view->setField(Id::Z, id, std::sin(t));
+                ++id;
+            }
+        }
+        reader.addView(view);
+    }
+
+    PointViewSet viewSet = filter.execute(table);
+    ASSERT_EQ(viewSet.size(), 2u);
+
+    for (PointViewPtr outView : viewSet)
+    {
+        // Sign of the normal relative to the outward radial direction.
+        auto side = [](const PointRef& p)
+        {
+            return p.getFieldAs<double>(Id::X) * p.getFieldAs<double>(Id::NormalX) +
+                p.getFieldAs<double>(Id::Z) * p.getFieldAs<double>(Id::NormalZ) > 0;
+        };
+
+        bool first = side(outView->point(0));
+        for (const PointRef& p : *outView)
+            EXPECT_EQ(side(p), first);
+    }
+}
+
 } // namespace pdal
