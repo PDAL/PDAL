@@ -304,9 +304,9 @@ void PcdWriter::writeAscii(const PointViewPtr view, std::ostream& out)
                 out << std::setprecision(dim.m_precision)
                     << point.getFieldAs<uint16_t>(dim.m_field.m_id)
                     << " ";
-            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 1)
                 out << std::setprecision(dim.m_precision)
-                    << point.getFieldAs<uint8_t>(dim.m_field.m_id)
+                    << static_cast<int>(point.getFieldAs<uint8_t>(dim.m_field.m_id))
                     << " ";
             else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 8)
                 out << std::setprecision(dim.m_precision)
@@ -322,7 +322,7 @@ void PcdWriter::writeAscii(const PointViewPtr view, std::ostream& out)
                     << " ";
             else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
                 out << std::setprecision(dim.m_precision)
-                    << point.getFieldAs<int8_t>(dim.m_field.m_id)
+                    << static_cast<int>(point.getFieldAs<int8_t>(dim.m_field.m_id))
                     << " ";
         }
         out << "\n";
@@ -347,7 +347,7 @@ void PcdWriter::writeBinary(const PointViewPtr view, std::ostream& out)
                 leOut << point.getFieldAs<uint32_t>(dim.m_field.m_id);
             else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 2)
                 leOut << point.getFieldAs<uint16_t>(dim.m_field.m_id);
-            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 1)
                 leOut << point.getFieldAs<uint8_t>(dim.m_field.m_id);
             else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 8)
                 leOut << point.getFieldAs<int64_t>(dim.m_field.m_id);
