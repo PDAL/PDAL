@@ -48,5 +48,10 @@ dimension
 
 : The name of the dimension to filter.
 
+mad_multiplier
+
+: Scale factor applied to the MAD so that it estimates the standard
+  deviation of normally distributed data. \[Default: 1.4826\]
+
 ```{include} filter_opts.md
 ```

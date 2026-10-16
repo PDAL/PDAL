@@ -408,6 +408,7 @@ PDAL_ADD_TEST(pdal_filters_lloydkmeans_test FILES filters/LloydKMeansFilterTest.
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_radius_assign_test FILES filters/RadiusAssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_mad_test FILES filters/MADFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
