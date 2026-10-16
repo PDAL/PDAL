@@ -130,7 +130,7 @@ bool SampleFilter::voxelize(PointRef& point)
         if (!m_originYArg->set())
             m_originY = y;
         if (!m_originZArg->set())
-            m_originZ = y;
+            m_originZ = z;
     }
 
     // Get voxel indices for current point.
