@@ -104,10 +104,7 @@ PointViewSet SampleFilter::run(PointViewPtr view)
     for (PointRef point : *view)
     {
         if (keepPoint(point))
-        {
-            bool kept = voxelize(point);
             output->appendPoint(*view, point.pointId());
-        }
     }
 
     PointViewSet viewSet;
@@ -130,7 +127,7 @@ bool SampleFilter::voxelize(PointRef& point)
         if (!m_originYArg->set())
             m_originY = y;
         if (!m_originZArg->set())
-            m_originZ = y;
+            m_originZ = z;
     }
 
     // Get voxel indices for current point.
