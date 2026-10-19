@@ -93,8 +93,8 @@ private:
     void compute(PointView& view, KD3Index& kdi);
     void refine(PointView& view, KD3Index& kdi);
     void
-    update(PointView& view, KD3Index& kdi, std::vector<bool> inMST,
-           std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue,
+    update(PointView& view, KD3Index& kdi, std::vector<bool>& inMST,
+           std::priority_queue<Edge, EdgeList, CompareEdgeWeight>& edge_queue,
            PointId updateIdx);
 
     virtual void addArgs(ProgramArgs& args);

@@ -182,8 +182,8 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
 }
 
 void NormalFilter::update(
-    PointView& view, KD3Index& kdi, std::vector<bool> inMST,
-    std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue,
+    PointView& view, KD3Index& kdi, std::vector<bool>& inMST,
+    std::priority_queue<Edge, EdgeList, CompareEdgeWeight>& edge_queue,
     PointId updateIdx)
 {
     // Add the current PointId to the minimum spanning tree.
@@ -228,6 +228,7 @@ void NormalFilter::refine(PointView& view, KD3Index& kdi)
     std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue;
     std::vector<bool> inMST(view.size(), false);
     PointId nextIdx(0);
+    m_count = 0;
     while (m_count < view.size())
     {
         // Find the PointId of the next point not currently part of the minimum
