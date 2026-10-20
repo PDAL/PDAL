@@ -6,6 +6,10 @@ The **Groupby Filter** takes a single `PointView` as its input and
 creates a `PointView` for each category in the named {ref}`dimensions` as
 its output.
 
+If the filter receives more than one `PointView`, points with the same
+category are merged into a single output `PointView`, as with
+{ref}`filters.splitter`.
+
 ```{eval-rst}
 .. embed::
 ```
