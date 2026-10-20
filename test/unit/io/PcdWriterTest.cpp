@@ -333,3 +333,57 @@ TEST(PcdWriterTest, binaryPdalTypes)
     EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::Z, 2), 0.0001);
     EXPECT_EQ(3, v->getFieldAs<int>(Dimension::Id::Intensity, 2));
 }
+
+TEST(PcdWriterTest, unsigned8)
+{
+    using namespace Dimension;
+
+    for (std::string compression : {"ascii", "binary"})
+    {
+        PointTable table;
+        table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+
+        PointViewPtr view(new PointView(table));
+        for (PointId i = 0; i < 3; ++i)
+        {
+            view->setField(Id::X, i, i);
+            view->setField(Id::Y, i, i);
+            view->setField(Id::Z, i, i);
+            view->setField(Id::Classification, i, i + 2);
+        }
+
+        BufferReader r;
+        r.addView(view);
+
+        std::string outfile(Support::temppath("unsigned8.pcd"));
+
+        PcdWriter w;
+
+        Options o;
+        o.add("order", "X=Float,Y=Float,Z=Float,Classification=Unsigned8");
+        o.add("compression", compression);
+        o.add("filename", outfile);
+
+        w.setInput(r);
+        w.setOptions(o);
+
+        w.prepare(table);
+        w.execute(table);
+
+        PcdReader pr;
+        Options po;
+        po.add("filename", outfile);
+        pr.setOptions(po);
+        PointTable t;
+        pr.prepare(t);
+        PointViewSet pvs = pr.execute(t);
+
+        PointViewPtr v = *pvs.begin();
+        EXPECT_EQ(3U, v->size());
+        for (PointId i = 0; i < v->size(); ++i)
+        {
+            EXPECT_EQ(i, v->getFieldAs<int>(Id::X, i));
+            EXPECT_EQ(i + 2, v->getFieldAs<int>(Id::Classification, i));
+        }
+    }
+}
