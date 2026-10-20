@@ -59,7 +59,7 @@ void MADFilter::addArgs(ProgramArgs& args)
     args.add("k", "Number of deviations", m_multiplier, 2.0);
     args.add("dimension", "Dimension on which to calculate statistics",
         m_dimName);
-    args.add("mad_multiplier", "MAD threshold multiplier", m_madMultiplier, 1.4862);
+    args.add("mad_multiplier", "MAD threshold multiplier", m_madMultiplier, 1.4826);
 }
 
 void MADFilter::prepared(PointTableRef table)
