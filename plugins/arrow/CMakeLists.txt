@@ -5,12 +5,11 @@ if (STANDALONE)
     find_package(PDAL REQUIRED)
     include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    include(${PDAL_CMAKE_DIR}/arrow.cmake)
+    include(${PDAL_CMAKE_DIR}/gdal.cmake)
 endif(STANDALONE)
 
-include(${PDAL_CMAKE_DIR}/arrow.cmake)
-include(${PDAL_CMAKE_DIR}/gdal.cmake)
-
-if (NOT Arrow_FOUND)
+if (NOT PDAL_HAVE_ARROW)
     message(FATAL_ERROR "Arrow-cpp can't be found. Can't build Arrow support")
 endif()
 
