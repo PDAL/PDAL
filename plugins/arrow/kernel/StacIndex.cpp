@@ -1,6 +1,7 @@
 #include "StacIndex.hpp"
-#include "Dataset.hpp"
 #include "ArrowRebuild.hpp"
+
+#include <kernels/private/tindex/Dataset.hpp>
 #include <pdal/util/private/JsonSupport.hpp>
 
 namespace pdal

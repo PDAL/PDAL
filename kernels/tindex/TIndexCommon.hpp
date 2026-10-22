@@ -4,12 +4,21 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/FileUtils.hpp>
+
 #include <filters/private/hexer/HexGrid.hpp>
 
 namespace pdal
 {
 namespace tindex
 {
+
+class TIndexError : public std::runtime_error
+{
+public:
+    TIndexError(const std::string txt) : std::runtime_error(txt)
+    {}
+};
 
 class TindexBoundary : public Filter, public Streamable
 {

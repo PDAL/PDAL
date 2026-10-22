@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "TIndexKernel.hpp"
+#include "tindex/TIndexCommon.hpp"
 
 #include <memory>
 #include <vector>
@@ -45,13 +46,44 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <kernels/private/tindex/TileIndex.hpp>
-#include <kernels/private/tindex/TIndexError.hpp>
-#include <kernels/private/tindex/StacIndex.hpp>
 
 #include "../io/LasWriter.hpp"
 
 namespace pdal
 {
+
+namespace tindex
+{
+
+StringList readSTDIN()
+{
+    std::string line;
+    StringList output;
+    while (std::getline(std::cin, line))
+    {
+        output.push_back(line);
+    }
+    return output;
+}
+
+StringList readFileList(const std::string& filename)
+{
+    std::istream* in = Utils::openFile(filename);
+    if (!in)
+        throw pdal_error("Unable to open filelist '" + filename + "'");
+    std::string line;
+    StringList output;
+    while (std::getline(*in, line))
+    {
+        Utils::trim(line);
+        if (!line.empty())
+            output.push_back(line);
+    }
+    FileUtils::closeFile(in);
+    return output;
+}
+
+} // namespace tindex
 
 static StaticPluginInfo const s_info
 {
@@ -65,8 +97,8 @@ CREATE_STATIC_KERNEL(TIndexKernel, s_info)
 std::string TIndexKernel::getName() const { return s_info.name; }
 
 TIndexKernel::TIndexKernel() : SubcommandKernel()
-    , m_srsColumnName("srs")
     , m_args(new tindex::Args())
+    , m_srsColumnName("srs")
     , m_maxFieldSize(0)
 {}
 
@@ -94,14 +126,6 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             m_args->layerName);
         args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
             "location");
-        args.add("stac-geoparquet", "Whether to write tile index as a STAC "
-            "GeoParquet file", m_writeStacGeoparquet);
-        args.add("pc_type", "Pointcloud type for STAC generation (lidar, "
-            "eopc, radar, sonar, other).", m_pcType, "lidar");
-        args.add("statistics", "Show stats on all points for STAC generation "
-            "(reads entire dataset)", m_showStats);
-        args.add("static_fields", "JSON object of field names and values to include "
-            "in tile index; specified as { \"fieldName\": value, ...}", m_staticFields);
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
@@ -152,6 +176,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
         args.add("t_srs", "Spatial reference of the clipping geometry",
             m_tgtSrsString, "EPSG:4326");
     }
+    // Adds stac-specific options for the StacIndexKernel subclass
+    addExtraSwitches(args, subcommand);
 }
 
 
@@ -178,34 +204,12 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (m_args->pathPrefix.size() && m_args->absPath)
             throw pdal_error("Can't specify both --write_absolute_path and "
                 "--path_prefix options.");
-        if (m_writeStacGeoparquet)
-        {
-#ifndef PDAL_HAVE_OGR_PARQUET
-                throw pdal_error("Can't output to STAC-GeoParquet; GDAL was "
-                    "built without the OGR Parquet driver.");
-#endif
-            if (args.set("ogrdriver") && m_driverName != "Parquet")
-                throw pdal_error("Can't specify OGR driver when outputting "
-                    "to STAC GeoParquet.");
-            if (args.set("t_srs") && m_tgtSrsString != "EPSG:4326")
-                throw pdal_error("Can't specify target SRS when outputting "
-                    "to STAC GeoParquet; must be EPSG:4326.");
-            if (args.set("tindex_name"))
-                throw pdal_error("Can't specify tile index column name when "
-                    "outputting to STAC GeoParquet.");
-            // If the static fields arg was a file, read it into m_staticFields
-            if (args.set("static_fields"))
-            {
-                if (FileUtils::fileExists(m_staticFields))
-                    m_staticFields = FileUtils::readFileIntoString(
-                        m_staticFields);
-            }
-            m_args->lcOptions.push_back("WRITE_COVERING_BBOX=YES");
-        }
         if (args.set("a_srs"))
             m_args->overrideASrs = true;
         if (m_driverName == "ESRI Shapefile")
             m_maxFieldSize = 254;
+        // validation in StacIndexKernel, only for create mode right now
+        validateExtraSwitches(args);
     }
 }
 
@@ -220,34 +224,6 @@ int TIndexKernel::execute()
     return 0;
 }
 
-
-StringList readSTDIN()
-{
-    std::string line;
-    StringList output;
-    while (std::getline(std::cin, line))
-    {
-        output.push_back(line);
-    }
-    return output;
-}
-
-StringList readFileList(const std::string& filename)
-{
-    std::istream* in = Utils::openFile(filename);
-    if (!in)
-        throw pdal_error("Unable to open filelist '" + filename + "'");
-    std::string line;
-    StringList output;
-    while (std::getline(*in, line))
-    {
-        Utils::trim(line);
-        if (!line.empty())
-            output.push_back(line);
-    }
-    FileUtils::closeFile(in);
-    return output;
-}
 
 void TIndexKernel::mergeFile()
 {
@@ -326,9 +302,9 @@ void TIndexKernel::createFile()
     if (!m_usestdin && m_listfile.empty())
         m_files = Utils::glob(m_filespec);
     else if (m_listfile.size())
-        m_files = readFileList(m_listfile);
+        m_files = tindex::readFileList(m_listfile);
     else
-        m_files = readSTDIN();
+        m_files = tindex::readSTDIN();
 
     if (m_files.empty())
     {
@@ -337,12 +313,13 @@ void TIndexKernel::createFile()
         throw pdal_error(out.str());
     }
 
-    if (m_writeStacGeoparquet)
-        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType, m_showStats,
-            m_staticFields));
-    else
-        m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
-            m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
+    create();
+}
+
+void TIndexKernel::create()
+{
+    m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
+        m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
     try
     {
         m_tindex->create(m_files, m_manager);
@@ -351,6 +328,7 @@ void TIndexKernel::createFile()
     {
         throw pdal_error(e.what());
     }
+
 }
 
 

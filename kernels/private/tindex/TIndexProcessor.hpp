@@ -4,8 +4,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/Options.hpp>
 
-#include "TIndexError.hpp"
-#include "TIndexBoundary.hpp"
+#include <kernels/tindex/TIndexCommon.hpp>
 
 namespace pdal
 {

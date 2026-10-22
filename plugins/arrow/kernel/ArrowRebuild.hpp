@@ -10,7 +10,7 @@
 
 #include <pdal/pdal_types.hpp>
 
-#include "TIndexError.hpp"
+#include <kernels/tindex/TIndexCommon.hpp>
 
 namespace pdal
 {

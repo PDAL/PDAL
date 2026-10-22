@@ -5,7 +5,7 @@
 #include <kernels/private/stac/StacInfo.hpp>
 #include <nlohmann/json.hpp>
 
-#include "TIndexProcessor.hpp"
+#include <kernels/tindex/TIndexProcessor.hpp>
 
 namespace pdal
 {

@@ -1,7 +1,7 @@
 #include "TIndexProcessor.hpp"
-#include "TIndexBoundary.hpp"
-#include "Dataset.hpp"
-#include "TIndexError.hpp"
+
+#include <kernels/tindex/Dataset.hpp>
+#include <kernels/tindex/TIndexCommon.hpp>
 
 #include <pdal/Polygon.hpp>
 #include <pdal/util/ThreadPool.hpp>

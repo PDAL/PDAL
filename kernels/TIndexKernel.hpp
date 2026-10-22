@@ -61,8 +61,18 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
 
 public:
-    std::string getName() const;
+    virtual std::string getName() const;
     TIndexKernel();
+
+protected:
+    virtual void create();
+
+    std::string m_driverName;
+    std::string m_tgtSrsString;
+
+    std::unique_ptr<tindex::Args> m_args;
+    std::unique_ptr<tindex::TIndexProcessor> m_tindex;
+    StringList m_files;
 
 private:
     virtual void addSubSwitches(ProgramArgs& args,
@@ -71,29 +81,25 @@ private:
     virtual int execute();
     virtual StringList subcommands() const;
 
+    virtual void addExtraSwitches(ProgramArgs& args,
+        const std::string& subcommand) {}
+    virtual void validateExtraSwitches(ProgramArgs& args)
+        {}
+
     void createFile();
     void mergeFile();
 
     std::string m_idxFilename;
     std::string m_filespec;
-    StringList m_files;
     std::string m_listfile;
     std::string m_layerName;
-    std::string m_driverName;
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
     BOX2D m_bounds;
-    std::string m_pcType;
 
-    std::unique_ptr<tindex::Args> m_args;
-    std::unique_ptr<tindex::TIndexProcessor> m_tindex;
-
-    std::string m_tgtSrsString;
     std::string m_assignSrsString;
     bool m_usestdin;
-    bool m_writeStacGeoparquet;
-    bool m_showStats;
     std::string m_staticFields;
     std::string m_originalSrs;
     size_t m_maxFieldSize;

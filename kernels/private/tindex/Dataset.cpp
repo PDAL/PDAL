@@ -1,6 +1,6 @@
 
 #include "Dataset.hpp"
-#include "TIndexError.hpp"
+#include <kernels/tindex/TIndexCommon.hpp>
 
 #include <pdal/Polygon.hpp>
 #include <pdal/util/private/JsonSupport.hpp>
