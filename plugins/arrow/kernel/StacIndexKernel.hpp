@@ -41,7 +41,6 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include <kernels/TIndexKernel.hpp>
-//#include <kernels/tindex/TIndexCommon.hpp>
 
 namespace pdal
 {
@@ -49,13 +48,13 @@ namespace pdal
 class PDAL_EXPORT StacIndexKernel : public TIndexKernel
 {
 public:
-    //virtual std::string getName() const override;
+    virtual std::string getName() const override;
     StacIndexKernel();
 
 private:
     virtual void addExtraSwitches(ProgramArgs& args,
-        const std::string& subcommand);
-    virtual void validateExtraSwitches(ProgramArgs& args);
+        const std::string& subcommand) override;
+    virtual void validateExtraSwitches(ProgramArgs& args) override;
     virtual void create() override;
 
     bool m_showStats;

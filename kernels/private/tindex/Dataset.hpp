@@ -63,7 +63,7 @@ struct StaticField : public Field
     NL::json m_value;
 };
 
-class Feature
+class PDAL_EXPORT Feature
 {
 public:
     Feature(OGRFeatureDefnH layerDefn, int maxFieldSize);
@@ -88,7 +88,7 @@ private:
     int m_maxFieldSize;
 };
 
-class Dataset
+class PDAL_EXPORT Dataset
 {
 public:
     Dataset(const std::string& idxFilename, const std::string& driverName);

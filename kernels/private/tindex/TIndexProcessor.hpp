@@ -4,7 +4,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/Options.hpp>
 
-#include <kernels/tindex/TIndexCommon.hpp>
+#include "TIndexCommon.hpp"
 
 namespace pdal
 {
@@ -66,7 +66,7 @@ struct FileInfo
 };
 using FileInfoPtr = std::unique_ptr<FileInfo>;
 
-class TIndexProcessor
+class PDAL_EXPORT TIndexProcessor
 {
 public:
     TIndexProcessor(const Args& args, const std::string& tileIndexColumnName,

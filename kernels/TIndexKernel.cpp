@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "TIndexKernel.hpp"
-#include "tindex/TIndexCommon.hpp"
+#include <kernels/private/tindex/TIndexCommon.hpp>
 
 #include <memory>
 #include <vector>

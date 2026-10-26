@@ -33,20 +33,23 @@
 ****************************************************************************/
 
 #include "StacIndexKernel.hpp"
+#include "StacIndex.hpp"
 
-#include <kernels/tindex/TIndexCommon.hpp>
+#include <kernels/private/tindex/TIndexCommon.hpp>
 
 namespace pdal
 {
 
 static PluginInfo const s_info
 {
-    "kernels.stac-index",
+    "kernels.stacindex",
     "STAC tile index kernel",
     "https://pdal.org/apps/tindex.html"
 };
 
 CREATE_SHARED_KERNEL(StacIndexKernel, s_info);
+
+std::string StacIndexKernel::getName() const { return s_info.name; }
 
 StacIndexKernel::StacIndexKernel() : TIndexKernel()
 {}
