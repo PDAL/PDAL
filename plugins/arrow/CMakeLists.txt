@@ -5,6 +5,8 @@ if (STANDALONE)
     find_package(PDAL REQUIRED)
     include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    # Hopefully the h3 hexbin stuff can be cleaned up and this will not be necessary
+    add_subdirectory("${PROJECT_SOURCE_DIR}/../../vendor/h3" "vendor/h3")
 endif(STANDALONE)
 
 include(${PDAL_CMAKE_DIR}/arrow.cmake)
@@ -13,8 +15,6 @@ include(${PDAL_CMAKE_DIR}/gdal.cmake)
 if (NOT Arrow_FOUND)
     message(FATAL_ERROR "Arrow-cpp can't be found. Can't build Arrow support")
 endif()
-
-
 
 PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
     FILES
@@ -39,6 +39,21 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
         GDAL::GDAL
 )
 
+PDAL_ADD_PLUGIN(stacindex_kernel_libname kernel stacindex
+    FILES
+        kernel/StacIndexKernel.cpp
+        kernel/StacIndex.cpp
+        kernel/ArrowRebuild.cpp
+    LINK_WITH
+        ${PDAL_LIBRARIES}
+        Arrow::arrow_shared
+        Parquet::parquet_shared
+        ${PDAL_H3_LIB_NAME}
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+        GDAL::GDAL
+    )
+
 if (WIN32)
     target_compile_definitions(${arrow_writer_libname} PRIVATE NOMINMAX=1)
     target_compile_definitions(${arrow_reader_libname} PRIVATE NOMINMAX=1)
@@ -61,6 +76,13 @@ if (WITH_TESTS)
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         ${arrow_reader_libname}
+    )
+
+    PDAL_ADD_TEST(pdal_stac_index_test
+        FILES
+            test/StacIndexKernelTest.cpp
+    LINK_WITH
+        ${PDAL_LIBRARIES}
     )
 
     if (WIN32)

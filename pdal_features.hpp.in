@@ -35,6 +35,7 @@ const std::string pdalSha { "@GIT_SHA1@" };
 #cmakedefine PDAL_HAVE_ZLIB
 #cmakedefine PDAL_HAVE_LZMA
 #cmakedefine PDAL_HAVE_LIBXML2
+#cmakedefine PDAL_HAVE_OGR_PARQUET
 #define PDAL_LAS_START
 
 /*

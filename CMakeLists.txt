@@ -296,6 +296,12 @@ if (LibXml2_FOUND)
         LibXml2::LibXml2)
 endif()
 
+if (Arrow_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        Arrow::arrow_shared
+        Parquet::parquet_shared)
+endif()
 
 
 #
