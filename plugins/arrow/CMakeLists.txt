@@ -5,17 +5,16 @@ if (STANDALONE)
     find_package(PDAL REQUIRED)
     include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
-    include(${PDAL_CMAKE_DIR}/arrow.cmake)
-    include(${PDAL_CMAKE_DIR}/gdal.cmake)
-    # Hopefully the h3 stuff can be cleaned up and this will not be necessary
+    # Hopefully the h3 hexbin stuff can be cleaned up and this will not be necessary
     add_subdirectory("${PROJECT_SOURCE_DIR}/../../vendor/h3" "vendor/h3")
 endif(STANDALONE)
 
-if (NOT PDAL_HAVE_ARROW)
+include(${PDAL_CMAKE_DIR}/arrow.cmake)
+include(${PDAL_CMAKE_DIR}/gdal.cmake)
+
+if (NOT Arrow_FOUND)
     message(FATAL_ERROR "Arrow-cpp can't be found. Can't build Arrow support")
 endif()
-
-
 
 PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
     FILES

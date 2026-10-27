@@ -5,7 +5,6 @@
 find_package(Arrow QUIET)
 set_package_properties(Arrow PROPERTIES TYPE OPTIONAL)
 if (Arrow_FOUND)
-    set(PDAL_HAVE_ARROW 1)
     if (Arrow_VERSION VERSION_LESS "21.0")
         message(FATAL_ERROR "Required at least Arrow version 21.0, but found ${Arrow_VERSION}")
     endif()

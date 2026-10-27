@@ -119,7 +119,6 @@ include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/gcs.cmake) # Optional
 include(${PDAL_CMAKE_DIR}/utfcpp.cmake)
-include(${PDAL_CMAKE_DIR}/arrow.cmake) # Optional
 
 #------------------------------------------------------------------------------
 # generate the pdal_features.hpp header
@@ -215,11 +214,6 @@ if (NOT PDAL_HAVE_LZMA)
     file(GLOB LZMA_SRCS
         ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
-endif()
-if (NOT (PDAL_HAVE_OGR_PARQUET AND PDAL_HAVE_ARROW))
-    file(GLOB ARROW_SRCS
-        kernels/private/tindex/ArrowRebuild.cpp)
-    list(REMOVE_ITEM SRCS ${ARROW_SRCS})
 endif()
 
 PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${SRCS})

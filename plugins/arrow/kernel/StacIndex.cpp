@@ -10,7 +10,6 @@ namespace tindex
 {
 
 #ifdef PDAL_HAVE_OGR_PARQUET
-#ifdef PDAL_HAVE_ARROW
 StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType,
     bool statistics, std::string fieldsJson)
     : TIndexProcessor(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
@@ -170,7 +169,6 @@ void StacIndexBuilder::finalize(const std::string& filename)
     nestFieldsToStruct(filename);
 }
 
-#endif // PDAL_HAVE_ARROW
 #endif // PDAL_HAVE_OGR_PARQUET
 } // namespace pdal
 } // namespace tindex
