@@ -382,8 +382,8 @@ TEST(PcdWriterTest, unsigned8)
         EXPECT_EQ(3U, v->size());
         for (PointId i = 0; i < v->size(); ++i)
         {
-            EXPECT_EQ(i, v->getFieldAs<int>(Id::X, i));
-            EXPECT_EQ(i + 2, v->getFieldAs<int>(Id::Classification, i));
+            EXPECT_EQ(i, v->getFieldAs<PointId>(Id::X, i));
+            EXPECT_EQ(i + 2, v->getFieldAs<PointId>(Id::Classification, i));
         }
     }
 }
