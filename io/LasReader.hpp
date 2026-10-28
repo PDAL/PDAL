@@ -50,6 +50,8 @@ namespace las
     struct Header;
     struct Vlr;
     using VlrList = std::vector<Vlr>;
+    class Tile;
+    using TilePtr = std::unique_ptr<Tile>;
 };
 
 class NitfReader;
@@ -132,6 +134,9 @@ private:
     bool eof();
     void queueNextCompressedChunk();
     void queueNextStandardChunk();
+    void addTile(las::TilePtr tile);
+    void setError(const std::string& msg);
+    bool hasFailed();
 
     const las::Header& lasHeader() const;
     

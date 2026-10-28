@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <atomic>
+
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/pdal_features.hpp>
@@ -836,4 +838,70 @@ TEST(LasReaderTest, remote_vsi)
             throw;
         }
     }, pdal_error);
+}
+
+// A reader whose chunk-loading tasks (which run on thread-pool threads) fail to open
+// the file. The error must surface as a pdal_error on the pipeline thread rather than
+// escaping the pool thread and terminating the process.
+class FailingStreamLasReader : public LasReader
+{
+protected:
+    LasStreamPtr createStream() override
+    {
+        // The first two calls happen on the pipeline thread (initializeLocal() and
+        // ready()). Every later call comes from a chunk task.
+        if (++m_calls > 2)
+            throw pdal_error("Simulated open failure");
+        return LasReader::createStream();
+    }
+
+private:
+    std::atomic<int> m_calls{0};
+};
+
+TEST(LasReaderTest, chunkTaskError)
+{
+    auto expectChunkError = [](auto&& execute)
+    {
+        EXPECT_THROW({
+            try
+            {
+                execute();
+            }
+            catch (const pdal_error& e)
+            {
+                EXPECT_NE(std::string(e.what()).find("Simulated open failure"),
+                    std::string::npos) << e.what();
+                throw;
+            }
+        }, pdal_error);
+    };
+
+    auto test = [&](const std::string& file, int threads, bool streaming)
+    {
+        Options ops;
+        ops.add("filename", Support::datapath(file));
+        ops.add("threads", threads);
+
+        FailingStreamLasReader reader;
+        reader.setOptions(ops);
+
+        if (streaming)
+        {
+            FixedPointTable table(100);
+            reader.prepare(table);
+            expectChunkError([&]() { reader.execute(table); });
+        }
+        else
+        {
+            PointTable table;
+            reader.prepare(table);
+            expectChunkError([&]() { reader.execute(table); });
+        }
+    };
+
+    for (const std::string& file : { "las/autzen_trim.las", "laz/autzen_trim.laz" })
+        for (int threads : { 1, 7 })
+            for (bool streaming : { false, true })
+                test(file, threads, streaming);
 }
