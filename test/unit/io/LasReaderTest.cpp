@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <array>
+
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/pdal_features.hpp>
@@ -233,6 +235,48 @@ TEST(LasReaderTest, test_different_formats)
     test_a_format("las/permutations/1.2_1.las", 1, 2, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
     test_a_format("las/permutations/1.2_2.las", 1, 2, 2, 470692.440000, 4602888.900000, 16.000000, 0, 255, 12, 234);
     test_a_format("las/permutations/1.2_3.las", 1, 2, 3, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 255, 12, 234);
+}
+
+
+TEST(LasReaderTest, preview_then_prepare_extra_bytes)
+{
+    // Synthetic LAS 1.4/format 6 data with the same uint32 OriginId extra
+    // dimension as Chicago Downtown. No external dataset is required.
+    const std::array<uint32_t, 4> originIds {{0, 1, 2147483648u, 4294967295u}};
+    for (int previews : {1, 2})
+    {
+        SCOPED_TRACE(previews);
+        Options options;
+        options.add("filename", Support::datapath("las/chicago-extra-bytes.laz"));
+        LasReader reader;
+        reader.setOptions(options);
+
+        for (int i = 0; i < previews; ++i)
+        {
+            QuickInfo info;
+            ASSERT_NO_THROW(info = reader.preview());
+            EXPECT_TRUE(info.valid());
+            EXPECT_EQ(info.m_pointCount, 4u);
+            EXPECT_EQ(info.m_bounds, BOX3D(0, 0, 0, 7, 8, 9));
+        }
+
+        PointTable table;
+        ASSERT_NO_THROW(reader.prepare(table));
+        const Dimension::Id originId = table.layout()->findDim("OriginId");
+        ASSERT_NE(originId, Dimension::Id::Unknown);
+        EXPECT_EQ(table.layout()->dimType(originId), Dimension::Type::Unsigned32);
+
+        PointViewSet views;
+        ASSERT_NO_THROW(views = reader.execute(table));
+        ASSERT_EQ(views.size(), 1u);
+        const PointViewPtr view = *views.begin();
+        ASSERT_EQ(view->size(), originIds.size());
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            EXPECT_EQ(view->getFieldAs<uint32_t>(originId, i), originIds[i]);
+            EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::GpsTime, i), i + 1);
+        }
+    }
 }
 
 
