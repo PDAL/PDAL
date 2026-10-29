@@ -900,7 +900,8 @@ TEST(LasReaderTest, chunkTaskError)
         }
     };
 
-    for (const std::string& file : { "las/autzen_trim.las", "laz/autzen_trim.laz" })
+    using namespace std::string_literals;
+    for (const std::string& file : { "las/autzen_trim.las"s, "laz/autzen_trim.laz"s })
         for (int threads : { 1, 7 })
             for (bool streaming : { false, true })
                 test(file, threads, streaming);
