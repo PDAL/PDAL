@@ -225,7 +225,7 @@ const las::Header& LasReader::lasHeader() const
 uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char const * & data)
 {
     const las::Vlr *vlr = las::findVlr(userId, recordId, d->vlrs);
-    if (!vlr)
+        if (!vlr)
 	return 0;
     data = vlr->data();
     return vlr->dataVec.size();
@@ -295,6 +295,12 @@ LasReader::LasStreamPtr LasReader::createStream()
 
 void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
+    // Reset private data but retain parsed options to handle the situation where
+    // initialize() is called more than once.
+    std::unique_ptr<Private> p(new Private);
+    p->opts = std::move(d->opts);
+    d = std::move(p);
+
     try
     {
         d->extraDims = las::parse(d->opts.extraDimSpec, false);
