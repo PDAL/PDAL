@@ -1,7 +1,6 @@
 
 #include "ArrowRebuild.hpp"
 
-#include <parquet/arrow/schema.h>
 #include <arrow/api.h>
 #include <arrow/io/api.h>
 #include <parquet/arrow/reader.h>
@@ -39,6 +38,7 @@ std::vector<std::string> splitName(const std::string& name)
     return parts;
 }
 
+// Add a field to an array column
 void insertColumn(FieldNode& root, const std::string& name,
     const std::shared_ptr<arrow::Field>& field,
     const std::shared_ptr<arrow::Array>& array)
@@ -49,11 +49,13 @@ void insertColumn(FieldNode& root, const std::string& name,
     for (size_t i = 0; i < parts.size() - 1; ++i)
         node = &node->children[parts[i]];
 
+    // Always only add the leaf node
     FieldNode& leaf = node->children[parts.back()];
     leaf.leafField = field;
     leaf.leafArray = array;
 }
 
+// Turn a FieldNode into an Arrow field. Leaf nodes are returned as-is
 std::pair<std::shared_ptr<arrow::Field>, std::shared_ptr<arrow::Array>>
 buildNode(const std::string& name, const FieldNode& node)
 {
@@ -79,14 +81,18 @@ buildNode(const std::string& name, const FieldNode& node)
     return { field, *structArrayResult };
 }
 
+// Take the flat table and return one where dotted column names have been 
+// grouped into structs.
 std::shared_ptr<arrow::Table> nestTable(const std::shared_ptr<arrow::Table>& flat)
 {
+    // Merge any chunks in the table to make sure there is only one chunk being dealt with
     arrow::Result<std::shared_ptr<arrow::Table>> combinedResult = flat->CombineChunks();
     if (!combinedResult.ok())
         throw TIndexError("Failed to combine table chunks: " +
             combinedResult.status().ToString());
     std::shared_ptr<arrow::Table> combined = *combinedResult;
 
+    // Put all the columns into the table
     FieldNode root;
     const std::shared_ptr<arrow::Schema>& schema = combined->schema();
     for (int i = 0; i < schema->num_fields(); ++i)
@@ -105,7 +111,7 @@ std::shared_ptr<arrow::Table> nestTable(const std::shared_ptr<arrow::Table>& fla
         topArrays.push_back(array);
     }
 
-    // preserve the original metadata
+    // preserve the original metadata, contains geoparquet metadata
     auto newSchema = arrow::schema(topFields)->WithMetadata(schema->metadata());
     return arrow::Table::Make(newSchema, topArrays, combined->num_rows());
 }
@@ -126,6 +132,9 @@ void nestFieldsToStruct(const std::string& filename)
         throw TIndexError(msg.str());
     }
 
+    // Read Parquet logical types like JSON back as Arrow extension types.
+    // Without this the JSON columns come back as plain strings, and OGR
+    // no longer treats them as String(JSON)
     parquet::ArrowReaderProperties reader_props;
     reader_props.set_arrow_extensions_enabled(true);
 
@@ -144,6 +153,7 @@ void nestFieldsToStruct(const std::string& filename)
         throw TIndexError("Unable to build FileReader: " + build_result.ToString());
     }
 
+    // read everything into memory.
     std::shared_ptr<arrow::Table> flatTable;
     status = arrow_reader->ReadTable(&flatTable);
     if (!status.ok())
@@ -163,9 +173,12 @@ void nestFieldsToStruct(const std::string& filename)
             "': " + createResult.status().ToString());
     std::shared_ptr<arrow::io::FileOutputStream> outfile = *createResult;
 
+    // store_schema() writes the schema to metadata - allows extension types
+    // like OGR StringJSON to be preserved 
     std::shared_ptr<parquet::ArrowWriterProperties> writer_props =
         parquet::ArrowWriterProperties::Builder().store_schema()->build();
 
+    // Write everything as a single row group
     int64_t chunk_size = nested->num_rows() > 0 ? nested->num_rows() : 1;
     status = parquet::arrow::WriteTable(*nested, arrow::default_memory_pool(), outfile,
                                         chunk_size, parquet::default_writer_properties(),
@@ -177,7 +190,15 @@ void nestFieldsToStruct(const std::string& filename)
     if (!status.ok())
     {
         std::stringstream msg;
-        msg << "Unable to read next batch for file '" << filename << "' with message '"
+        msg << "Arrow error closing file '" << filename << "' with message '"
+            << status.ToString() <<"'";
+        throw TIndexError(msg.str());
+    }
+    status = outfile->Close();
+    if (!status.ok())
+    {
+        std::stringstream msg;
+        msg << "Arrow error re-writing file '" << filename << "' with message '"
             << status.ToString() <<"'";
         throw TIndexError(msg.str());
     }
