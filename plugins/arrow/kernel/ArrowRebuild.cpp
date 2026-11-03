@@ -1,6 +1,8 @@
 
 #include "ArrowRebuild.hpp"
 
+#include <pdal/util/Utils.hpp>
+
 #include <arrow/api.h>
 #include <arrow/io/api.h>
 #include <parquet/arrow/reader.h>
@@ -23,28 +25,15 @@ struct FieldNode
     bool isLeaf() const { return children.empty(); }
 };
 
-// Split "x.y.z" into ["x", "y", "z"].
-std::vector<std::string> splitName(const std::string& name)
-{
-    std::vector<std::string> parts;
-    size_t start = 0;
-    size_t dot;
-    while ((dot = name.find('.', start)) != std::string::npos)
-    {
-        parts.push_back(name.substr(start, dot - start));
-        start = dot + 1;
-    }
-    parts.push_back(name.substr(start));
-    return parts;
-}
-
 // Add a field to an array column
 void insertColumn(FieldNode& root, const std::string& name,
     const std::shared_ptr<arrow::Field>& field,
     const std::shared_ptr<arrow::Array>& array)
 {
-    std::vector<std::string> parts = splitName(name);
+    StringList parts = Utils::split(name, '.');
 
+    // Insert a new FieldNode for each part of the name into our empty node,
+    // starting from the front.
     FieldNode *node = &root;
     for (size_t i = 0; i < parts.size() - 1; ++i)
         node = &node->children[parts[i]];
@@ -142,7 +131,8 @@ void nestFieldsToStruct(const std::string& filename)
     auto status = builder.Open(file);
     if (!status.ok())
     {
-        throw TIndexError("Unable to open file with builder: " + status.ToString());
+        throw TIndexError("Unable to read data from file with error: " +
+            status.ToString());
     }
     builder.properties(reader_props);
 
@@ -165,7 +155,9 @@ void nestFieldsToStruct(const std::string& filename)
     }
     std::shared_ptr<arrow::Table> nested = nestTable(flatTable);
 
-    // write to a tempfile instead?
+    // We are opening a FileOutputStream here to write the same file which we already
+    // opened to read.
+    //!! write to a tempfile instead?
     arrow::Result<std::shared_ptr<arrow::io::FileOutputStream>> createResult =
         arrow::io::FileOutputStream::Open(filename);
     if (!createResult.ok())
@@ -179,26 +171,19 @@ void nestFieldsToStruct(const std::string& filename)
         parquet::ArrowWriterProperties::Builder().store_schema()->build();
 
     // Write everything as a single row group
-    int64_t chunk_size = nested->num_rows() > 0 ? nested->num_rows() : 1;
+    int64_t chunk_size = (std::max)(nested->num_rows(), (int64_t)1);
     status = parquet::arrow::WriteTable(*nested, arrow::default_memory_pool(), outfile,
                                         chunk_size, parquet::default_writer_properties(),
                                         writer_props);
     if (!status.ok())
-        throw TIndexError("Unable to write nested Parquet file '" + filename +
+        throw TIndexError("Arrow error writing Parquet file '" + filename +
             "': " + status.ToString());
-    status = file->Close();
-    if (!status.ok())
-    {
-        std::stringstream msg;
-        msg << "Arrow error closing file '" << filename << "' with message '"
-            << status.ToString() <<"'";
-        throw TIndexError(msg.str());
-    }
+
     status = outfile->Close();
     if (!status.ok())
     {
         std::stringstream msg;
-        msg << "Arrow error re-writing file '" << filename << "' with message '"
+        msg << "Arrow output error for file '" << filename << "' with message '"
             << status.ToString() <<"'";
         throw TIndexError(msg.str());
     }

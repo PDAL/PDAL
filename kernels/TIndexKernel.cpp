@@ -45,7 +45,7 @@
 #include <pdal/util/private/JsonSupport.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
-#include <kernels/private/tindex/TileIndex.hpp>
+#include <kernels/private/tindex/TileIndexBuilder.hpp>
 
 #include "../io/LasWriter.hpp"
 
@@ -176,7 +176,7 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
         args.add("t_srs", "Spatial reference of the clipping geometry",
             m_tgtSrsString, "EPSG:4326");
     }
-    // Adds stac-specific options for the StacIndexKernel subclass
+    // Virtual function to add options in the StacIndexKernel class
     addExtraSwitches(args, subcommand);
 }
 
@@ -208,7 +208,7 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
             m_args->overrideASrs = true;
         if (m_driverName == "ESRI Shapefile")
             m_maxFieldSize = 254;
-        // validation in StacIndexKernel, only for create mode right now
+        // Virtual function to validate options in the StacIndexKernel class
         validateExtraSwitches(args);
     }
 }

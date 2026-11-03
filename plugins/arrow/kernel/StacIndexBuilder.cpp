@@ -1,4 +1,4 @@
-#include "StacIndex.hpp"
+#include "StacIndexBuilder.hpp"
 #include "ArrowRebuild.hpp"
 
 #include <kernels/private/tindex/Dataset.hpp>
@@ -128,6 +128,8 @@ bool StacIndexBuilder::fastBoundary(PipelineManager& manager, FileInfoPtr& fileI
 
     // If the optional stats filter was added in fillFileInfo, we still need 
     // to execute the whole thing in order to get stats metadata.
+    // There is another reference to the stats stage in fillFileInfo(), and 
+    // the metadata gets extracted there.
     if (m_writeStats)
     {
         // If fastBoundary is run after a slowBoundary failure, we can't rerun the manager.

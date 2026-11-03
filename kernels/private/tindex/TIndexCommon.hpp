@@ -20,6 +20,9 @@ public:
     {}
 };
 
+// This class is a ligtweight and thread safe adaptation of filters.hexbin -
+// it still uses HexGrid to create boundaries but it doesn't write metadata or 
+// use non-threadsafe OGR functions
 class TindexBoundary : public Filter, public Streamable
 {
 public:

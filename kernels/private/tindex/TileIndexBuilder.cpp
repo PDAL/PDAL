@@ -1,4 +1,4 @@
-#include "TileIndex.hpp"
+#include "TileIndexBuilder.hpp"
 #include "Dataset.hpp"
 
 namespace pdal

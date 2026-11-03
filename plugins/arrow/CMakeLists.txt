@@ -42,7 +42,7 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
 PDAL_ADD_PLUGIN(stacindex_kernel_libname kernel stacindex
     FILES
         kernel/StacIndexKernel.cpp
-        kernel/StacIndex.cpp
+        kernel/StacIndexBuilder.cpp
         kernel/ArrowRebuild.cpp
     LINK_WITH
         ${PDAL_LIBRARIES}

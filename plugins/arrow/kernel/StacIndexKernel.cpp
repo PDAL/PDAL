@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "StacIndexKernel.hpp"
-#include "StacIndex.hpp"
+#include "StacIndexBuilder.hpp"
 
 #include <kernels/private/tindex/TIndexCommon.hpp>
 

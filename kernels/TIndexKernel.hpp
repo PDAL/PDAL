@@ -61,7 +61,7 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
 
 public:
-    virtual std::string getName() const;
+    std::string getName() const;
     TIndexKernel();
 
 protected:

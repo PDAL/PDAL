@@ -223,10 +223,9 @@ bool TIndexProcessor::isFileIndexed(const FileInfoPtr& fileInfo)
 
 bool TIndexProcessor::runBoundary(FileInfoPtr& fileInfo, PipelineManager& manager)
 {
-    // If we aren't able to make a hexbin filter, we
-    // will just do a simple fast_boundary.
-    bool fast(m_args.fastBoundary);
-    if (!fast)
+    // If we aren't running a fast boundary, calculate the boundary with a
+    // hexbin filter. Otherwise (and on failure of the filter) we run fastBoundary
+    if (!m_args.fastBoundary)
     {
         TindexBoundary hexer{m_args.density, m_args.edgeLength, m_args.sampleSize};
         if (m_args.boundaryExpr.size())
@@ -248,10 +247,11 @@ bool TIndexProcessor::runBoundary(FileInfoPtr& fileInfo, PipelineManager& manage
             fileInfo->m_boundary = hexer.toWKT();
             fileInfo->m_srs = hexer.getSpatialReference().getWKT();
             fileInfo->m_gridHeight = hexer.height();
+
+            return true;
         }
         catch(pdal_error& e)
         {
-            fast = true;
             // Destroy the hexbin filter -- the manager gets executed again for STAC
             manager.destroyStage(&hexer);
             m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " <<
@@ -259,10 +259,7 @@ bool TIndexProcessor::runBoundary(FileInfoPtr& fileInfo, PipelineManager& manage
         }
     }
 
-    if (fast)
-        return fastBoundary(manager, fileInfo);
-
-    return true;
+    return fastBoundary(manager, fileInfo);
 }
 
 pdal::Polygon TIndexProcessor::prepareGeometry(const FileInfo& fileInfo)

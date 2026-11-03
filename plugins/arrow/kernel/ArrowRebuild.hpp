@@ -12,7 +12,7 @@ namespace tindex
 {
 
 // Re-reads a stac-geoparquet file with libarrow, and reconstructs
-// string fields matching the `<structName>.<field>` pattern into
+// string fields matching `<structName>.<subField>.<...>` pattern into
 // nested structs.
 void nestFieldsToStruct(const std::string& filename);
 
