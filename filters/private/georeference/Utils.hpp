@@ -82,14 +82,14 @@ template <typename Scalar = double>
 inline Scalar getValue(pdal::PointRef p1, pdal::PointRef p2,
                        pdal::Dimension::Id id, double frac)
 {
-    return (p1.getFieldAs<Scalar>(id) * frac +
-            p2.getFieldAs<Scalar>(id) * (1 - frac));
+    return (p1.getFieldAs<Scalar>(id) * (1 - frac) +
+            p2.getFieldAs<Scalar>(id) * frac);
 }
 
 template <typename Scalar = double>
 inline Scalar getValue(Scalar p1, Scalar p2, Scalar frac)
 {
-    return p1 * frac + p2 * (1 - frac);
+    return p1 * (1 - frac) + p2 * frac;
 }
 
 template <typename Scalar = double>
