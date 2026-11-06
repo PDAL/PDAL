@@ -15,6 +15,7 @@ dependencies:
   - nitro
   - ceres-solver
   - python=3.12
+  - aws-c-s3
   - conda
   - mamba
   - conda-build

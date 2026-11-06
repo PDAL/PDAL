@@ -68,7 +68,7 @@ RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && 
     --no-build-isolation
 
 RUN git clone https://github.com/PDAL/python.git pdal-python && \
-    cd pdal-python && git checkout 3.5.4  && \
+    cd pdal-python && git checkout 3.5.5  && \
     uv pip install \
     -Cbuild-dir=build \
     . \
