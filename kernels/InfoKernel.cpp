@@ -365,7 +365,7 @@ void InfoKernel::dump(MetadataNode& root)
         else
             readerMeta = root.findChild("metadata");
 
-        addStacMetadata(root, statsMeta, readerMeta, infoMeta, m_pcType);
+        stac::addStacMetadata(root, statsMeta, readerMeta, infoMeta, m_pcType);
     }
 }
 

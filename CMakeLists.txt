@@ -297,7 +297,6 @@ if (LibXml2_FOUND)
 endif()
 
 
-
 #
 # Allow downstream cmake projects to find PDAL header files without
 # being explicit.
