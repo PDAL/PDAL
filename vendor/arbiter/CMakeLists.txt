@@ -13,13 +13,6 @@ target_include_directories(${PDAL_ARBITER_LIB_NAME}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-if (NOT TARGET CURL::libcurl)
-    add_library(CURL::libcurl UNKNOWN IMPORTED)
-    set_target_properties(CURL::libcurl
-        PROPERTIES
-            IMPORTED_LOCATION "${CURL_LIBRARIES}")
-endif ()
-
 target_link_libraries(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         CURL::libcurl
