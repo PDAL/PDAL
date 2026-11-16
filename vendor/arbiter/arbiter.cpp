@@ -2195,7 +2195,7 @@ S3::AuthFields S3::Auth::fields() const
             else
             {
                 // Parse JSON response.
-                const json creds = json::parse(res.data());
+                const json creds = json::parse(data.data());
 
                 m_access = creds.at("AccessKeyId").get<std::string>();
                 m_hidden = creds.at("SecretAccessKey").get<std::string>();
@@ -4410,6 +4410,7 @@ Curl::Curl(Curl&& other)
     m_followRedirect = other.m_followRedirect;
     m_verifyPeer = other.m_verifyPeer;
     m_caPath = std::move(other.m_caPath);
+    m_caBundle = std::move(other.m_caBundle);
     m_caInfo = std::move(other.m_caInfo);
     m_proxy = std::move(other.m_proxy);
     m_response = std::move(other.m_response);
