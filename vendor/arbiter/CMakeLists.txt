@@ -14,7 +14,7 @@ target_include_directories(${PDAL_ARBITER_LIB_NAME}
 )
 
 target_link_libraries(${PDAL_ARBITER_LIB_NAME}
-    PRIVATE
+    PUBLIC
         CURL::libcurl
 )
 target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
