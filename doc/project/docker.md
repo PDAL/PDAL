@@ -3,11 +3,15 @@
 # Building Docker Containers for PDAL
 
 PDAL's {ref}`repository <source>` is linked to [DockerHub] for automatic
-building of [Docker] containers. PDAL keeps two Docker containers current.
+building of [Docker] containers. PDAL keeps these Docker containers current.
 
 - `pdal/pdal:latest` -- PDAL master
+- `pdal/pdal:sha-<commit>` -- a master commit, by the first 8 characters of its SHA
 - {{'`pdal/pdal:{ver}` -- PDAL current release'.format(ver=version) }}
-```
+- `pdal/pdal:<major>.<minor>` -- the newest release of that series, e.g. `pdal/pdal:2.11`
+
+Each is also published as `ghcr.io/pdal/pdal`, for both `linux/amd64` and
+`linux/arm64`.
 
 ## Dockerfile
 
