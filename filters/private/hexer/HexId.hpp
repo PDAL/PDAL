@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
+#include <functional>
+#include <limits>
 
 namespace hexer
 {
