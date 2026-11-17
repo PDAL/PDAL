@@ -46,12 +46,12 @@ jobs:
   build_individual_images:
     needs: prepare
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
-          - runners: ubuntu-24.04
+          - runners: ubuntu-26.04
             arch: amd64
-          - runners: ubuntu-24.04-arm
+          - runners: ubuntu-26.04-arm
             arch: arm64
     runs-on: ${{ matrix.runners }}
     permissions:
