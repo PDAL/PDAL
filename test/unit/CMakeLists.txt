@@ -335,7 +335,14 @@ endif()
 #
 # sources for the native filters
 #
-PDAL_ADD_TEST(pdal_filters_georeference_test FILES filters/GeoreferenceFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_georeference_test
+    FILES
+        filters/GeoreferenceFilterTest.cpp
+        ${PDAL_FILTERS_DIR}/private/georeference/Trajectory.cpp
+    INCLUDES
+        ${PDAL_VENDOR_EIGEN_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES
