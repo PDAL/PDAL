@@ -21,7 +21,6 @@ $ pdal tindex create <tindex> <glob>
 --glob                 Glob pattern of files to index
 --stdin, -s            Read list of input files from standard input
 --filelist             Text file to read list of input files from (newline delimited)
---fast_boundary        Use extent instead of exact boundary
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
 --ogrdriver, -f        OGR driver name to use
@@ -31,6 +30,9 @@ $ pdal tindex create <tindex> <glob>
 --write_absolute_path  Write absolute rather than relative file paths
 --skip_different_srs   Reject files to be indexed with different SRS values
 --threads              Number of threads to use for file boundary creation
+
+/** Boundary Generation **/
+--fast_boundary        Use extent instead of exact boundary
 --simplify             Simplify the file's exact boundary
 --threshold            Number of points a cell must contain to be declared 
                        positive space, when creating exact boundaries
@@ -61,6 +63,11 @@ are created with a grid of tessellated hexagons, in a modified version of
 
 Creation mode also supports parallel file processing by specifying the `threads`
 option.
+
+### STAC-GeoParquet Creation
+
+The {ref}`stacindex <stacindex_command>` command is an adaptation of `tindex` which
+can create an index of point clouds in the [STAC-Geoparquet] format.
 
 ## tindex Merge Mode
 
@@ -119,3 +126,4 @@ $ pdal tindex create index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" \
 [gdal]: https://gdal.org
 [gdaltindex]: https://gdal.org/en/latest/programs/gdaltindex.html
 [sqlite]: http://www.sqlite.org
+[STAC-Geoparquet] https://radiantearth.github.io/stac-geoparquet-spec/latest/

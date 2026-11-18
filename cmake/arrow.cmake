@@ -3,11 +3,16 @@
 #
 
 find_package(Arrow REQUIRED CONFIG)
-if (Arrow_VERSION VERSION_LESS "21.0")
-    message(FATAL_ERROR "Required at least Arrow version 21.0, but found ${Arrow_VERSION}")
-endif()
-
-find_package(Parquet REQUIRED CONFIG)
-if (Parquet_VERSION VERSION_LESS "21.0")
-    message(FATAL_ERROR "Required at least Parquet version 21.0, but found ${Parquet_VERSION}")
+if (Arrow_FOUND)
+    if (Arrow_VERSION VERSION_LESS "21.0")
+        message(FATAL_ERROR "Required at least Arrow version 21.0, but found ${Arrow_VERSION}")
+    endif()
+    
+    # Only look for Parquet if we found arrow already.
+    find_package(Parquet REQUIRED CONFIG)
+    if (Parquet_FOUND)
+        if (Parquet_VERSION VERSION_LESS "21.0")
+            message(FATAL_ERROR "Required at least Parquet version 21.0, but found ${Parquet_VERSION}")
+        endif()
+    endif()
 endif()

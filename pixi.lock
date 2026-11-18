@@ -80,6 +80,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libamd-3.3.3-h456b2da_7100101.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libarchive-3.8.9-gpl_hc2c16d8_100.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libarrow-25.0.0-hcc2f0d9_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libarrow-acero-25.0.0-h635bf11_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libarrow-compute-25.0.0-h53684a4_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libarrow-dataset-25.0.0-h635bf11_4_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libblas-3.11.0-9_h4a7cf45_openblas.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlicommon-1.2.0-h39a168f_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlidec-1.2.0-ha411449_3.conda
@@ -105,6 +108,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcc-16.1.0-ha9f2e26_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-64-14.4.0-hd9a9cd0_101.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcc-ng-16.1.0-h69a702a_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libgdal-arrow-parquet-3.13.2-h9eb9f8a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgdal-core-3.13.2-hd345f60_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgfortran-16.1.0-h69a702a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgfortran5-16.1.0-h79bb938_1.conda
@@ -155,6 +159,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libtiff-4.7.2-h9d88235_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libudev1-257.13-h084b8d7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libumfpack-6.3.5-h873dde6_7100101.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libutf8proc-2.11.3-hfe17d71_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libuuid-2.42.2-h5347b49_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libuv-1.52.1-h280c20c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libwebp-base-1.6.0-hd42ef1d_1.conda
@@ -274,6 +279,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libamd-3.3.3-h913f464_7100102.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libarchive-3.8.9-gpl_hbe7d12b_100.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libarrow-25.0.0-hf28620a_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libarrow-acero-25.0.0-hb326ee9_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libarrow-compute-25.0.0-hdd99842_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libarrow-dataset-25.0.0-hb326ee9_4_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libblas-3.11.0-9_haddc8a3_openblas.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libbrotlicommon-1.2.0-h384ecca_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libbrotlidec-1.2.0-h011f0d3_3.conda
@@ -299,6 +307,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgcc-16.1.0-h205dda4_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-aarch64-14.4.0-ha8b83fe_101.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgcc-ng-16.1.0-he9431aa_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgdal-arrow-parquet-3.13.2-h00a2266_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgdal-core-3.13.2-h3e0fee2_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgfortran-16.1.0-he9431aa_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgfortran5-16.1.0-h47adacf_1.conda
@@ -349,6 +358,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libtiff-4.7.2-hdb009f0_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libudev1-257.13-hfcc8634_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libumfpack-6.3.5-h8b28e19_7100102.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libutf8proc-2.11.3-hec6f9f7_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libuuid-2.42.2-h1022ec0_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libuv-1.52.1-h80f16a2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libwebp-base-1.6.0-ha2e29f5_1.conda
@@ -471,6 +481,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libamd-3.3.3-ha5840a7_7100102.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libarchive-3.8.9-gpl_h2bf6321_100.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libarrow-25.0.0-he333e4a_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libarrow-acero-25.0.0-h620650e_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libarrow-compute-25.0.0-h03721a0_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libarrow-dataset-25.0.0-h620650e_4_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libblas-3.11.0-9_he492b99_openblas.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libbrotlicommon-1.2.0-he0616a4_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libbrotlidec-1.2.0-h4a2f56c_3.conda
@@ -497,6 +510,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libfabric1-2.6.0-ha1e9b39_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libffi-3.7.0-h8c408c4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libgcc-16.1.0-h13771c8_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libgdal-arrow-parquet-3.13.2-h4c8e70a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libgdal-core-3.13.2-he8206cc_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libgfortran-16.1.0-h7e5c614_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/libgfortran-devel_osx-64-14.4.0-h7e5c614_0.conda
@@ -541,6 +555,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libthrift-0.22.0-hebea4ca_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libtiff-4.7.2-h95d6d7f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libumfpack-6.3.5-h0658b90_7100102.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libutf8proc-2.11.3-hc282952_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libuv-1.52.1-ha3d0635_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libwebp-base-1.6.0-hb276fe9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libxml2-16-2.15.3-h7a90416_0.conda
@@ -664,6 +679,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libamd-3.3.3-h5087772_7100102.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarchive-3.8.9-gpl_h6fbacd7_100.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarrow-25.0.0-haaed7fe_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarrow-acero-25.0.0-heaff1e6_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarrow-compute-25.0.0-h93a2d87_4_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarrow-dataset-25.0.0-heaff1e6_4_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libblas-3.11.0-9_h51639a9_openblas.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libbrotlicommon-1.2.0-h1dcdb26_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libbrotlidec-1.2.0-h5295a6a_3.conda
@@ -690,6 +708,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libfabric1-2.6.0-h84a0fba_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.7.0-hcf2aa1b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgcc-16.1.0-h3cf6597_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgdal-arrow-parquet-3.13.2-h4b5c33d_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgdal-core-3.13.2-h21e278e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgfortran-16.1.0-h07b0088_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/libgfortran-devel_osx-arm64-14.4.0-h07b0088_0.conda
@@ -734,6 +753,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libthrift-0.22.0-h1fb9c8a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libtiff-4.7.2-h282da08_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libumfpack-6.3.5-h7c2c975_7100102.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libutf8proc-2.11.3-h2431656_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libuv-1.52.1-h1a92334_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libwebp-base-1.6.0-h202fb40_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libxml2-16-2.15.3-h5ef1a60_0.conda
@@ -843,6 +863,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/libamd-3.3.3-h60129d2_7100102.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libarchive-3.8.9-gpl_he24518a_100.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libarrow-25.0.0-h20c36f3_3_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libarrow-acero-25.0.0-h7d8d6a5_3_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libarrow-compute-25.0.0-h081cd8e_3_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libarrow-dataset-25.0.0-h7d8d6a5_3_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libblas-3.11.0-9_h8455456_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlicommon-1.2.0-hf02afa3_3.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlidec-1.2.0-h84f9c24_3.conda
@@ -862,6 +885,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/libffi-3.7.0-h3d046cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libflang-19.1.7-he0c23c2_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libgcc-16.1.0-h110b43a_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libgdal-arrow-parquet-3.13.2-h150f5f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libgdal-core-3.13.2-hbfeefb7_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libgomp-16.1.0-h8ee18e1_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libgoogle-cloud-3.7.0-hfe3f7e9_0.conda
@@ -899,6 +923,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/libthrift-0.22.0-h2e43b2f_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libtiff-4.7.2-h8f73337_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libumfpack-6.3.5-h4ca129d_7100102.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libutf8proc-2.11.3-hb980946_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libuv-1.52.1-h6a83c73_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libwebp-base-1.6.0-h4d5522a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libwinpthread-12.0.0.r4.gg4f2fc60ca-h57928b3_10.conda

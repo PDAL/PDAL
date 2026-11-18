@@ -28,4 +28,5 @@ dependencies:
   - re2  # [linux]
   - ccache
   - spz
+  - libgdal-arrow-parquet
 
