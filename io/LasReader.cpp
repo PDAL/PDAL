@@ -170,10 +170,13 @@ struct LasReader::Private
     std::function<void(PointRef&, const char *, size_t)> loadPoint;
     std::mutex mutex;
     std::condition_variable processedCv;
+    bool failed;
+    std::string error;
     bool isRemote;
     std::unique_ptr<connector::Connector> connector;
 
-    Private() : apiHeader(header, srs, vlrs), index(0), pool(DefaultNumThreads), isRemote(false)
+    Private() : apiHeader(header, srs, vlrs), index(0), pool(DefaultNumThreads), failed(false),
+        isRemote(false)
     {}
 };
 
@@ -472,6 +475,8 @@ void LasReader::ready(PointTableRef table)
 
     d->currentTile.reset();
     d->tiles.clear();
+    d->failed = false;
+    d->error.clear();
 
     d->index = 0;
     if (d->header.dataCompressed())
@@ -524,47 +529,52 @@ void LasReader::queueNextCompressedChunk()
 
     d->pool.add([this, chunk, start]()
     {
-        uint32_t chunkpoints = d->chunkInfo.chunkPoints(chunk);
-        uint64_t chunkoffset = d->chunkInfo.chunkOffset(chunk);
-        uint32_t chunksize = d->chunkInfo.chunkSize(chunk);
+        // If another chunk task has already failed, don't bother trying to read more.
+        if (hasFailed())
+            return;
 
-        LasStreamPtr lasStream = createStream();
-        std::istream& in(*lasStream);
-
-        std::vector<char> buf(chunksize);
-        in.seekg(chunkoffset);
-        in.read(buf.data(), buf.size());
-
-        int32_t tilepoints = chunkpoints - start;
-        las::TilePtr tile = std::make_unique<las::Tile>(chunk, tilepoints * d->header.pointSize);
-
-        lazperf::reader::chunk_decompressor decomp(d->header.pointFormat(), d->header.ebCount(),
-            buf.data());
-
-        // We have to decompress all the points, even if we're discarding the points at
-        // the front because nextFetchPoint isn't 0. Just reuse the front of the tile
-        // buffer for discarded points.
-        char *pos = tile->data();
-        for (uint32_t i = 0; i < chunkpoints; ++i)
+        try
         {
-            decomp.decompress(pos);
+            uint32_t chunkpoints = d->chunkInfo.chunkPoints(chunk);
+            uint64_t chunkoffset = d->chunkInfo.chunkOffset(chunk);
+            uint32_t chunksize = d->chunkInfo.chunkSize(chunk);
 
-            // Advance the point location in the tile if we're keeping the point.
-            if (i >= start)
-                pos += d->header.pointSize;
+            LasStreamPtr lasStream = createStream();
+            std::istream& in(*lasStream);
+
+            std::vector<char> buf(chunksize);
+            in.seekg(chunkoffset);
+            in.read(buf.data(), buf.size());
+
+            int32_t tilepoints = chunkpoints - start;
+            las::TilePtr tile =
+                std::make_unique<las::Tile>(chunk, tilepoints * d->header.pointSize);
+
+            lazperf::reader::chunk_decompressor decomp(d->header.pointFormat(),
+                d->header.ebCount(), buf.data());
+
+            // We have to decompress all the points, even if we're discarding the points at
+            // the front because nextFetchPoint isn't 0. Just reuse the front of the tile
+            // buffer for discarded points.
+            char *pos = tile->data();
+            for (uint32_t i = 0; i < chunkpoints; ++i)
+            {
+                decomp.decompress(pos);
+
+                // Advance the point location in the tile if we're keeping the point.
+                if (i >= start)
+                    pos += d->header.pointSize;
+            }
+            addTile(std::move(tile));
         }
+        catch (const std::exception& ex)
         {
-            std::unique_lock l(d->mutex);
-            for (las::TilePtr& t : d->tiles)
-                if (!t)
-                {
-                    t = std::move(tile);
-                    goto done;
-                }
-            d->tiles.push_back(std::move(tile));
+            setError(ex.what());
         }
-        done:
-        d->processedCv.notify_one();
+        catch (...)
+        {
+            setError("Unknown error reading chunk " + std::to_string(chunk) + ".");
+        }
     });
     d->nextFetchChunk++;
     // After the first chunk, we always start at 0.
@@ -583,25 +593,29 @@ void LasReader::queueNextStandardChunk()
     uint64_t count = (std::min)(chunkSize, d->end - start);
     d->pool.add([this, chunk, count, start]()
     {
-        LasStreamPtr lasStream = createStream();
-        std::istream& in(*lasStream);
+        // If another chunk task has already failed, don't bother trying to read more.
+        if (hasFailed())
+            return;
 
-        las::TilePtr tile = std::make_unique<las::Tile>(chunk, count * d->header.pointSize);
-        in.seekg(d->header.pointOffset + start * d->header.pointSize);
-        in.read(tile->data(), tile->size());
-
+        try
         {
-            std::unique_lock l(d->mutex);
-            for (las::TilePtr& t : d->tiles)
-                if (!t)
-                {
-                    t = std::move(tile);
-                    goto done;
-                }
-            d->tiles.push_back(std::move(tile));
+            LasStreamPtr lasStream = createStream();
+            std::istream& in(*lasStream);
+
+            las::TilePtr tile = std::make_unique<las::Tile>(chunk, count * d->header.pointSize);
+            in.seekg(d->header.pointOffset + start * d->header.pointSize);
+            in.read(tile->data(), tile->size());
+
+            addTile(std::move(tile));
         }
-        done:
-        d->processedCv.notify_one();
+        catch (const std::exception& ex)
+        {
+            setError(ex.what());
+        }
+        catch (...)
+        {
+            setError("Unknown error reading chunk " + std::to_string(chunk) + ".");
+        }
     });
 
     // This check is just to prevent overflow.
@@ -610,6 +624,42 @@ void LasReader::queueNextStandardChunk()
     else
         d->nextFetchPoint += chunkSize;
     d->nextFetchChunk++;
+}
+
+void LasReader::addTile(las::TilePtr tile)
+{
+    {
+        std::unique_lock l(d->mutex);
+        for (las::TilePtr& t : d->tiles)
+            if (!t)
+            {
+                t = std::move(tile);
+                break;
+            }
+        if (tile)
+            d->tiles.push_back(std::move(tile));
+    }
+    d->processedCv.notify_one();
+}
+
+// Called from a pool thread when loading a tile fails. Exceptions must never escape
+// a pool task (there's no handler on the worker thread, so they'd terminate the
+// process), so the error is recorded here and thrown from processOne() instead.
+void LasReader::setError(const std::string& msg)
+{
+    {
+        std::unique_lock l(d->mutex);
+        d->failed = true;
+        if (d->error.empty())
+            d->error = msg;
+    }
+    d->processedCv.notify_all();
+}
+
+bool LasReader::hasFailed()
+{
+    std::unique_lock l(d->mutex);
+    return d->failed;
 }
 
 void LasReader::readExtraBytesVlr()
@@ -702,6 +752,7 @@ bool LasReader::processOne(PointRef& point)
     // If we don't have an active tile, get the next one or wait for it to be ready.
     if (!d->currentTile)
     {
+        std::string error;
         {
             std::unique_lock<std::mutex> l(d->mutex);
             while (true)
@@ -709,8 +760,21 @@ bool LasReader::processOne(PointRef& point)
                 d->currentTile = getTile(d->nextReadChunk);
                 if (d->currentTile)
                     break;
+                if (d->failed)
+                {
+                    // If task failed, tile may never arrive. Stop waiting and report error.
+                    error = d->error;
+                    break;
+                }
                 d->processedCv.wait(l);
             }
+        }
+        if (error.size())
+        {
+            // Drop any chunk reads still queued. Tasks already running will see the
+            // failure flag and exit without doing anything.
+            d->pool.clearTasks();
+            throwError(error);
         }
 
         // Found the tile we wanted. Queue the next file read.
