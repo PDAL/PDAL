@@ -15,7 +15,6 @@ dependencies:
   - nitro
   - ceres-solver
   - python=3.12
-  - aws-c-s3
   - conda
   - mamba
   - conda-build
@@ -24,7 +23,7 @@ dependencies:
   - compilers
   - ninja
   - cmake
-  - pkg-config
+  - pkgconf
   - make  # [not win]
   - re2  # [linux]
   - ccache
