@@ -24,7 +24,8 @@ dependencies:
   - ninja
   - liblzma-devel
   - cmake
-  - pkgconf
+  - aws-c-s3
+  - pkg-config
   - make  # [not win]
   - re2  # [linux]
   - ccache
