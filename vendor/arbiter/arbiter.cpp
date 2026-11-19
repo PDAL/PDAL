@@ -2195,7 +2195,7 @@ S3::AuthFields S3::Auth::fields() const
             else
             {
                 // Parse JSON response.
-                const json creds = json::parse(res.data());
+                const json creds = json::parse(data.data());
 
                 m_access = creds.at("AccessKeyId").get<std::string>();
                 m_hidden = creds.at("SecretAccessKey").get<std::string>();
@@ -4410,6 +4410,7 @@ Curl::Curl(Curl&& other)
     m_followRedirect = other.m_followRedirect;
     m_verifyPeer = other.m_verifyPeer;
     m_caPath = std::move(other.m_caPath);
+    m_caBundle = std::move(other.m_caBundle);
     m_caInfo = std::move(other.m_caInfo);
     m_proxy = std::move(other.m_proxy);
     m_response = std::move(other.m_response);
@@ -4648,6 +4649,14 @@ namespace arbiter
 {
 namespace http
 {
+
+namespace
+{
+    // HTTP code given to a transfer that failed in curl itself (connection
+    // error, timeout, body cut off after the headers).  Not a real HTTP
+    // status, but a 5xx, so Resource::exec retries it.
+    const int retryableCurlError(550);
+}
 
 std::string sanitize(const std::string& path, const std::string& excStr)
 {
@@ -4891,15 +4900,32 @@ bool Pool::handleCompleted()
         if (m->msg != CURLMSG_DONE)
             continue;
 
+        // The message doesn't survive curl_multi_remove_handle, so copy it.
+        CURL* easyHandle = m->easy_handle;
+        const CURLcode result = m->data.result;
+
         // If we have a completed transfer, set the state to done, update the http code
         // and say we should notify.
-        curl_multi_remove_handle(m_multi, m->easy_handle);
+        curl_multi_remove_handle(m_multi, easyHandle);
         std::lock_guard l(m_mutex);
         for (Curl& curl : m_curls)
-            if (curl.m_curl == m->easy_handle)
+            if (curl.m_curl == easyHandle)
             {
                 curl.m_state = Curl::State::DONE;
                 curl_easy_getinfo(curl.m_curl, CURLINFO_RESPONSE_CODE, &curl.m_code);
+
+                // A transfer that failed (connection error, timeout, body cut
+                // off after the headers) may still have an HTTP code of 200.
+                // Report it as a server error so that it is retried.
+                if (result != CURLE_OK)
+                {
+                    if (curl.m_verbose)
+                    {
+                        std::cout << "Curl failure: " <<
+                            curl_easy_strerror(result) << std::endl;
+                    }
+                    curl.m_code = retryableCurlError;
+                }
                 notify = true;
             }
     }
@@ -4918,7 +4944,7 @@ bool Pool::handleFailure()
         {
             curl_multi_remove_handle(m_multi, curl.m_curl);
             curl.m_state = Curl::State::DONE;
-            curl.m_code = 550;  // Made-up error code.
+            curl.m_code = retryableCurlError;
             notify = true;
         }
     return notify;
