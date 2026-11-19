@@ -982,7 +982,7 @@ public:
     */
     virtual void setValue(const std::string& s)
     {
-        std::vector<std::string> slist = Utils::split2(s, ',');
+        std::vector<std::string> slist = Utils::splitEscaped(s, ',');
         for (auto& ts : slist)
             Utils::trim(ts);
 
