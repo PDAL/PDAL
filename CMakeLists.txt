@@ -253,6 +253,7 @@ target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
+        CURL::libcurl
         GDAL::GDAL
         PROJ::proj
         ${GEOTIFF_LIBRARY}
