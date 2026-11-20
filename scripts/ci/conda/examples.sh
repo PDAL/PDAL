@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CMAKE_OPTIONS="-Werror=author -Wno-error=non-target-directive --log-level=VERBOSE"
+
 export BASE=`pwd`
 
 conda activate test
@@ -18,5 +20,7 @@ do
     cd $BASE/examples/$EXAMPLE
     mkdir -p _build || exit 1
     cd _build || exit 1
-    cmake -G "Ninja" .. -DPDAL_DIR=$CONDA_PREFIX/lib/cmake/PDAL && ninja
+    cmake $CMAKE_OPTIONS -G "Ninja" .. \
+        -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
+        -DPDAL_DIR="$CONDA_PREFIX/lib/cmake/PDAL" && ninja
 done

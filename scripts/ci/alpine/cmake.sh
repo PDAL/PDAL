@@ -1,8 +1,12 @@
 #!/bin/bash
 
-cmake .. \
+CMAKE_OPTIONS="-Werror=author -Wno-error=non-target-directive --log-level=VERBOSE \
+    -DCMAKE_INSTALL_BINDIR=bin -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_INCLUDEDIR=include"
+
+cmake $CMAKE_OPTIONS .. \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     -DBUILD_PLUGIN_CPD=ON \
     -DBUILD_PLUGIN_NITF=OFF \
     -DBUILD_PLUGIN_ICEBRIDGE=ON \

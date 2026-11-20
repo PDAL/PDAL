@@ -115,12 +115,12 @@ jobs:
           source ./scripts/ci/linux/setup.sh
           cd build
           source ../scripts/ci/linux/cmake.sh
-          cmake .. \
+          cmake $CMAKE_OPTIONS .. \
             -G Ninja \
             -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
             -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+            -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
             -DWITH_TESTS=OFF
           source ../scripts/ci/linux/compile.sh
           export PDAL_VERSION=$(pdal-config --version)

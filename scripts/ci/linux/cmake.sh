@@ -1,15 +1,18 @@
 #!/bin/bash
 
+CMAKE_OPTIONS="-Werror=author -Wno-error=non-target-directive --log-level=VERBOSE \
+    -DCMAKE_INSTALL_BINDIR=bin -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_INCLUDEDIR=include"
+
 export PKG_CONFIG_PATH=$CONDA_PREFIX/lib64/pkgconfig
 
-LDFLAGS="$LDFLAGS -Wl,-rpath-link,$CONDA_PREFIX/lib" cmake .. \
+LDFLAGS="$LDFLAGS -Wl,-rpath-link,$CONDA_PREFIX/lib" cmake $CMAKE_OPTIONS .. \
       -G Ninja \
       -DCMAKE_C_COMPILER_LAUNCHER=ccache \
       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
       -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
       -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
       -DCMAKE_BUILD_TYPE=Debug \
-      -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+      -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
       -DUSE_EXTERNAL_GTEST=ON \
       -DBUILD_PLUGIN_NITF=ON \
       -DBUILD_PLUGIN_TILEDB=ON \
