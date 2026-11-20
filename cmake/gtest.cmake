@@ -84,11 +84,10 @@ else()
         add_library(GTest::gtest_main ALIAS gtest_main)
     endif()
 
-    set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
-
     if(WITH_ABSEIL)
+        set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
         find_package(absl REQUIRED)
-        set(FPHSA_NAME_MISMATCHED 0)
+        unset(FPHSA_NAME_MISMATCHED)
 
         if(absl_FOUND)
             find_package(re2 REQUIRED)
