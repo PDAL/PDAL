@@ -216,6 +216,9 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES TIMEOUT 300)
+if (GDAL_VERSION VERSION_LESS "3.13.4")
+    set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES DISABLED TRUE)
+endif()
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
