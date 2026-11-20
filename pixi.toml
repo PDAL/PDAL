@@ -6,7 +6,7 @@ version = "2.8.2"
 
 [feature.dev.dependencies]
 libgdal-core = "*"
-cmake = "*"
+cmake = ">=4.5"
 ninja = "*"
 libpq = "*"
 hdf5 = "*"
