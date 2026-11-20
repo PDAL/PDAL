@@ -582,6 +582,49 @@ namespace Utils
     }
 
     /**
+      Split a string into substrings, allowing literal predicate characters to be
+      escaped.  Non-escaped characters matching the predicate are
+      discarded, as are empty strings otherwise produced by \ref split().
+
+      \param s  String to split.
+      \param p  Predicate returns true if a char in a string is a split
+        location.
+      \param esc  Escape character to be used
+      \return  Vector of substrings.
+    */
+    template<typename PREDICATE>
+    std::vector<std::string> splitEscaped(const std::string& s, PREDICATE p,
+      char esc)
+    {
+        std::vector<std::string> result;
+        std::string curLine;
+
+        if (s.empty())
+          return result;
+
+        auto endLine = [&]()
+        {
+            if (!curLine.empty())
+                result.push_back(curLine);
+            curLine.clear();
+        };
+        for (size_t i = 0; i < s.size(); ++i)
+        {
+            char c = s[i];
+            if (c == esc && (i + 1 < s.size() && p(s[i + 1])))
+                curLine += s[++i];
+            else if (p(c))
+                endLine();
+            else
+                curLine += c;
+        }
+        endLine();
+
+        return result;
+    }
+
+
+    /**
       Split a string into substrings based a splitting character.  The
       splitting characters are discarded.
 
@@ -610,6 +653,23 @@ namespace Utils
     {
         auto pred = [tChar](char c){ return(c == tChar); };
         return split2(s, pred);
+    }
+
+    /**
+      Split a string into substrings, allowing literal splitting characters to be
+      escaped.  Non-escaped characters matching the splitting characters are
+      discarded, as are empty strings otherwise produced by \ref split().
+
+      \param s  String to split.
+      \param tChar  Character indicating split positions.
+      \param esc  Escape character to be used (defalut: '\').
+      \return  Vector of substrings.
+    */
+    inline PDAL_EXPORT std::vector<std::string>
+    splitEscaped(const std::string& s, char tChar, char esc = '\\')
+    {
+        auto pred = [tChar](char c){ return(c == tChar); };
+        return splitEscaped(s, pred, esc);
     }
 
     /**
