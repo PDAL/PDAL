@@ -39,8 +39,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include "../lepcc/src/include/lepcc_c_api.h"
-#include "../lepcc/src/include/lepcc_types.h"
+#include <lepcc/src/include/lepcc_c_api.h>
+#include <lepcc/src/include/lepcc_types.h>
 
 namespace pdal
 {

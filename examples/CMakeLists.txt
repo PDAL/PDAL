@@ -24,6 +24,7 @@ file(GLOB SRCS
     writing-writer/*.cpp)
 
 add_library(dummy_lib OBJECT ${SRCS})
+pdal_example_compile_settings(dummy_lib)
 add_dependencies(dummy_lib generate_dimension_hpp)
 target_include_directories(dummy_lib PRIVATE
     ${PDAL_INCLUDE_DIR}

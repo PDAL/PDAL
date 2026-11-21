@@ -128,7 +128,7 @@ endmacro(PDAL_ADD_FREE_LIBRARY)
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
+    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES COMPILE_DEFINITIONS)
     cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
     if(MSVC)
@@ -153,7 +153,8 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         # Enable C++17 standard compliance
         CXX_STANDARD 17
     )
-    target_compile_definitions(${${_name}} PRIVATE PDAL_DLL_EXPORT)
+    target_compile_definitions(${${_name}} PRIVATE
+        PDAL_DLL_EXPORT ${PDAL_ADD_PLUGIN_COMPILE_DEFINITIONS})
     if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
         target_include_directories(${${_name}} SYSTEM PRIVATE
             ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
@@ -191,6 +192,7 @@ endmacro(PDAL_ADD_PLUGIN)
 #    FILES the source files for the test
 #    LINK_WITH link test executable with libraries
 #    INCLUDES header file directories
+#    COMPILE_DEFINITIONS private definitions for the test sources
 #
 
 if(NOT TARGET GTest::gtest)
@@ -205,7 +207,7 @@ macro(PDAL_ADD_TEST _name)
 
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
+    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES COMPILE_DEFINITIONS)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -213,6 +215,8 @@ macro(PDAL_ADD_TEST _name)
     add_executable(${_name} ${PDAL_ADD_TEST_FILES}
         $<TARGET_OBJECTS:${PDAL_TEST_SUPPORT_OBJS}>)
     pdal_target_compile_settings(${_name})
+    target_compile_definitions(${_name} PRIVATE
+        ${PDAL_TEST_COMPILE_DEFINITIONS} ${PDAL_ADD_TEST_COMPILE_DEFINITIONS})
     target_include_directories(${_name} PRIVATE
         ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}
@@ -220,9 +224,13 @@ macro(PDAL_ADD_TEST _name)
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
-    if(NOT USE_EXTERNAL_GTEST AND NOT MSVC)
-        target_compile_options(${_name} BEFORE PRIVATE
-            "-iquote${ROOT_DIR}/vendor/gtest/include")
+    if(NOT USE_EXTERNAL_GTEST)
+        target_include_directories(${_name} BEFORE PRIVATE
+            ${ROOT_DIR}/vendor/gtest ${ROOT_DIR}/vendor/gtest/include)
+        if(NOT MSVC)
+            target_compile_options(${_name} BEFORE PRIVATE
+                "-iquote${ROOT_DIR}/vendor/gtest/include")
+        endif()
     endif()
     if (PDAL_ADD_TEST_SYSTEM_INCLUDES)
         target_include_directories(${_name} SYSTEM PRIVATE

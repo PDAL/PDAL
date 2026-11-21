@@ -30,11 +30,15 @@ target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
         ${PDAL_INCLUDE_DIR}
 )
 if(NOT USE_EXTERNAL_GTEST)
+    target_include_directories(${PDAL_TEST_SUPPORT_OBJS} BEFORE PRIVATE
+        ${ROOT_DIR}/vendor/gtest ${ROOT_DIR}/vendor/gtest/include)
     target_compile_options(${PDAL_TEST_SUPPORT_OBJS} BEFORE
         PRIVATE
             "-iquote${ROOT_DIR}/vendor/gtest/include"
     )
 endif()
+target_compile_definitions(${PDAL_TEST_SUPPORT_OBJS} PRIVATE
+    ${PDAL_TEST_COMPILE_DEFINITIONS})
 PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
@@ -484,6 +488,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
 )
 target_compile_definitions(pdal_filters_hexbin_test
     PRIVATE
+        ${PDAL_CURL_COMPILE_DEFINITIONS}
         H3_PREFIX=PDALH3
 )
 

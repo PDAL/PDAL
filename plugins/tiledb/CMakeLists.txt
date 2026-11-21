@@ -15,10 +15,6 @@ if (NOT TileDB_FOUND)
     message(FATAL_ERROR "Can't find TileDB support required.")
 endif()
 
-if (WIN32)
-    add_definitions(-DNOMINMAX)
-endif()
-
 #
 # TileDB Reader
 #

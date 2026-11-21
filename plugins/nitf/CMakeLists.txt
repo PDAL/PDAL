@@ -22,6 +22,8 @@ include(${PDAL_CMAKE_DIR}/gdal.cmake)
 
 
 PDAL_ADD_PLUGIN(reader_libname reader nitf
+    COMPILE_DEFINITIONS
+        ${PDAL_NITRO_COMPILE_DEFINITIONS}
     FILES
         io/NitfFileReader.cpp
         io/MetadataReader.cpp
@@ -36,6 +38,7 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_LIBRARIES}
 )
+target_include_directories(${reader_libname} BEFORE PRIVATE ${PDAL_NITRO_INCLUDE_DIRS})
 if (WIN32)
     target_compile_definitions(${reader_libname}
         PRIVATE
@@ -45,6 +48,8 @@ if (WIN32)
 endif()
 
 PDAL_ADD_PLUGIN(writer_libname writer nitf
+    COMPILE_DEFINITIONS
+        ${PDAL_NITRO_COMPILE_DEFINITIONS}
     FILES
         io/NitfFileWriter.cpp
         io/NitfWriter.cpp
@@ -56,6 +61,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${PDAL_LIBRARIES}
         ${PDAL_ARBITER_LIB_NAME}
 )
+target_include_directories(${writer_libname} BEFORE PRIVATE ${PDAL_NITRO_INCLUDE_DIRS})
 if (WIN32)
     target_compile_definitions(${writer_libname}
         PRIVATE
@@ -66,16 +72,22 @@ endif()
 
 if (WITH_TESTS AND NOT STANDALONE)
     PDAL_ADD_TEST(pdal_io_nitf_writer_test
+        COMPILE_DEFINITIONS
+            ${PDAL_NITRO_COMPILE_DEFINITIONS}
         FILES
             test/NitfWriterTest.cpp
         LINK_WITH
             ${writer_libname}
     )
+    target_include_directories(pdal_io_nitf_writer_test BEFORE PRIVATE ${PDAL_NITRO_INCLUDE_DIRS})
 
     PDAL_ADD_TEST(pdal_io_nitf_reader_test
+        COMPILE_DEFINITIONS
+            ${PDAL_NITRO_COMPILE_DEFINITIONS}
         FILES
             test/NitfReaderTest.cpp
         LINK_WITH
             ${reader_libname}
     )
+    target_include_directories(pdal_io_nitf_reader_test BEFORE PRIVATE ${PDAL_NITRO_INCLUDE_DIRS})
 endif()

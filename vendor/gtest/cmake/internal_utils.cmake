@@ -150,6 +150,7 @@ function(cxx_library_with_type name type cxx_flags)
   # type can be either STATIC or SHARED to denote a static or shared library.
   # ARGN refers to additional arguments after 'cxx_flags'.
   add_library(${name} ${type} ${ARGN})
+  target_include_directories(${name} PRIVATE ${gtest_build_include_dirs})
   add_library(${cmake_package_name}::${name} ALIAS ${name})
   set_target_properties(${name}
     PROPERTIES
@@ -211,6 +212,7 @@ endfunction()
 # is built from the given source files with the given compiler flags.
 function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
+  target_include_directories(${name} PRIVATE ${gtest_build_include_dirs})
   if (MSVC)
     # BigObj required for tests.
     set(cxx_flags "${cxx_flags} -bigobj")

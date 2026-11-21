@@ -113,7 +113,6 @@ endif()
 set(gtest_build_include_dirs
   "${gtest_SOURCE_DIR}/include"
   "${gtest_SOURCE_DIR}")
-include_directories(${gtest_build_include_dirs})
 
 ########################################################################
 #

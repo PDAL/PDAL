@@ -8,6 +8,10 @@ include(${PDAL_CMAKE_DIR}/matlab.cmake)
 #endif()
 
 PDAL_ADD_PLUGIN(libname_writer writer matlab
+    COMPILE_DEFINITIONS
+        ${PDAL_MATLAB_COMPILE_DEFINITIONS}
+    SYSTEM_INCLUDES
+        ${Matlab_INCLUDE_DIRS}
     FILES
         ./filters/Script.cpp
         io/MatlabWriter.cpp
@@ -19,6 +23,10 @@ PDAL_ADD_PLUGIN(libname_writer writer matlab
 )
 
 PDAL_ADD_PLUGIN(libname_reader reader matlab
+    COMPILE_DEFINITIONS
+        ${PDAL_MATLAB_COMPILE_DEFINITIONS}
+    SYSTEM_INCLUDES
+        ${Matlab_INCLUDE_DIRS}
     FILES
         ./filters/Script.cpp
         io/MatlabReader.cpp
@@ -31,6 +39,10 @@ PDAL_ADD_PLUGIN(libname_reader reader matlab
 
 
 PDAL_ADD_PLUGIN(matlab_libname filter matlab
+    COMPILE_DEFINITIONS
+        ${PDAL_MATLAB_COMPILE_DEFINITIONS}
+    SYSTEM_INCLUDES
+        ${Matlab_INCLUDE_DIRS}
     FILES
         ./filters/Environment.cpp
         ./filters/Script.cpp
@@ -45,6 +57,10 @@ PDAL_ADD_PLUGIN(matlab_libname filter matlab
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_matlab_writer_test
+        COMPILE_DEFINITIONS
+            ${PDAL_MATLAB_COMPILE_DEFINITIONS}
+        SYSTEM_INCLUDES
+            ${Matlab_INCLUDE_DIRS}
         FILES
             test/MatlabWriterTest.cpp
         LINK_WITH
@@ -61,6 +77,10 @@ if (WITH_TESTS)
 
 
     PDAL_ADD_TEST(pdal_io_matlab_reader_test
+        COMPILE_DEFINITIONS
+            ${PDAL_MATLAB_COMPILE_DEFINITIONS}
+        SYSTEM_INCLUDES
+            ${Matlab_INCLUDE_DIRS}
         FILES
             test/MatlabReaderTest.cpp
         LINK_WITH
@@ -76,6 +96,10 @@ if (WITH_TESTS)
 #    )
 
     PDAL_ADD_TEST(pdal_filters_matlab_test
+        COMPILE_DEFINITIONS
+            ${PDAL_MATLAB_COMPILE_DEFINITIONS}
+        SYSTEM_INCLUDES
+            ${Matlab_INCLUDE_DIRS}
         FILES
             ./filters/Script.cpp
             ./filters/Environment.cpp

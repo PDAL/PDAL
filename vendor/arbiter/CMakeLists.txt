@@ -19,6 +19,7 @@ target_link_libraries(${PDAL_ARBITER_LIB_NAME}
 )
 target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
+        ${PDAL_CURL_COMPILE_DEFINITIONS}
         ARBITER_CURL)
 
 # Arbiter is built static but is included in a shared lib.

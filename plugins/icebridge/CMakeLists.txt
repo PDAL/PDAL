@@ -21,6 +21,8 @@ if (NOT PDAL_HAVE_HDF5)
     message(FATAL "HDF5 not found but is required for Icebridge.")
 else()
     PDAL_ADD_PLUGIN(libname reader icebridge
+        COMPILE_DEFINITIONS
+            ${PDAL_HDF5_COMPILE_DEFINITIONS}
         FILES
             io/IcebridgeReader.cpp
             io/Hdf5Handler.cpp
@@ -31,10 +33,14 @@ else()
             ${ROOT_DIR}
             ${LIBXML2_INCLUDE_DIR}
     )
+    target_include_directories(${libname} BEFORE PRIVATE ${HDF5_INCLUDE_DIR})
 
     if (WITH_TESTS)
         PDAL_ADD_TEST(pdal_io_icebridge_reader_test
+            COMPILE_DEFINITIONS
+                ${PDAL_HDF5_COMPILE_DEFINITIONS}
             FILES test/IcebridgeReaderTest.cpp
             LINK_WITH ${libname})
+        target_include_directories(pdal_io_icebridge_reader_test BEFORE PRIVATE ${HDF5_INCLUDE_DIR})
     endif()
 endif()
