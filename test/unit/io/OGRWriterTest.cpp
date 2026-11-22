@@ -44,14 +44,130 @@
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
+#include <nlohmann/json.hpp>
+
+#include <cmath>
 #include <iostream>
 #include <sstream>
+
+// These tests write points with writers.ogr, then open the result with GDAL
+// and write what it holds as JSON: the layer's geometry type, feature
+// count, extent, SRS and fields, and each feature's values and points.
+// That's compared with the expected JSON in test/data/ogr.
 
 namespace pdal
 {
 
 namespace
 {
+
+// Rounds to 6 decimal places, so the last bits of a double, which can
+// differ between drivers, don't change the JSON text
+double rounded(double v)
+{
+    return std::round(v * 1e6) / 1e6;
+}
+
+// The OGC name of a geometry type, such as PointZM
+const char *geomTypeName(OGRwkbGeometryType type)
+{
+    return OGRToOGCGeomType(type, /*bCamelCase=*/true, /*bAddZM=*/true);
+}
+
+// The layer in filename as JSON, with its features unless summaryOnly
+std::string layerInfo(const std::string& filename, bool summaryOnly)
+{
+    GDALDatasetUniquePtr ds(GDALDataset::Open(filename.c_str(),
+        GDAL_OF_VECTOR | GDAL_OF_READONLY));
+    if (!ds || ds->GetLayerCount() != 1)
+    {
+        ADD_FAILURE() << "can't read one layer from " << filename;
+        return "";
+    }
+    OGRLayer *layer = ds->GetLayer(0);
+    OGRFeatureDefn *defn = layer->GetLayerDefn();
+
+    NL::ordered_json info;
+    info["name"] = layer->GetName();
+    info["geometryType"] = geomTypeName(layer->GetGeomType());
+    info["featureCount"] = layer->GetFeatureCount();
+    OGREnvelope env;
+    if (layer->GetExtent(&env) == OGRERR_NONE)
+        info["extent"] = { rounded(env.MinX), rounded(env.MinY),
+            rounded(env.MaxX), rounded(env.MaxY) };
+    // Only the SRS name, as the rest changes with the PROJ version
+    const OGRSpatialReference *srs = layer->GetSpatialRef();
+    if (srs)
+        info["srs"] = srs->GetName();
+    else
+        info["srs"] = nullptr;
+
+    info["fields"] = NL::ordered_json::array();
+    for (int i = 0; i < defn->GetFieldCount(); ++i)
+    {
+        const OGRFieldDefn *fd = defn->GetFieldDefn(i);
+        info["fields"].push_back({
+            { "name", fd->GetNameRef() },
+            { "type", OGRFieldDefn::GetFieldTypeName(fd->GetType()) },
+            { "width", fd->GetWidth() },
+            { "precision", fd->GetPrecision() } });
+    }
+    if (summaryOnly)
+        return info.dump(2) + "\n";
+
+    info["features"] = NL::ordered_json::array();
+    for (auto& feat : *layer)
+    {
+        NL::ordered_json f;
+        f["fid"] = feat->GetFID();
+        f["properties"] = NL::ordered_json::object();
+        for (int i = 0; i < defn->GetFieldCount(); ++i)
+        {
+            const char *name = defn->GetFieldDefn(i)->GetNameRef();
+            switch (defn->GetFieldDefn(i)->GetType())
+            {
+            case OFTInteger:
+            case OFTInteger64:
+                f["properties"][name] = feat->GetFieldAsInteger64(i);
+                break;
+            case OFTReal:
+                f["properties"][name] = rounded(feat->GetFieldAsDouble(i));
+                break;
+            default:
+                f["properties"][name] = feat->GetFieldAsString(i);
+            }
+        }
+
+        // Points as [x, y, z] or [x, y, z, m]
+        const OGRGeometry *geom = feat->GetGeometryRef();
+        if (!geom)
+        {
+            ADD_FAILURE() << "feature " << feat->GetFID() << " of "
+                << filename << " has no geometry";
+            continue;
+        }
+        f["geometryType"] = geomTypeName(geom->getGeometryType());
+        f["points"] = NL::ordered_json::array();
+        auto addPoint = [&f](const OGRPoint *p)
+        {
+            NL::ordered_json c = { rounded(p->getX()), rounded(p->getY()) };
+            if (p->Is3D())
+                c.push_back(rounded(p->getZ()));
+            if (p->IsMeasured())
+                c.push_back(rounded(p->getM()));
+            f["points"].push_back(c);
+        };
+        if (wkbFlatten(geom->getGeometryType()) == wkbMultiPoint)
+            for (const OGRPoint *p : *geom->toMultiPoint())
+                addPoint(p);
+        else
+            addPoint(geom->toPoint());
+        info["features"].push_back(f);
+    }
+    return info.dump(2) + "\n";
+}
 
 void runOgrWriterInfo(const Options& wo, const std::string& infile,
     const std::string& infofile, const std::string suffix, int featureCount = 10,
@@ -60,7 +176,7 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
 {
     FileUtils::createDirectory(Support::temppath("ogr"));
     std::string outfile(Support::temppath(std::string("ogr/") + FileUtils::stem(FileUtils::stem(FileUtils::getFilename(infofile))) + suffix));
-    std::string outinfofile(outfile + ".ogrinfo");
+    std::string outinfofile(outfile + ".json");
 
     if(FileUtils::isDirectory(outfile)) {
         FileUtils::deleteDirectory(outfile);
@@ -103,22 +219,13 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
     writer.prepare(t);
     writer.execute(t);
 
-    std::string cmd = "ogrinfo -nomd -al " + outfile;
-    if (featureCount == 0) {
-        cmd += " -so";
-    }
-    cmd += " 2>&1";
-    std::string info;
-    if (Utils::run_shell_command(cmd, info)) {
-        std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
-        return;
-    }
+    std::string info = layerInfo(outfile, featureCount == 0);
 
     auto handle = FileUtils::createFile(outinfofile);
     *handle << info;
     FileUtils::closeFile(handle);
 
-    EXPECT_EQ(compare(infofile, outinfofile, 1), 0u) \
+    EXPECT_EQ(compare(infofile, outinfofile, -1), 0u) \
         << "  (" << infofile << " <-> " << outinfofile << ")";
 }
 
@@ -227,7 +334,7 @@ uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_
 TEST(OGRWriterTest, shapefile)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/shapefile.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/shapefile.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -238,7 +345,7 @@ TEST(OGRWriterTest, shapefile)
 TEST(OGRWriterTest, json)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/json.geojson.ogrinfo");
+    std::string infofile = Support::datapath("ogr/json.geojson.json");
 
     Options wo;
     wo.add("ogrdriver", "GeoJSON");
@@ -249,7 +356,7 @@ TEST(OGRWriterTest, json)
 TEST(OGRWriterTest, geopackage)
 {
     std::string infile = Support::datapath("las/utm15.las");
-    std::string infofile = Support::datapath("ogr/geopackage.gpkg.ogrinfo");
+    std::string infofile = Support::datapath("ogr/geopackage.gpkg.json");
 
     Options wo;
     wo.add("ogrdriver", "GPKG");
@@ -261,9 +368,9 @@ TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
     #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
-        std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.ogrinfo");
+        std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.json");
     #else
-        std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
+        std::string infofile = Support::datapath("ogr/creation_options.geojson.json");
     #endif
 
         Options wo;
@@ -277,7 +384,7 @@ TEST(OGRWriterTest, creation_options)
 TEST(OGRWriterTest, shapefile_measure)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/shapefile_measure.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/shapefile_measure.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -289,7 +396,7 @@ TEST(OGRWriterTest, shapefile_measure)
 TEST(OGRWriterTest, attrs_all)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/attrs_all.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/attrs_all.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -303,9 +410,9 @@ TEST(OGRWriterTest, geopackage_attrs_all)
     std::string infile = Support::datapath("las/simple.las");
 
     #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
-        std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.ogrinfo");
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.json");
     #else
-        std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.json");
     #endif
 
 
@@ -319,7 +426,7 @@ TEST(OGRWriterTest, geopackage_attrs_all)
 TEST(OGRWriterTest, attrs)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/attrs.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/attrs.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -331,7 +438,7 @@ TEST(OGRWriterTest, attrs)
 TEST(OGRWriterTest, attrs_measure)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/attrs_measure.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/attrs_measure.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -344,7 +451,7 @@ TEST(OGRWriterTest, attrs_measure)
 TEST(OGRWriterTest, multicount)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/multicount.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/multicount.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -357,7 +464,7 @@ TEST(OGRWriterTest, multicount_2)
 {
     // feature count < multicount
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/multicount_2.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/multicount_2.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -370,7 +477,7 @@ TEST(OGRWriterTest, multicount_3)
 {
     // feature count == exact multiple of multicount
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/multicount_3.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/multicount_3.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");

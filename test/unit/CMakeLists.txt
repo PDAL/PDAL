@@ -245,6 +245,8 @@ PDAL_ADD_TEST(pdal_io_ogr_writer_test
         io/OGRWriterTest.cpp
     LINK_WITH
         GDAL::GDAL
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_las_reader_test
     FILES
