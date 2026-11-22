@@ -1,0 +1,135 @@
+{
+  "name": "points",
+  "geometryType": "PointZ",
+  "featureCount": 10,
+  "extent": [
+    635619.85,
+    849017.32,
+    635685.33,
+    852165.12
+  ],
+  "srs": "WGS 84",
+  "fields": [],
+  "features": [
+    {
+      "fid": 0,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635619.85,
+          850064.04,
+          447.01
+        ]
+      ]
+    },
+    {
+      "fid": 1,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635640.42,
+          849758.79,
+          422.74
+        ]
+      ]
+    },
+    {
+      "fid": 2,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635650.95,
+          850244.03,
+          424.93
+        ]
+      ]
+    },
+    {
+      "fid": 3,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635673.46,
+          850157.55,
+          435.73
+        ]
+      ]
+    },
+    {
+      "fid": 4,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635674.05,
+          849017.32,
+          428.02
+        ]
+      ]
+    },
+    {
+      "fid": 5,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635678.9,
+          851351.44,
+          436.45
+        ]
+      ]
+    },
+    {
+      "fid": 6,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635680.54,
+          849362.66,
+          421.56
+        ]
+      ]
+    },
+    {
+      "fid": 7,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635681.07,
+          851383.76,
+          419.0
+        ]
+      ]
+    },
+    {
+      "fid": 8,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635684.02,
+          849494.39,
+          407.12
+        ]
+      ]
+    },
+    {
+      "fid": 9,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          635685.33,
+          852165.12,
+          421.75
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "points",
+  "geometryType": "PointZM",
+  "featureCount": 1,
+  "extent": [
+    470692.44,
+    4602888.9,
+    470692.44,
+    4602888.9
+  ],
+  "srs": "NAD83 / UTM zone 15N",
+  "fields": [],
+  "features": [
+    {
+      "fid": 1,
+      "properties": {},
+      "geometryType": "PointZ",
+      "points": [
+        [
+          470692.44,
+          4602888.9,
+          16.0
+        ]
+      ]
+    }
+  ]
+}
