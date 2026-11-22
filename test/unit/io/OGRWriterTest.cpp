@@ -267,11 +267,7 @@ TEST(OGRWriterTest, geopackage)
 TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
-    #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
-        std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.json");
-    #else
-        std::string infofile = Support::datapath("ogr/creation_options.geojson.json");
-    #endif
+    std::string infofile = Support::datapath("ogr/creation_options.geojson.json");
 
         Options wo;
         wo.add("ogrdriver", "GeoJSON");
