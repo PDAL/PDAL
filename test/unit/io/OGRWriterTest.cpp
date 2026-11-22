@@ -229,106 +229,6 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
         << "  (" << infofile << " <-> " << outinfofile << ")";
 }
 
-uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_t ignoreLine1=-1)
-{
-    // GeoJSON files depend on PROJ version, later versions write a much different
-    // SRS format. Crudely ignore lines between ^GEOGCRS[ and ^OGRFeature
-
-    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
-        return (std::numeric_limits<uint32_t>::max)();
-    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
-        return (std::numeric_limits<uint32_t>::max)();
-
-    std::istream *istr1 = Utils::openFile(file1, false);
-    std::istream *istr2 = Utils::openFile(file2, false);
-    std::istream& str1 = *istr1;
-    std::istream& str2 = *istr2;
-
-    uint32_t numdiffs = 0;
-    int32_t currLine = 1;
-    bool buf1ignore = false;
-    bool buf2ignore = false;
-    std::string buf1;
-    std::string buf2;
-
-    while (!str1.eof() && !str2.eof())
-    {
-        if (currLine == ignoreLine1)
-        {
-            std::getline(str1, buf1);
-            std::getline(str2, buf2);
-            ++currLine;
-            continue;
-        }
-
-        if (!(buf1ignore ^ buf2ignore))
-        {
-            std::getline(str1, buf1);
-            std::getline(str2, buf2);
-        }
-        else if (!buf2ignore)
-            std::getline(str1, buf1);
-        else if (!buf1ignore)
-            std::getline(str2, buf2);
-
-        // EOF handling won't work properly if we're in an ignored block. NBD
-        if (str1.eof() && str2.eof())
-        {
-            // hit end on both together
-            break;
-        }
-        else if (str1.eof() && !str2.eof())
-        {
-            // str1 ended, but str2 still going
-            while (!str2.eof())
-            {
-                std::getline(str2, buf2);
-                ++numdiffs;
-            }
-            break;
-        }
-        else if (!str1.eof() && str2.eof())
-        {
-            // str2 ended, but str1 still going
-            while (!str1.eof())
-            {
-                std::getline(str1, buf1);
-                ++numdiffs;
-            }
-            break;
-        }
-
-        if (buf1ignore && buf1.rfind("OGRFeature", 0) == 0)
-            buf1ignore = false;
-        else if (buf1.rfind("GEOGCRS[", 0) == 0)
-            buf1ignore = true;
-
-        if (buf2ignore && buf2.rfind("OGRFeature", 0) == 0)
-            buf2ignore = false;
-        else if (buf2.rfind("GEOGCRS[", 0) == 0)
-            buf2ignore = true;
-
-        // remove line endings from test comparisons
-        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\r' ), buf1.end());
-        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\n' ), buf1.end());
-        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\r' ), buf2.end());
-        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\n' ), buf2.end());
-
-        if (!buf1ignore && !buf2ignore && buf1 != buf2)
-            ++numdiffs;
-
-        ++currLine;
-    }
-
-    assert(str1.eof());
-    assert(str2.eof());
-
-    Utils::closeFile(istr1);
-    Utils::closeFile(istr2);
-
-    return numdiffs;
-}
-
 }
 
 TEST(OGRWriterTest, shapefile)
@@ -350,7 +250,7 @@ TEST(OGRWriterTest, json)
     Options wo;
     wo.add("ogrdriver", "GeoJSON");
 
-    runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
+    runOgrWriterInfo(wo, infile, infofile, ".geojson");
 }
 
 TEST(OGRWriterTest, geopackage)
@@ -378,7 +278,7 @@ TEST(OGRWriterTest, creation_options)
         wo.add("ogr_options", "WRITE_BBOX=YES");
         wo.add("ogr_options", "COORDINATE_PRECISION=1");
 
-        runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
+        runOgrWriterInfo(wo, infile, infofile, ".geojson");
 }
 
 TEST(OGRWriterTest, shapefile_measure)
