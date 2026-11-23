@@ -36,6 +36,7 @@
 
 #include "Support.hpp"
 #include <filters/GroupByFilter.hpp>
+#include <io/BufferReader.hpp>
 #include <io/LasReader.hpp>
 
 using namespace pdal;
@@ -124,4 +125,39 @@ TEST(GroupByTest, multiple_groups)
 
     EXPECT_EQ(1065u, totalPoints);
     EXPECT_EQ(expectedGroups, foundGroups);
+}
+
+TEST(GroupByTest, multiple_views)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+
+    Options fo;
+    fo.add("dimension", "Classification");
+
+    BufferReader r;
+    GroupByFilter s;
+    s.setOptions(fo);
+    s.setInput(r);
+    s.prepare(table);
+
+    // Groups with the same key are merged across input views.
+    for (int v = 0; v < 2; ++v)
+    {
+        PointViewPtr view(new PointView(table));
+        view->setField(Id::Classification, 0, 1);
+        view->setField(Id::Classification, 1, 2);
+        r.addView(view);
+    }
+
+    PointViewSet viewSet = s.execute(table);
+    EXPECT_EQ(2u, viewSet.size());
+    for (PointViewPtr v : viewSet)
+    {
+        EXPECT_EQ(2u, v->size());
+        EXPECT_EQ(v->getFieldAs<int>(Id::Classification, 0),
+            v->getFieldAs<int>(Id::Classification, 1));
+    }
 }

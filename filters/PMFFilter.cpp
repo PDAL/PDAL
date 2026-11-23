@@ -237,8 +237,8 @@ void PMFFilter::processGround(PointViewPtr view)
         double x = p.getFieldAs<double>(Id::X);
         double y = p.getFieldAs<double>(Id::Y);
         double z = p.getFieldAs<double>(Id::Z);
-        int c = static_cast<int>(floor(x - bounds.minx) / m_args->m_cellSize);
-        int r = static_cast<int>(floor(y - bounds.miny) / m_args->m_cellSize);
+        int c = static_cast<int>(floor((x - bounds.minx) / m_args->m_cellSize));
+        int r = static_cast<int>(floor((y - bounds.miny) / m_args->m_cellSize));
         size_t idx = c * rows + r;
         if (z < ZImin[idx] || std::isnan(ZImin[idx]))
             ZImin[idx] = z;

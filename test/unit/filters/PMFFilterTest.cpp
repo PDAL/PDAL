@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <filters/PMFFilter.hpp>
+#include <io/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_test_main.hpp>
 
@@ -101,4 +102,37 @@ TEST(PMFFilterTest, classOneAndTwoOnly)
     }
     EXPECT_EQ(v->size(), 110000u);
     EXPECT_EQ(classZero, 0u);
+}
+
+TEST(PMFFilterTest, fractionalCell)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    Options opts;
+    opts.add("cell_size", 0.5);
+
+    BufferReader reader;
+    PMFFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(opts);
+    filter.prepare(table);
+
+    // A gentle ramp with one point per cell is all ground.
+    PointViewPtr view(new PointView(table));
+    for (PointId i = 0; i < 6; ++i)
+    {
+        view->setField(Id::X, i, 0.25 + 0.5 * i);
+        view->setField(Id::Y, i, 0.0);
+        view->setField(Id::Z, i, 0.4 * i);
+    }
+    reader.addView(view);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+    for (PointId i = 0; i < outView->size(); ++i)
+        EXPECT_EQ(outView->getFieldAs<uint8_t>(Id::Classification, i),
+            ClassLabel::Ground);
 }

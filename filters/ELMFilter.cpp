@@ -90,8 +90,8 @@ void ELMFilter::filter(PointView& view)
         double y = view.getFieldAs<double>(Dimension::Id::Y, id);
         double z = view.getFieldAs<double>(Dimension::Id::Z, id);
 
-        size_t c = static_cast<size_t>(std::floor(x - bounds.minx) / m_cell);
-        size_t r = static_cast<size_t>(std::floor(y - bounds.miny) / m_cell);
+        size_t c = static_cast<size_t>(std::floor((x - bounds.minx) / m_cell));
+        size_t r = static_cast<size_t>(std::floor((y - bounds.miny) / m_cell));
 
         hash[c * rows + r].emplace(z, id);
     }

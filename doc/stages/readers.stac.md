@@ -2,10 +2,12 @@
 
 # readers.stac
 
-[Spatio Temporal Access Catalog (STAC)] is a common language to describe geospatial
-information, so it can more easily be worked with, indexed, and discovered. The STAC
-reader will read Catalogs and Features. For Catalogs, the reader will iterate through
-items available in the Links key, creating a list of reads to accomplish.
+[Spatio Temporal Access Catalog (STAC)] is a common language to describe
+geospatial information, so it can more easily be worked with, indexed, and
+discovered. The STAC reader will read Catalogs, Features, Collections, and
+ItemCollections. For Catalogs, Collections, and ItemCollections the reader
+will iterate through Items available in the Links key, creating a list of
+reads to accomplish.
 
 ```{eval-rst}
 .. embed::
@@ -43,7 +45,7 @@ pdal info --input https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_Gold
 
 filename
 
-: STAC endpoint, local or remote, that corresponds to a Catalog, Feature or ItemCollection.
+: STAC endpoint, local or remote, that corresponds to a Catalog, Collection, Feature or ItemCollection.
   Refer to {ref}`filespec` \[Required\]
 
 asset_names

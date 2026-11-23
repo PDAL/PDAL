@@ -119,3 +119,36 @@ TEST(ELMFilterTest, emptyView)
     EXPECT_EQ(s.size(), 0u);
 
 }
+
+TEST(ELMFilterTest, fractionalCell)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    Options opts;
+    opts.add("cell", 0.5);
+
+    BufferReader reader;
+    ELMFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(opts);
+    filter.prepare(table);
+
+    // The two points fall in adjacent cells, so neither is a low point.
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 0.0);
+    view->setField(Id::Y, 0, 0.0);
+    view->setField(Id::Z, 0, 0.0);
+    view->setField(Id::X, 1, 0.6);
+    view->setField(Id::Y, 1, 0.0);
+    view->setField(Id::Z, 1, 10.0);
+    reader.addView(view);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+    for (PointId i = 0; i < outView->size(); ++i)
+        EXPECT_NE(outView->getFieldAs<uint8_t>(Id::Classification, i),
+            ClassLabel::LowPoint);
+}

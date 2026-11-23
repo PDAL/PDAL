@@ -33,7 +33,10 @@
 ****************************************************************************/
 
 #include <filters/GeoreferenceFilter.hpp>
+#include <filters/ReprojectionFilter.hpp>
 #include <filters/TransformationFilter.hpp>
+#include <filters/private/georeference/Trajectory.hpp>
+#include <filters/private/georeference/Utils.hpp>
 #include <io/BpfWriter.hpp>
 #include <io/BufferReader.hpp>
 #include <pdal/Options.hpp>
@@ -63,7 +66,7 @@ Transform identityTransform()
     return Transform(arr);
 }
 
-std::string writeTrajectoryFile()
+std::string writeTrajectoryFile(double endAltitude = 50.0)
 {
     using DimId = Dimension::Id;
 
@@ -102,7 +105,7 @@ std::string writeTrajectoryFile()
     view->setField(DimId::WanderAngle, 1, 0.0);
     view->setField(DimId::X, 1, lon_rad);
     view->setField(DimId::Y, 1, lat_rad);
-    view->setField(DimId::Z, 1, alt_m);
+    view->setField(DimId::Z, 1, endAltitude);
 
     BufferReader reader;
     reader.addView(view);
@@ -122,6 +125,92 @@ std::string writeTrajectoryFile()
 }
 
 } // unnamed namespace
+
+TEST(GeoreferenceFilterTest, ScalarInterpolation)
+{
+    using DimId = Dimension::Id;
+    PointTable table;
+    table.layout()->registerDim(DimId::Z);
+    PointViewPtr view(new PointView(table));
+    view->setField(DimId::Z, 0, 50.0);
+    view->setField(DimId::Z, 1, 150.0);
+    PointRef first(*view, 0);
+    PointRef second(*view, 1);
+
+    for (double fraction : {0.0, 0.25, 0.5, 0.75, 1.0})
+    {
+        SCOPED_TRACE(fraction);
+        const double expected = 50.0 + 100.0 * fraction;
+        EXPECT_DOUBLE_EQ(georeference::Utils::getValue(50.0, 150.0, fraction),
+            expected);
+        EXPECT_DOUBLE_EQ(georeference::Utils::getValue(first, second, DimId::Z,
+            fraction), expected);
+        EXPECT_DOUBLE_EQ(georeference::Utils::getValue(view, DimId::Z, 1,
+            fraction), expected);
+    }
+}
+
+TEST(GeoreferenceFilterTest, InterpolatesTrajectoryAltitudeAndTime)
+{
+    const std::string filename = writeTrajectoryFile(150.0);
+    {
+        georeference::Trajectory trajectory(filename, NL::json::object());
+        for (double time : {0.1, 2.5, 5.0, 7.5, 10.0})
+        {
+            SCOPED_TRACE(time);
+            georeference::TrajPoint point;
+            ASSERT_TRUE(trajectory.getTrajPoint(time, point));
+            EXPECT_DOUBLE_EQ(point.time, time);
+            EXPECT_NEAR(point.z, 50.0 + 10.0 * time, 1e-10);
+        }
+    }
+    FileUtils::deleteFile(filename);
+}
+
+TEST(GeoreferenceFilterTest, GeoreferencesWithInterpolatedAltitude)
+{
+    using DimId = Dimension::Id;
+    const std::string filename = writeTrajectoryFile(150.0);
+    PointTable table;
+    table.layout()->registerDims({DimId::X, DimId::Y, DimId::Z, DimId::GpsTime});
+    PointViewPtr view(new PointView(table));
+    const std::vector<double> times{0.1, 2.5, 5.0, 7.5, 10.0};
+    for (PointId i = 0; i < times.size(); ++i)
+    {
+        view->setField(DimId::X, i, 0.0);
+        view->setField(DimId::Y, i, 0.0);
+        view->setField(DimId::Z, i, 0.0);
+        view->setField(DimId::GpsTime, i, times[i]);
+    }
+
+    BufferReader reader;
+    reader.addView(view);
+    GeoreferenceFilter filter;
+    Options options;
+    options.add("trajectory_file", filename);
+    options.add("scan2imu", identityTransform());
+    filter.setOptions(options);
+    filter.setInput(reader);
+
+    ReprojectionFilter reprojection;
+    Options reprojectionOptions;
+    reprojectionOptions.add("in_srs", "EPSG:4978");
+    reprojectionOptions.add("out_srs", "EPSG:4979");
+    reprojection.setOptions(reprojectionOptions);
+    reprojection.setInput(filter);
+    reprojection.prepare(table);
+    const PointViewSet views = reprojection.execute(table);
+    ASSERT_EQ(views.size(), 1u);
+    const PointViewPtr result = *views.begin();
+    ASSERT_EQ(result->size(), times.size());
+    for (PointId i = 0; i < times.size(); ++i)
+    {
+        SCOPED_TRACE(times[i]);
+        EXPECT_NEAR(result->getFieldAs<double>(DimId::Z, i),
+            50.0 + 10.0 * times[i], 1e-6);
+    }
+    FileUtils::deleteFile(filename);
+}
 
 TEST(GeoreferenceFilterTest, MissingBeamDimensionsThrows)
 {

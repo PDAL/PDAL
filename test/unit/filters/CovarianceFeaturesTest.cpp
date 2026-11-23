@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PointView.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 #include <io/BufferReader.hpp>
 #include <io/TextReader.hpp>
 #include <filters/CovarianceFeaturesFilter.hpp>
@@ -187,6 +188,18 @@ TEST(DimensionalityTest, Scattering)
         ASSERT_NEAR(outView->getFieldAs<float>(Id::SurfaceVariation, i), 0.095, 0.001);
         ASSERT_NEAR(outView->getFieldAs<float>(Id::DemantkeVerticality, i), 0.492, 0.001);
     }
+}
+
+TEST(CovarianceFeaturesTest, ModeDefault)
+{
+    CovarianceFeaturesFilter filter;
+    ProgramArgs args;
+    filter.addAllArgs(args);
+
+    std::ostringstream oss;
+    args.dump3(oss);
+    EXPECT_NE(oss.str().find("{\"name\":\"mode\",\"default\":\"sqrt\","),
+        std::string::npos);
 }
 
 }

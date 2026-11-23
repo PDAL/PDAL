@@ -216,6 +216,9 @@ PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES TIMEOUT 300)
+if (GDAL_VERSION VERSION_LESS "3.13.4")
+    set_tests_properties(pdal_io_copc_remote_reader_test PROPERTIES DISABLED TRUE)
+endif()
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
@@ -335,7 +338,14 @@ endif()
 #
 # sources for the native filters
 #
-PDAL_ADD_TEST(pdal_filters_georeference_test FILES filters/GeoreferenceFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_georeference_test
+    FILES
+        filters/GeoreferenceFilterTest.cpp
+        ${PDAL_FILTERS_DIR}/private/georeference/Trajectory.cpp
+    INCLUDES
+        ${PDAL_VENDOR_EIGEN_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES
@@ -408,6 +418,8 @@ PDAL_ADD_TEST(pdal_filters_lloydkmeans_test FILES filters/LloydKMeansFilterTest.
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_radius_assign_test FILES filters/RadiusAssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_mad_test FILES filters/MADFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_lof_test FILES filters/LOFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)

@@ -91,10 +91,13 @@ std::ostream& operator<<(std::ostream& out, const CovarianceFeaturesFilter::Mode
     {
     case CovarianceFeaturesFilter::Mode::Raw:
         out << "raw";
+        break;
     case CovarianceFeaturesFilter::Mode::SQRT:
         out << "sqrt";
+        break;
     case CovarianceFeaturesFilter::Mode::Normalized:
         out << "normalized";
+        break;
     }
     return out;
 }
