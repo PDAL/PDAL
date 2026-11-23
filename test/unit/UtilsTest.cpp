@@ -284,6 +284,23 @@ TEST(UtilsTest, split2Char)
     EXPECT_EQ(result.size(), 0U);
 }
 
+TEST(UtilsTest, splitEscaped)
+{
+    std::vector<std::string> result;
+
+    std::string input(",\\,This,is\\,\\,a\\,test,,,");
+
+    result = Utils::splitEscaped(input, ',');
+    EXPECT_EQ(result.size(), 2U);
+    EXPECT_EQ(result[0], ",This");
+    EXPECT_EQ(result[1], "is,,a,test");
+
+    input = "";
+    result = Utils::split2(input, ' ');
+    EXPECT_EQ(result.size(), 0U);
+
+}
+
 TEST(UtilsTest, case)
 {
     std::string s("This is a test");
