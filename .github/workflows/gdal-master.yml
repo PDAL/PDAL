@@ -1,0 +1,77 @@
+name: GDAL master
+
+# Builds PDAL and runs the tests against GDAL's nightly build of its master
+# branch, from the gdal-master channel on anaconda.org, to catch GDAL changes
+# that break PDAL before they're released. It runs weekly rather than on
+# every push or pull request, since a failure here usually comes from GDAL
+# rather than the change being tested.
+
+on:
+    schedule:
+        # Mondays at 06:17 UTC
+        - cron: '17 6 * * 1'
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Linux (GDAL master)
+    # don't run the schedule on forks
+    if: github.event_name != 'schedule' || github.repository == 'PDAL/PDAL'
+    runs-on: 'ubuntu-latest'
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      BUILD_TYPE: current
+    steps:
+    - uses: actions/checkout@v7
+    - uses: mamba-org/setup-micromamba@v3
+      with:
+        init-shell: bash
+        environment-file: "scripts/ci/current-environment.yml"
+        environment-name: "pdal-build"
+        # GDAL is replaced with the nightly below, so don't cache the env
+        cache-environment: false
+        cache-downloads: true
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}-gdal-master
+
+    - name: Setup
+      run: |
+          source ./scripts/ci/linux/setup.sh
+
+    - name: Install GDAL master nightly
+      run: |
+          micromamba install -y -n pdal-build \
+              -c gdal-master -c conda-forge "gdal-master::libgdal-core"
+
+    - name: Versions
+      run: |
+          gdalinfo --version
+          micromamba list -n pdal-build \
+              | grep -E '^\s*(libgdal-core|proj|libcurl) '
+
+    - name: CMake
+      run: |
+          source ../scripts/ci/linux/cmake.sh
+      working-directory: ./build
+
+    - name: Compile
+      run: |
+          source ../scripts/ci/linux/compile.sh
+      working-directory: ./build
+
+    - name: Test
+      run: |
+          source ../scripts/ci/linux/test.sh
+      working-directory: ./build
