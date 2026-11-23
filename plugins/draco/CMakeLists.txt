@@ -20,10 +20,6 @@ find_package(Draco 1.5 REQUIRED CONFIG)
 
 set (DRACO_LIBRARIES "draco::draco")
 
-if (WIN32)
-    add_definitions(-DNOMINMAX)
-endif()
-
 if (UNIX)
     set(PDAL_DRACO_COMPILE_OPTIONS "-Wno-deprecated-copy;-Wno-sign-compare;-Wno-ignored-qualifiers")
 endif()

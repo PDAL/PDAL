@@ -29,7 +29,9 @@ RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
 
 RUN mkdir -p pdal/build && \
     cd pdal/build  && \
-    CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
+    CMAKE_OPTIONS="-Werror=author -Wno-error=non-target-directive --log-level=VERBOSE \
+    -DCMAKE_INSTALL_BINDIR=bin -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_INCLUDEDIR=include" && \
+    CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake $CMAKE_OPTIONS -G Ninja  \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_AR=${CONDA_PREFIX}/bin/gcc-ar \
     -DCMAKE_PREFIX_PATH:FILEPATH="$CONDA_PREFIX/lib" \

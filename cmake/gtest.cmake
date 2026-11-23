@@ -60,9 +60,6 @@ else()
         option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
     endif()
 
-    include_directories(BEFORE ${ROOT_DIR}/vendor/gtest/include
-        ${ROOT_DIR}/vendor/gtest)
-
     set(GOOGLETEST_VERSION 1.12.1)
     set(_pdal_gtest_source_dir "${ROOT_DIR}/vendor/gtest")
     set(_pdal_gtest_binary_dir "${PROJECT_BINARY_DIR}/vendor/gtest")
@@ -75,6 +72,10 @@ else()
     endif()
 
     add_subdirectory("${_pdal_gtest_source_dir}" "${_pdal_gtest_binary_dir}")
+    foreach(_pdal_gtest_target gtest gtest_main)
+        target_include_directories(${_pdal_gtest_target} BEFORE PRIVATE
+            ${ROOT_DIR}/vendor/gtest ${ROOT_DIR}/vendor/gtest/include)
+    endforeach()
 
     if(NOT TARGET GTest::gtest)
         add_library(GTest::gtest ALIAS gtest)
@@ -84,11 +85,10 @@ else()
         add_library(GTest::gtest_main ALIAS gtest_main)
     endif()
 
-    set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
-
     if(WITH_ABSEIL)
+        set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
         find_package(absl REQUIRED)
-        set(FPHSA_NAME_MISMATCHED 0)
+        unset(FPHSA_NAME_MISMATCHED)
 
         if(absl_FOUND)
             find_package(re2 REQUIRED)

@@ -77,7 +77,6 @@ set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
     "${PDAL_OUTPUT_LIB_DIR}/*")
 
 if(WIN32)
-  add_definitions("-DPDAL_DLL_EXPORT=1")
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_LIB_DIR}" )
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}" )
   # ---[ Windows requires DLLs (shared libraries) to be installed in
@@ -309,6 +308,7 @@ target_include_directories(${PDAL_LIB_NAME}
 
 target_compile_definitions(${PDAL_LIB_NAME}
     PRIVATE
+    ${PDAL_CURL_COMPILE_DEFINITIONS}
     H3_PREFIX=PDALH3)
 
 if(WIN32)

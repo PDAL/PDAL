@@ -27,4 +27,5 @@ PDAL_ADD_PLUGIN(reader_libname reader openscenegraph
     INCLUDES
         ${OSG_INCLUDE_DIRS}
 )
+target_include_directories(${reader_libname} BEFORE PRIVATE ${OSG_INCLUDE_DIRS})
 

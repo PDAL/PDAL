@@ -4,14 +4,14 @@
 
 find_package(Nitro QUIET 2.6 REQUIRED)
 if (NITRO_FOUND)
-    include_directories(${NITRO_INCLUDE_DIR})
-    include_directories(${NITRO_INCLUDE_DIR}/nitro/c++)
-    include_directories(${NITRO_INCLUDE_DIR}/nitro/c)
-    add_definitions("-D_REENTRANT")
+    set(PDAL_NITRO_INCLUDE_DIRS
+        ${NITRO_INCLUDE_DIR}
+        ${NITRO_INCLUDE_DIR}/nitro/c++
+        ${NITRO_INCLUDE_DIR}/nitro/c)
+    set(PDAL_NITRO_COMPILE_DEFINITIONS _REENTRANT)
     if (WIN32)
-        add_definitions("-DSIZEOF_SIZE_T=4")
-        add_definitions("-DIMPORT_NITRO_API")
+        list(APPEND PDAL_NITRO_COMPILE_DEFINITIONS SIZEOF_SIZE_T=4 IMPORT_NITRO_API)
     else()
-        add_definitions("-D__POSIX")
+        list(APPEND PDAL_NITRO_COMPILE_DEFINITIONS __POSIX)
     endif()
 endif()
