@@ -2,8 +2,6 @@
 #include <iostream>
 #include <cmath>
 
-#include <h3api.h>
-
 #include "BaseGrid.hpp"
 #include "Path.hpp"
 
