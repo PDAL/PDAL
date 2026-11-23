@@ -25,6 +25,7 @@ parts:
     - file: apps/random
     - file: apps/sort
     - file: apps/split
+    - file: apps/stacindex
     - file: apps/tile
     - file: apps/tindex
     - file: apps/translate

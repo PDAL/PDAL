@@ -9,5 +9,6 @@ RUN \
     conda update -n base -c defaults conda && \
     conda install -c conda-forge -n base conda-pack git compilers cmake make ninja && \
     conda create -n pdal -y && \
-    conda install --yes --name pdal -c conda-forge pdal --only-deps
+    conda install --yes --name pdal -c conda-forge pdal --only-deps && \
+    conda install --yes --name pdal -c conda-forge libgdal-arrow-parquet
 
