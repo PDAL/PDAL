@@ -19,6 +19,7 @@ namespace hexer
 class HexGrid;
 class H3Grid;
 
+using H3Index = uint64_t;
 static const double SQRT_3 = 1.732050808;
 
 class PDAL_EXPORT BaseGrid

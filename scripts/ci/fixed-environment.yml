@@ -23,7 +23,7 @@ dependencies:
   - compilers
   - ninja
   - cmake
-  - pkg-config
+  - pkgconf
   - make  # [not win]
   - re2  # [linux]
   - ccache

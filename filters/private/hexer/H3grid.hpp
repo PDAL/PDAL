@@ -29,7 +29,8 @@ public:
 
     H3Index ij2h3(HexId ij)
         {   H3Index h3;
-            if (PDALH3localIjToCell(m_origin, &ij, 0, &h3) != E_SUCCESS) {
+            CoordIJ ijCoords{ij.i, ij.j};
+            if (PDALH3localIjToCell(m_origin, &ijCoords, 0, &h3) != E_SUCCESS) {
                 std::ostringstream oss;
                 oss << "Can't convert IJ (" << ij.i <<
                     ", " << ij.j <<") to H3Index.";
@@ -39,14 +40,14 @@ public:
 
     // Convert H3 index to IJ coordinates
     HexId h32ij(H3Index h3)
-        {   HexId ij;
+        {   CoordIJ ij;
             if (PDALH3cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS) {
                 std::ostringstream oss;
                 oss << "Can't convert H3 index " << h3 <<
                     " to IJ.";
                 throw hexer_error(oss.str());
             }
-            return ij;  }
+            return {ij.i, ij.j};  }
 
     Point findPoint(Segment& s);
 

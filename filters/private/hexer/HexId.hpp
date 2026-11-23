@@ -1,13 +1,18 @@
 #pragma once
 
 #include <cmath>
-#include <h3api.h>
+#include <cstdint>
+#include <functional>
+#include <limits>
 
 namespace hexer
 {
 
-struct HexId : public CoordIJ
+struct HexId
 {
+    int i;
+    int j;
+
     bool iodd() const { return i % 2 != 0; }
     bool ieven() const { return !iodd(); }
 };
