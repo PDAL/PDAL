@@ -44,6 +44,8 @@
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
 #include <nlohmann/json.hpp>
 
 #include <iostream>
@@ -172,6 +174,28 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
         NL::ordered_json::parse(info));
 }
 
+// ogrinfo's JSON gives points as GeoJSON, which has no M, so this checks
+// the M of each point in filename's layer through GDAL
+void expectMeasures(const std::string& filename,
+    const std::vector<double>& expected)
+{
+    GDALDatasetUniquePtr ds(GDALDataset::Open(filename.c_str(),
+        GDAL_OF_VECTOR | GDAL_OF_READONLY));
+    ASSERT_TRUE(ds != nullptr) << "can't open " << filename;
+    ASSERT_EQ(ds->GetLayerCount(), 1);
+
+    std::vector<double> measures;
+    for (auto& feat : *ds->GetLayer(0))
+    {
+        const OGRGeometry *geom = feat->GetGeometryRef();
+        ASSERT_TRUE(geom && geom->IsMeasured() &&
+            wkbFlatten(geom->getGeometryType()) == wkbPoint)
+            << "feature " << feat->GetFID() << " isn't a measured point";
+        measures.push_back(geom->toPoint()->getM());
+    }
+    EXPECT_EQ(measures, expected);
+}
+
 }
 
 TEST(OGRWriterTest, shapefile)
@@ -230,6 +254,8 @@ TEST(OGRWriterTest, shapefile_measure)
     wo.add("measure_dim", "Classification");
 
     runOgrWriterInfo(wo, infile, infofile, ".shp");
+    expectMeasures(Support::temppath("ogr/shapefile_measure.shp"),
+        { 1, 1, 2, 1, 1, 1, 2, 2, 1, 1 });
 }
 
 TEST(OGRWriterTest, attrs_all)
@@ -285,6 +311,8 @@ TEST(OGRWriterTest, attrs_measure)
     wo.add("attr_dims", "all");
 
     runOgrWriterInfo(wo, infile, infofile, ".shp");
+    expectMeasures(Support::temppath("ogr/attrs_measure.shp"),
+        { 1, 1, 2, 1, 1, 1, 2, 2, 1, 1 });
 }
 
 TEST(OGRWriterTest, multicount)
