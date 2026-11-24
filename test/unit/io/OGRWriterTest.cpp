@@ -44,18 +44,10 @@
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
-#include <gdal_priv.h>
-#include <ogrsf_frmts.h>
 #include <nlohmann/json.hpp>
 
-#include <cmath>
 #include <iostream>
 #include <sstream>
-
-// These tests write points with writers.ogr, then open the result with GDAL
-// and write what it holds as JSON: the layer's geometry type, feature
-// count, extent, SRS and fields, and each feature's values and points.
-// That's compared with the expected JSON in test/data/ogr.
 
 namespace pdal
 {
@@ -63,116 +55,57 @@ namespace pdal
 namespace
 {
 
-// Rounds to 6 decimal places, so the last bits of a double, which can
-// differ between drivers, don't change the JSON text
-double rounded(double v)
+// Checks that actual holds everything in expected. Object keys that
+// expected doesn't have are ignored, so it can leave out what changes
+// between GDAL and PROJ versions, such as the file path and the full SRS.
+// Arrays must be the same length. Numbers match within 1e-6, so float
+// noise such as 849017.3200000001 doesn't count. Each difference is
+// reported with its path, such as /layers/0/featureCount.
+void expectSubset(const NL::ordered_json& expected,
+    const NL::ordered_json& actual, const std::string& path = "")
 {
-    return std::round(v * 1e6) / 1e6;
-}
-
-// The OGC name of a geometry type, such as PointZM
-const char *geomTypeName(OGRwkbGeometryType type)
-{
-    return OGRToOGCGeomType(type, /*bCamelCase=*/true, /*bAddZM=*/true);
-}
-
-// The layer in filename as JSON, with its features unless summaryOnly
-std::string layerInfo(const std::string& filename, bool summaryOnly)
-{
-    GDALDatasetUniquePtr ds(GDALDataset::Open(filename.c_str(),
-        GDAL_OF_VECTOR | GDAL_OF_READONLY));
-    if (!ds || ds->GetLayerCount() != 1)
+    if (expected.is_number() && actual.is_number())
     {
-        ADD_FAILURE() << "can't read one layer from " << filename;
-        return "";
+        EXPECT_NEAR(actual.get<double>(), expected.get<double>(), 1e-6)
+            << "at " << path;
     }
-    OGRLayer *layer = ds->GetLayer(0);
-    OGRFeatureDefn *defn = layer->GetLayerDefn();
-
-    NL::ordered_json info;
-    info["name"] = layer->GetName();
-    info["geometryType"] = geomTypeName(layer->GetGeomType());
-    info["featureCount"] = layer->GetFeatureCount();
-    OGREnvelope env;
-    if (layer->GetExtent(&env) == OGRERR_NONE)
-        info["extent"] = { rounded(env.MinX), rounded(env.MinY),
-            rounded(env.MaxX), rounded(env.MaxY) };
-    // Only the SRS name, as the rest changes with the PROJ version
-    const OGRSpatialReference *srs = layer->GetSpatialRef();
-    if (srs)
-        info["srs"] = srs->GetName();
-    else
-        info["srs"] = nullptr;
-
-    info["fields"] = NL::ordered_json::array();
-    for (int i = 0; i < defn->GetFieldCount(); ++i)
+    else if (expected.type() != actual.type())
     {
-        const OGRFieldDefn *fd = defn->GetFieldDefn(i);
-        info["fields"].push_back({
-            { "name", fd->GetNameRef() },
-            { "type", OGRFieldDefn::GetFieldTypeName(fd->GetType()) },
-            { "width", fd->GetWidth() },
-            { "precision", fd->GetPrecision() } });
+        ADD_FAILURE() << "at " << path << ": expected " << expected.dump()
+            << ", got " << actual.dump();
     }
-    if (summaryOnly)
-        return info.dump(2) + "\n";
-
-    info["features"] = NL::ordered_json::array();
-    for (auto& feat : *layer)
+    else if (expected.is_object())
     {
-        NL::ordered_json f;
-        f["fid"] = feat->GetFID();
-        f["properties"] = NL::ordered_json::object();
-        for (int i = 0; i < defn->GetFieldCount(); ++i)
+        for (auto it = expected.begin(); it != expected.end(); ++it)
         {
-            const char *name = defn->GetFieldDefn(i)->GetNameRef();
-            switch (defn->GetFieldDefn(i)->GetType())
-            {
-            case OFTInteger:
-            case OFTInteger64:
-                f["properties"][name] = feat->GetFieldAsInteger64(i);
-                break;
-            case OFTReal:
-                f["properties"][name] = rounded(feat->GetFieldAsDouble(i));
-                break;
-            default:
-                f["properties"][name] = feat->GetFieldAsString(i);
-            }
+            std::string keyPath = path + "/" + it.key();
+            if (actual.contains(it.key()))
+                expectSubset(it.value(), actual[it.key()], keyPath);
+            else
+                ADD_FAILURE() << keyPath << " is missing";
         }
-
-        // Points as [x, y, z] or [x, y, z, m]
-        const OGRGeometry *geom = feat->GetGeometryRef();
-        if (!geom)
-        {
-            ADD_FAILURE() << "feature " << feat->GetFID() << " of "
-                << filename << " has no geometry";
-            continue;
-        }
-        f["geometryType"] = geomTypeName(geom->getGeometryType());
-        f["points"] = NL::ordered_json::array();
-        auto addPoint = [&f](const OGRPoint *p)
-        {
-            NL::ordered_json c = { rounded(p->getX()), rounded(p->getY()) };
-            if (p->Is3D())
-                c.push_back(rounded(p->getZ()));
-            if (p->IsMeasured())
-                c.push_back(rounded(p->getM()));
-            f["points"].push_back(c);
-        };
-        if (wkbFlatten(geom->getGeometryType()) == wkbMultiPoint)
-            for (const OGRPoint *p : *geom->toMultiPoint())
-                addPoint(p);
-        else
-            addPoint(geom->toPoint());
-        info["features"].push_back(f);
     }
-    return info.dump(2) + "\n";
+    else if (expected.is_array())
+    {
+        if (expected.size() != actual.size())
+        {
+            ADD_FAILURE() << "at " << path << ": expected "
+                << expected.size() << " elements, got " << actual.size();
+            return;
+        }
+        for (size_t i = 0; i < expected.size(); ++i)
+            expectSubset(expected[i], actual[i],
+                path + "/" + std::to_string(i));
+    }
+    else if (expected != actual)
+    {
+        ADD_FAILURE() << "at " << path << ": expected " << expected.dump()
+            << ", got " << actual.dump();
+    }
 }
 
 void runOgrWriterInfo(const Options& wo, const std::string& infile,
-    const std::string& infofile, const std::string suffix, int featureCount = 10,
-    uint32_t(*compare)(const std::string&, const std::string&, int32_t) = &Support::diff_text_files
-)
+    const std::string& infofile, const std::string suffix, int featureCount = 10)
 {
     FileUtils::createDirectory(Support::temppath("ogr"));
     std::string outfile(Support::temppath(std::string("ogr/") + FileUtils::stem(FileUtils::stem(FileUtils::getFilename(infofile))) + suffix));
@@ -219,14 +152,24 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
     writer.prepare(t);
     writer.execute(t);
 
-    std::string info = layerInfo(outfile, featureCount == 0);
+    std::string cmd = "ogrinfo -json -nomd " + outfile;
+    if (featureCount != 0) {
+        cmd += " -features";
+    }
+    // Only stdout is captured, so GDAL's warnings can't get into the JSON
+    std::string info;
+    ASSERT_EQ(Utils::run_shell_command(cmd, info), 0)
+        << "error running " << cmd;
 
     auto handle = FileUtils::createFile(outinfofile);
     *handle << info;
     FileUtils::closeFile(handle);
 
-    EXPECT_EQ(compare(infofile, outinfofile, -1), 0u) \
-        << "  (" << infofile << " <-> " << outinfofile << ")";
+    SCOPED_TRACE(infofile + " <-> " + outinfofile);
+    ASSERT_TRUE(FileUtils::fileExists(infofile));
+    expectSubset(
+        NL::ordered_json::parse(FileUtils::readFileIntoString(infofile)),
+        NL::ordered_json::parse(info));
 }
 
 }

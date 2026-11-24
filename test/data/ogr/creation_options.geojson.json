@@ -1,134 +1,113 @@
 {
-  "name": "points",
-  "geometryType": "PointZ",
-  "featureCount": 10,
-  "extent": [
-    635619.8,
-    849017.3,
-    635685.3,
-    852165.1
-  ],
-  "srs": "WGS 84",
-  "fields": [],
-  "features": [
+  "driverShortName": "GeoJSON",
+  "layers": [
     {
-      "fid": 0,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635619.8,
-          850064.0,
-          447.0
-        ]
-      ]
-    },
-    {
-      "fid": 1,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635640.4,
-          849758.8,
-          422.7
-        ]
-      ]
-    },
-    {
-      "fid": 2,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635651.0,
-          850244.0,
-          424.9
-        ]
-      ]
-    },
-    {
-      "fid": 3,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635673.5,
-          850157.6,
-          435.7
-        ]
-      ]
-    },
-    {
-      "fid": 4,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635674.1,
-          849017.3,
-          428.0
-        ]
-      ]
-    },
-    {
-      "fid": 5,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635678.9,
-          851351.4,
-          436.4
-        ]
-      ]
-    },
-    {
-      "fid": 6,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635680.5,
-          849362.7,
-          421.6
-        ]
-      ]
-    },
-    {
-      "fid": 7,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635681.1,
-          851383.8,
-          419.0
-        ]
-      ]
-    },
-    {
-      "fid": 8,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635684.0,
-          849494.4,
-          407.1
-        ]
-      ]
-    },
-    {
-      "fid": 9,
-      "properties": {},
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635685.3,
-          852165.1,
-          421.8
-        ]
+      "name": "points",
+      "geometryFields": [
+        {
+          "name": "",
+          "type": "PointZ",
+          "extent": [635619.8, 849017.3, 635685.3, 852165.1],
+          "coordinateSystem": {
+            "projjson": {
+              "name": "WGS 84"
+            }
+          }
+        }
+      ],
+      "featureCount": 10,
+      "fields": [],
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 0,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635619.8, 850064.0, 447.0]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 1,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635640.4, 849758.8, 422.7]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 2,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635651.0, 850244.0, 424.9]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 3,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635673.5, 850157.6, 435.7]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 4,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635674.1, 849017.3, 428.0]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 5,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635678.9, 851351.4, 436.4]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 6,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635680.5, 849362.7, 421.6]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 7,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635681.1, 851383.8, 419.0]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 8,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635684.0, 849494.4, 407.1]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 9,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635685.3, 852165.1, 421.8]
+          }
+        }
       ]
     }
   ]

@@ -1,417 +1,359 @@
 {
-  "name": "points",
-  "geometryType": "PointZM",
-  "featureCount": 10,
-  "extent": [
-    635619.85,
-    849017.32,
-    635685.33,
-    852165.12
-  ],
-  "srs": null,
-  "fields": [
+  "driverShortName": "GPKG",
+  "layers": [
     {
-      "name": "Intensity",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "ReturnNumber",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "NumberOfReturns",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "ScanDirectionFlag",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "EdgeOfFlightLine",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Classification",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Synthetic",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "KeyPoint",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Withheld",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Overlap",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "ScanAngleRank",
-      "type": "Real",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "UserData",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "PointSourceId",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "GpsTime",
-      "type": "Real",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Red",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Green",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    },
-    {
-      "name": "Blue",
-      "type": "Integer",
-      "width": 0,
-      "precision": 0
-    }
-  ],
-  "features": [
-    {
-      "fid": 1,
-      "properties": {
-        "Intensity": 1,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 2,
-        "ScanDirectionFlag": 0,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": 15.0,
-        "UserData": 125,
-        "PointSourceId": 7327,
-        "GpsTime": 246092.207881,
-        "Red": 52,
-        "Green": 65,
-        "Blue": 68
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635619.85,
-          850064.04,
-          447.01
-        ]
-      ]
-    },
-    {
-      "fid": 2,
-      "properties": {
-        "Intensity": 25,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 1,
-        "ScanDirectionFlag": 1,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": 6.0,
-        "UserData": 124,
-        "PointSourceId": 7327,
-        "GpsTime": 246092.682015,
-        "Red": 39,
-        "Green": 57,
-        "Blue": 56
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635640.42,
-          849758.79,
-          422.74
-        ]
-      ]
-    },
-    {
-      "fid": 3,
-      "properties": {
-        "Intensity": 33,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 1,
-        "ScanDirectionFlag": 1,
-        "EdgeOfFlightLine": 0,
-        "Classification": 2,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": -11.0,
-        "UserData": 126,
-        "PointSourceId": 7329,
-        "GpsTime": 247175.609839,
-        "Red": 109,
-        "Green": 104,
-        "Blue": 122
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635650.95,
-          850244.03,
-          424.93
-        ]
-      ]
-    },
-    {
-      "fid": 4,
-      "properties": {
-        "Intensity": 70,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 1,
-        "ScanDirectionFlag": 1,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": 0.0,
-        "UserData": 124,
-        "PointSourceId": 7328,
-        "GpsTime": 246509.078758,
-        "Red": 228,
-        "Green": 220,
-        "Blue": 231
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635673.46,
-          850157.55,
-          435.73
-        ]
-      ]
-    },
-    {
-      "fid": 5,
-      "properties": {
-        "Intensity": 153,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 1,
-        "ScanDirectionFlag": 0,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": -7.0,
-        "UserData": 126,
-        "PointSourceId": 7326,
-        "GpsTime": 245388.610486,
-        "Red": 146,
-        "Green": 104,
-        "Blue": 140
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635674.05,
-          849017.32,
-          428.02
-        ]
-      ]
-    },
-    {
-      "fid": 6,
-      "properties": {
-        "Intensity": 6,
-        "ReturnNumber": 2,
-        "NumberOfReturns": 2,
-        "ScanDirectionFlag": 0,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": 10.0,
-        "UserData": 126,
-        "PointSourceId": 7329,
-        "GpsTime": 247174.372762,
-        "Red": 76,
-        "Green": 87,
-        "Blue": 92
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635678.9,
-          851351.44,
-          436.45
-        ]
-      ]
-    },
-    {
-      "fid": 7,
-      "properties": {
-        "Intensity": 58,
-        "ReturnNumber": 2,
-        "NumberOfReturns": 2,
-        "ScanDirectionFlag": 0,
-        "EdgeOfFlightLine": 0,
-        "Classification": 2,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": -1.0,
-        "UserData": 126,
-        "PointSourceId": 7327,
-        "GpsTime": 246093.418377,
-        "Red": 64,
-        "Green": 73,
-        "Blue": 78
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635680.54,
-          849362.66,
-          421.56
-        ]
-      ]
-    },
-    {
-      "fid": 8,
-      "properties": {
-        "Intensity": 99,
-        "ReturnNumber": 2,
-        "NumberOfReturns": 2,
-        "ScanDirectionFlag": 1,
-        "EdgeOfFlightLine": 0,
-        "Classification": 2,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": -3.0,
-        "UserData": 130,
-        "PointSourceId": 7330,
-        "GpsTime": 247574.175079,
-        "Red": 81,
-        "Green": 84,
-        "Blue": 95
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635681.07,
-          851383.76,
-          419.0
-        ]
-      ]
-    },
-    {
-      "fid": 9,
-      "properties": {
-        "Intensity": 48,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 1,
-        "ScanDirectionFlag": 0,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": 1.0,
-        "UserData": 126,
-        "PointSourceId": 7327,
-        "GpsTime": 246093.264552,
-        "Red": 78,
-        "Green": 88,
-        "Blue": 94
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635684.02,
-          849494.39,
-          407.12
-        ]
-      ]
-    },
-    {
-      "fid": 10,
-      "properties": {
-        "Intensity": 109,
-        "ReturnNumber": 1,
-        "NumberOfReturns": 1,
-        "ScanDirectionFlag": 1,
-        "EdgeOfFlightLine": 0,
-        "Classification": 1,
-        "Synthetic": 0,
-        "KeyPoint": 0,
-        "Withheld": 0,
-        "Overlap": 0,
-        "ScanAngleRank": 7.0,
-        "UserData": 126,
-        "PointSourceId": 7332,
-        "GpsTime": 248689.024384,
-        "Red": 64,
-        "Green": 73,
-        "Blue": 78
-      },
-      "geometryType": "PointZ",
-      "points": [
-        [
-          635685.33,
-          852165.12,
-          421.75
-        ]
+      "name": "points",
+      "fidColumnName": "fid",
+      "geometryFields": [
+        {
+          "name": "geom",
+          "type": "PointZM",
+          "extent": [635619.85, 849017.3200000001, 635685.33, 852165.12],
+          "coordinateSystem": null
+        }
+      ],
+      "featureCount": 10,
+      "fields": [
+        {
+          "name": "Intensity",
+          "type": "Integer"
+        },
+        {
+          "name": "ReturnNumber",
+          "type": "Integer"
+        },
+        {
+          "name": "NumberOfReturns",
+          "type": "Integer"
+        },
+        {
+          "name": "ScanDirectionFlag",
+          "type": "Integer"
+        },
+        {
+          "name": "EdgeOfFlightLine",
+          "type": "Integer"
+        },
+        {
+          "name": "Classification",
+          "type": "Integer"
+        },
+        {
+          "name": "Synthetic",
+          "type": "Integer"
+        },
+        {
+          "name": "KeyPoint",
+          "type": "Integer"
+        },
+        {
+          "name": "Withheld",
+          "type": "Integer"
+        },
+        {
+          "name": "Overlap",
+          "type": "Integer"
+        },
+        {
+          "name": "ScanAngleRank",
+          "type": "Real"
+        },
+        {
+          "name": "UserData",
+          "type": "Integer"
+        },
+        {
+          "name": "PointSourceId",
+          "type": "Integer"
+        },
+        {
+          "name": "GpsTime",
+          "type": "Real"
+        },
+        {
+          "name": "Red",
+          "type": "Integer"
+        },
+        {
+          "name": "Green",
+          "type": "Integer"
+        },
+        {
+          "name": "Blue",
+          "type": "Integer"
+        }
+      ],
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 1,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 2,
+            "ScanDirectionFlag": 0,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": 15.0,
+            "UserData": 125,
+            "PointSourceId": 7327,
+            "GpsTime": 246092.20788099366,
+            "Red": 52,
+            "Green": 65,
+            "Blue": 68
+          },
+          "fid": 1,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635619.85, 850064.04, 447.01]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 25,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 1,
+            "ScanDirectionFlag": 1,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": 6.0,
+            "UserData": 124,
+            "PointSourceId": 7327,
+            "GpsTime": 246092.68201508585,
+            "Red": 39,
+            "Green": 57,
+            "Blue": 56
+          },
+          "fid": 2,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635640.42, 849758.79, 422.74]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 33,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 1,
+            "ScanDirectionFlag": 1,
+            "EdgeOfFlightLine": 0,
+            "Classification": 2,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": -11.0,
+            "UserData": 126,
+            "PointSourceId": 7329,
+            "GpsTime": 247175.60983893464,
+            "Red": 109,
+            "Green": 104,
+            "Blue": 122
+          },
+          "fid": 3,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635650.9500000001, 850244.03, 424.93]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 70,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 1,
+            "ScanDirectionFlag": 1,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": 0.0,
+            "UserData": 124,
+            "PointSourceId": 7328,
+            "GpsTime": 246509.07875807735,
+            "Red": 228,
+            "Green": 220,
+            "Blue": 231
+          },
+          "fid": 4,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635673.46, 850157.55, 435.73]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 153,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 1,
+            "ScanDirectionFlag": 0,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": -7.0,
+            "UserData": 126,
+            "PointSourceId": 7326,
+            "GpsTime": 245388.61048614173,
+            "Red": 146,
+            "Green": 104,
+            "Blue": 140
+          },
+          "fid": 5,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635674.05, 849017.3200000001, 428.02]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 6,
+            "ReturnNumber": 2,
+            "NumberOfReturns": 2,
+            "ScanDirectionFlag": 0,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": 10.0,
+            "UserData": 126,
+            "PointSourceId": 7329,
+            "GpsTime": 247174.37276212775,
+            "Red": 76,
+            "Green": 87,
+            "Blue": 92
+          },
+          "fid": 6,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635678.9, 851351.4400000001, 436.45]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 58,
+            "ReturnNumber": 2,
+            "NumberOfReturns": 2,
+            "ScanDirectionFlag": 0,
+            "EdgeOfFlightLine": 0,
+            "Classification": 2,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": -1.0,
+            "UserData": 126,
+            "PointSourceId": 7327,
+            "GpsTime": 246093.4183773745,
+            "Red": 64,
+            "Green": 73,
+            "Blue": 78
+          },
+          "fid": 7,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635680.54, 849362.66, 421.56]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 99,
+            "ReturnNumber": 2,
+            "NumberOfReturns": 2,
+            "ScanDirectionFlag": 1,
+            "EdgeOfFlightLine": 0,
+            "Classification": 2,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": -3.0,
+            "UserData": 130,
+            "PointSourceId": 7330,
+            "GpsTime": 247574.17507863705,
+            "Red": 81,
+            "Green": 84,
+            "Blue": 95
+          },
+          "fid": 8,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635681.0700000001, 851383.76, 419.0]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 48,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 1,
+            "ScanDirectionFlag": 0,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": 1.0,
+            "UserData": 126,
+            "PointSourceId": 7327,
+            "GpsTime": 246093.26455227938,
+            "Red": 78,
+            "Green": 88,
+            "Blue": 94
+          },
+          "fid": 9,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635684.02, 849494.39, 407.12]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "Intensity": 109,
+            "ReturnNumber": 1,
+            "NumberOfReturns": 1,
+            "ScanDirectionFlag": 1,
+            "EdgeOfFlightLine": 0,
+            "Classification": 1,
+            "Synthetic": 0,
+            "KeyPoint": 0,
+            "Withheld": 0,
+            "Overlap": 0,
+            "ScanAngleRank": 7.0,
+            "UserData": 126,
+            "PointSourceId": 7332,
+            "GpsTime": 248689.02438421705,
+            "Red": 64,
+            "Green": 73,
+            "Blue": 78
+          },
+          "fid": 10,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635685.33, 852165.12, 421.75]
+          }
+        }
       ]
     }
   ]

@@ -1,171 +1,135 @@
 {
-  "name": "shapefile_measure",
-  "geometryType": "PointZM",
-  "featureCount": 10,
-  "extent": [
-    635619.85,
-    849017.32,
-    635685.33,
-    852165.12
-  ],
-  "srs": null,
-  "fields": [
+  "driverShortName": "ESRI Shapefile",
+  "layers": [
     {
-      "name": "FID",
-      "type": "Integer64",
-      "width": 11,
-      "precision": 0
-    }
-  ],
-  "features": [
-    {
-      "fid": 0,
-      "properties": {
-        "FID": 0
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635619.85,
-          850064.04,
-          447.01,
-          1.0
-        ]
-      ]
-    },
-    {
-      "fid": 1,
-      "properties": {
-        "FID": 1
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635640.42,
-          849758.79,
-          422.74,
-          1.0
-        ]
-      ]
-    },
-    {
-      "fid": 2,
-      "properties": {
-        "FID": 2
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635650.95,
-          850244.03,
-          424.93,
-          2.0
-        ]
-      ]
-    },
-    {
-      "fid": 3,
-      "properties": {
-        "FID": 3
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635673.46,
-          850157.55,
-          435.73,
-          1.0
-        ]
-      ]
-    },
-    {
-      "fid": 4,
-      "properties": {
-        "FID": 4
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635674.05,
-          849017.32,
-          428.02,
-          1.0
-        ]
-      ]
-    },
-    {
-      "fid": 5,
-      "properties": {
-        "FID": 5
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635678.9,
-          851351.44,
-          436.45,
-          1.0
-        ]
-      ]
-    },
-    {
-      "fid": 6,
-      "properties": {
-        "FID": 6
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635680.54,
-          849362.66,
-          421.56,
-          2.0
-        ]
-      ]
-    },
-    {
-      "fid": 7,
-      "properties": {
-        "FID": 7
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635681.07,
-          851383.76,
-          419.0,
-          2.0
-        ]
-      ]
-    },
-    {
-      "fid": 8,
-      "properties": {
-        "FID": 8
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635684.02,
-          849494.39,
-          407.12,
-          1.0
-        ]
-      ]
-    },
-    {
-      "fid": 9,
-      "properties": {
-        "FID": 9
-      },
-      "geometryType": "PointZM",
-      "points": [
-        [
-          635685.33,
-          852165.12,
-          421.75,
-          1.0
-        ]
+      "name": "shapefile_measure",
+      "geometryFields": [
+        {
+          "name": "",
+          "type": "PointZM",
+          "extent": [635619.85, 849017.3200000001, 635685.33, 852165.12],
+          "coordinateSystem": null
+        }
+      ],
+      "featureCount": 10,
+      "fields": [
+        {
+          "name": "FID",
+          "type": "Integer64",
+          "width": 11
+        }
+      ],
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 0
+          },
+          "fid": 0,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635619.85, 850064.04, 447.01]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 1
+          },
+          "fid": 1,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635640.42, 849758.79, 422.74]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 2
+          },
+          "fid": 2,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635650.9500000001, 850244.03, 424.93]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 3
+          },
+          "fid": 3,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635673.46, 850157.55, 435.73]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 4
+          },
+          "fid": 4,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635674.05, 849017.3200000001, 428.02]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 5
+          },
+          "fid": 5,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635678.9, 851351.4400000001, 436.45]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 6
+          },
+          "fid": 6,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635680.54, 849362.66, 421.56]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 7
+          },
+          "fid": 7,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635681.0700000001, 851383.76, 419.0]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 8
+          },
+          "fid": 8,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635684.02, 849494.39, 407.12]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "FID": 9
+          },
+          "fid": 9,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [635685.33, 852165.12, 421.75]
+          }
+        }
       ]
     }
   ]
