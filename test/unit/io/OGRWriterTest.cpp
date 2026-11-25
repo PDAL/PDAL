@@ -44,6 +44,10 @@
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
+#include <nlohmann/json.hpp>
+
 #include <iostream>
 #include <sstream>
 
@@ -53,14 +57,61 @@ namespace pdal
 namespace
 {
 
+// Checks that actual holds everything in expected. Object keys that
+// expected doesn't have are ignored, so it can leave out what changes
+// between GDAL and PROJ versions, such as the file path and the full SRS.
+// Arrays must be the same length. Numbers match within 1e-6, so float
+// noise such as 849017.3200000001 doesn't count. Each difference is
+// reported with its path, such as /layers/0/featureCount.
+void expectSubset(const NL::ordered_json& expected,
+    const NL::ordered_json& actual, const std::string& path = "")
+{
+    if (expected.is_number() && actual.is_number())
+    {
+        EXPECT_NEAR(actual.get<double>(), expected.get<double>(), 1e-6)
+            << "at " << path;
+    }
+    else if (expected.type() != actual.type())
+    {
+        ADD_FAILURE() << "at " << path << ": expected " << expected.dump()
+            << ", got " << actual.dump();
+    }
+    else if (expected.is_object())
+    {
+        for (auto it = expected.begin(); it != expected.end(); ++it)
+        {
+            std::string keyPath = path + "/" + it.key();
+            if (actual.contains(it.key()))
+                expectSubset(it.value(), actual[it.key()], keyPath);
+            else
+                ADD_FAILURE() << keyPath << " is missing";
+        }
+    }
+    else if (expected.is_array())
+    {
+        if (expected.size() != actual.size())
+        {
+            ADD_FAILURE() << "at " << path << ": expected "
+                << expected.size() << " elements, got " << actual.size();
+            return;
+        }
+        for (size_t i = 0; i < expected.size(); ++i)
+            expectSubset(expected[i], actual[i],
+                path + "/" + std::to_string(i));
+    }
+    else if (expected != actual)
+    {
+        ADD_FAILURE() << "at " << path << ": expected " << expected.dump()
+            << ", got " << actual.dump();
+    }
+}
+
 void runOgrWriterInfo(const Options& wo, const std::string& infile,
-    const std::string& infofile, const std::string suffix, int featureCount = 10,
-    uint32_t(*compare)(const std::string&, const std::string&, int32_t) = &Support::diff_text_files
-)
+    const std::string& infofile, const std::string suffix, int featureCount = 10)
 {
     FileUtils::createDirectory(Support::temppath("ogr"));
     std::string outfile(Support::temppath(std::string("ogr/") + FileUtils::stem(FileUtils::stem(FileUtils::getFilename(infofile))) + suffix));
-    std::string outinfofile(outfile + ".ogrinfo");
+    std::string outinfofile(outfile + ".json");
 
     if(FileUtils::isDirectory(outfile)) {
         FileUtils::deleteDirectory(outfile);
@@ -103,123 +154,46 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
     writer.prepare(t);
     writer.execute(t);
 
-    std::string cmd = "ogrinfo -nomd -al " + outfile;
-    if (featureCount == 0) {
-        cmd += " -so";
+    std::string cmd = "ogrinfo -json -nomd " + outfile;
+    if (featureCount != 0) {
+        cmd += " -features";
     }
-    cmd += " 2>&1";
+    // Only stdout is captured, so GDAL's warnings can't get into the JSON
     std::string info;
-    if (Utils::run_shell_command(cmd, info)) {
-        std::cerr << "WARNING: error running ogrinfo, skipping test" << std::endl;
-        return;
-    }
+    ASSERT_EQ(Utils::run_shell_command(cmd, info), 0)
+        << "error running " << cmd;
 
     auto handle = FileUtils::createFile(outinfofile);
     *handle << info;
     FileUtils::closeFile(handle);
 
-    EXPECT_EQ(compare(infofile, outinfofile, 1), 0u) \
-        << "  (" << infofile << " <-> " << outinfofile << ")";
+    SCOPED_TRACE(infofile + " <-> " + outinfofile);
+    ASSERT_TRUE(FileUtils::fileExists(infofile));
+    expectSubset(
+        NL::ordered_json::parse(FileUtils::readFileIntoString(infofile)),
+        NL::ordered_json::parse(info));
 }
 
-uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_t ignoreLine1=-1)
+// ogrinfo's JSON gives points as GeoJSON, which has no M, so this checks
+// the M of each point in filename's layer through GDAL
+void expectMeasures(const std::string& filename,
+    const std::vector<double>& expected)
 {
-    // GeoJSON files depend on PROJ version, later versions write a much different
-    // SRS format. Crudely ignore lines between ^GEOGCRS[ and ^OGRFeature
+    GDALDatasetUniquePtr ds(GDALDataset::Open(filename.c_str(),
+        GDAL_OF_VECTOR | GDAL_OF_READONLY));
+    ASSERT_TRUE(ds != nullptr) << "can't open " << filename;
+    ASSERT_EQ(ds->GetLayerCount(), 1);
 
-    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
-        return (std::numeric_limits<uint32_t>::max)();
-    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
-        return (std::numeric_limits<uint32_t>::max)();
-
-    std::istream *istr1 = Utils::openFile(file1, false);
-    std::istream *istr2 = Utils::openFile(file2, false);
-    std::istream& str1 = *istr1;
-    std::istream& str2 = *istr2;
-
-    uint32_t numdiffs = 0;
-    int32_t currLine = 1;
-    bool buf1ignore = false;
-    bool buf2ignore = false;
-    std::string buf1;
-    std::string buf2;
-
-    while (!str1.eof() && !str2.eof())
+    std::vector<double> measures;
+    for (auto& feat : *ds->GetLayer(0))
     {
-        if (currLine == ignoreLine1)
-        {
-            std::getline(str1, buf1);
-            std::getline(str2, buf2);
-            ++currLine;
-            continue;
-        }
-
-        if (!(buf1ignore ^ buf2ignore))
-        {
-            std::getline(str1, buf1);
-            std::getline(str2, buf2);
-        }
-        else if (!buf2ignore)
-            std::getline(str1, buf1);
-        else if (!buf1ignore)
-            std::getline(str2, buf2);
-
-        // EOF handling won't work properly if we're in an ignored block. NBD
-        if (str1.eof() && str2.eof())
-        {
-            // hit end on both together
-            break;
-        }
-        else if (str1.eof() && !str2.eof())
-        {
-            // str1 ended, but str2 still going
-            while (!str2.eof())
-            {
-                std::getline(str2, buf2);
-                ++numdiffs;
-            }
-            break;
-        }
-        else if (!str1.eof() && str2.eof())
-        {
-            // str2 ended, but str1 still going
-            while (!str1.eof())
-            {
-                std::getline(str1, buf1);
-                ++numdiffs;
-            }
-            break;
-        }
-
-        if (buf1ignore && buf1.rfind("OGRFeature", 0) == 0)
-            buf1ignore = false;
-        else if (buf1.rfind("GEOGCRS[", 0) == 0)
-            buf1ignore = true;
-
-        if (buf2ignore && buf2.rfind("OGRFeature", 0) == 0)
-            buf2ignore = false;
-        else if (buf2.rfind("GEOGCRS[", 0) == 0)
-            buf2ignore = true;
-
-        // remove line endings from test comparisons
-        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\r' ), buf1.end());
-        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\n' ), buf1.end());
-        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\r' ), buf2.end());
-        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\n' ), buf2.end());
-
-        if (!buf1ignore && !buf2ignore && buf1 != buf2)
-            ++numdiffs;
-
-        ++currLine;
+        const OGRGeometry *geom = feat->GetGeometryRef();
+        ASSERT_TRUE(geom && geom->IsMeasured() &&
+            wkbFlatten(geom->getGeometryType()) == wkbPoint)
+            << "feature " << feat->GetFID() << " isn't a measured point";
+        measures.push_back(geom->toPoint()->getM());
     }
-
-    assert(str1.eof());
-    assert(str2.eof());
-
-    Utils::closeFile(istr1);
-    Utils::closeFile(istr2);
-
-    return numdiffs;
+    EXPECT_EQ(measures, expected);
 }
 
 }
@@ -227,7 +201,7 @@ uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_
 TEST(OGRWriterTest, shapefile)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/shapefile.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/shapefile.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -238,18 +212,18 @@ TEST(OGRWriterTest, shapefile)
 TEST(OGRWriterTest, json)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/json.geojson.ogrinfo");
+    std::string infofile = Support::datapath("ogr/json.geojson.json");
 
     Options wo;
     wo.add("ogrdriver", "GeoJSON");
 
-    runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
+    runOgrWriterInfo(wo, infile, infofile, ".geojson");
 }
 
 TEST(OGRWriterTest, geopackage)
 {
     std::string infile = Support::datapath("las/utm15.las");
-    std::string infofile = Support::datapath("ogr/geopackage.gpkg.ogrinfo");
+    std::string infofile = Support::datapath("ogr/geopackage.gpkg.json");
 
     Options wo;
     wo.add("ogrdriver", "GPKG");
@@ -260,36 +234,34 @@ TEST(OGRWriterTest, geopackage)
 TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
-    #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
-        std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.ogrinfo");
-    #else
-        std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
-    #endif
+    std::string infofile = Support::datapath("ogr/creation_options.geojson.json");
 
         Options wo;
         wo.add("ogrdriver", "GeoJSON");
         wo.add("ogr_options", "WRITE_BBOX=YES");
         wo.add("ogr_options", "COORDINATE_PRECISION=1");
 
-        runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
+        runOgrWriterInfo(wo, infile, infofile, ".geojson");
 }
 
 TEST(OGRWriterTest, shapefile_measure)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/shapefile_measure.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/shapefile_measure.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
     wo.add("measure_dim", "Classification");
 
     runOgrWriterInfo(wo, infile, infofile, ".shp");
+    expectMeasures(Support::temppath("ogr/shapefile_measure.shp"),
+        { 1, 1, 2, 1, 1, 1, 2, 2, 1, 1 });
 }
 
 TEST(OGRWriterTest, attrs_all)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/attrs_all.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/attrs_all.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -303,9 +275,9 @@ TEST(OGRWriterTest, geopackage_attrs_all)
     std::string infile = Support::datapath("las/simple.las");
 
     #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
-        std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.ogrinfo");
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.json");
     #else
-        std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.json");
     #endif
 
 
@@ -319,7 +291,7 @@ TEST(OGRWriterTest, geopackage_attrs_all)
 TEST(OGRWriterTest, attrs)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/attrs.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/attrs.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -331,7 +303,7 @@ TEST(OGRWriterTest, attrs)
 TEST(OGRWriterTest, attrs_measure)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/attrs_measure.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/attrs_measure.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -339,12 +311,14 @@ TEST(OGRWriterTest, attrs_measure)
     wo.add("attr_dims", "all");
 
     runOgrWriterInfo(wo, infile, infofile, ".shp");
+    expectMeasures(Support::temppath("ogr/attrs_measure.shp"),
+        { 1, 1, 2, 1, 1, 1, 2, 2, 1, 1 });
 }
 
 TEST(OGRWriterTest, multicount)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/multicount.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/multicount.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -357,7 +331,7 @@ TEST(OGRWriterTest, multicount_2)
 {
     // feature count < multicount
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/multicount_2.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/multicount_2.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");
@@ -370,7 +344,7 @@ TEST(OGRWriterTest, multicount_3)
 {
     // feature count == exact multiple of multicount
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/multicount_3.shp.ogrinfo");
+    std::string infofile = Support::datapath("ogr/multicount_3.shp.json");
 
     Options wo;
     wo.add("ogrdriver", "ESRI Shapefile");

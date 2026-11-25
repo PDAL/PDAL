@@ -1,0 +1,34 @@
+{
+  "driverShortName": "GPKG",
+  "layers": [
+    {
+      "name": "points",
+      "fidColumnName": "fid",
+      "geometryFields": [
+        {
+          "name": "geom",
+          "type": "PointZM",
+          "extent": [470692.44, 4602888.9, 470692.44, 4602888.9],
+          "coordinateSystem": {
+            "projjson": {
+              "name": "NAD83 / UTM zone 15N"
+            }
+          }
+        }
+      ],
+      "featureCount": 1,
+      "fields": [],
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {},
+          "fid": 1,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [470692.44, 4602888.9, 16.0]
+          }
+        }
+      ]
+    }
+  ]
+}
